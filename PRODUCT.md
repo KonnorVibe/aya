@@ -20,10 +20,10 @@ Homescreen-App im Standalone-Modus auf dem iPhone, Safari/WebKit. Kurze Sitzunge
 
 ## Capabilities and Constraints
 - Zero Network: Systemschriften, keine CDNs, keine Webfonts, keine externen Bilder; CSP `connect-src 'none'`.
-- Daten nur verschlüsselt in IndexedDB (Geräteschlüssel, optionale PIN als App-Sperre).
+- Daten nur verschlüsselt in IndexedDB. Schutzart wählbar: Geräteschlüssel mit optionaler PIN (Standard) oder Passphrase mit Wiederherstellungscode.
 - Kein Verhütungsmittel, kein Medizinprodukt; das steht im Onboarding und in den Einstellungen.
 - Modi: Zyklus verfolgen (Standard), Kinderwunsch, hormonelle Verhütung.
-- v1 schlank, „Erweiterte Funktionen“ (BBT, LH, CSV, Druckansicht) per Schalter.
+- Voller Umfang: Temperatur, LH, Ausfluss, Tests, Medikamente (bei Kinderwunsch oben, sonst eingeklappt), CSV/JSON/Apple-Health-Import, Druckansicht, Genauigkeit.
 - UI Deutsch.
 
 ## Brand Commitments
@@ -31,7 +31,7 @@ Homescreen-App im Standalone-Modus auf dem iPhone, Safari/WebKit. Kurze Sitzunge
 - Ansprache: du, ruhig, sachlich-warm, wie eine kluge Freundin. Nie belehrend, kein Kitsch, keine Emojis, kein Alarmismus.
 - Farbvorgaben aus dem Brief: Periode gedecktes Rosé/Rot, fruchtbares Fenster Türkis, Eisprung kräftiger Akzent, Lutealphase sanftes Violett. Vollwertiger Dark Mode.
 - App-Icon neutral, kein offensichtliches Perioden-Symbol (Diskretion auf dem Homescreen).
-- Kein Logo, keine Wortmarke vorhanden.
+- Logo: Geflecht-Ring aus Tinte und Indigo (綾, gewebtes Muster), App-Icon Leinen auf Indigo.
 
 ## Evidence on Hand
 Keine Testimonials, Nutzerzahlen oder Studien eigener Art. Quellen der Methodik: Bull et al. 2019, FIGO 2018, Wilcox et al. 1995, Li et al. 2022 (siehe `src/engine/constants.ts`). Nichts davon darf als Werbeaussage erfunden oder überhöht werden.

@@ -19,7 +19,7 @@ const RULES: { name: string; pattern: RegExp }[] = [
   { name: 'EventSource', pattern: /\bEventSource\b/ },
   { name: 'sendBeacon', pattern: /\bsendBeacon\b/ },
   { name: 'RTCPeerConnection', pattern: /\bRTCPeerConnection\b/ },
-  { name: 'external-url', pattern: /\b(?:https?:|wss?:)\/\/(?!(?:www\.w3\.org|react\.dev\/errors|bit\.ly\/wb-precache)\b)[^\s'"`)]+/ },
+  { name: 'external-url', pattern: /\b(?:https?:|wss?:)\/\/(?!(?:www\.w3\.org|react\.dev\/errors|bit\.ly\/wb-precache|docs\.github\.com\/de\/site-policy)\b)[^\s'"`)]+/ },
 ];
 
 // Build output from third-party code (React, Workbox) mentions these names without using

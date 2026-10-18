@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src 'self'; base-uri 'none'; form-action 'none'">
+<title>Datenschutz und Sicherheit · aya</title>
+<style>
+:root{--bg:#eeece4;--surface:#f7f5ef;--text:#232323;--muted:#5d5953;--line:#d9d5cb;--ovu:#283c8c;color-scheme:light dark}
+@media (prefers-color-scheme:dark){:root{--bg:#0a0812;--surface:#15121e;--text:#efebf7;--muted:#a19cb3;--line:#2a2536;--ovu:#9d96ff}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:17px/1.55 -apple-system,system-ui,sans-serif;-webkit-text-size-adjust:100%}
+main{max-width:640px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 24px) 20px calc(env(safe-area-inset-bottom) + 48px)}
+h1{font-family:ui-serif,"New York",Georgia,serif;font-size:32px;line-height:1.15;margin:12px 0 8px;font-weight:600}
+h2{font-size:20px;margin:36px 0 8px;font-weight:600;letter-spacing:-.01em}
+h3{font-size:17px;margin:20px 0 4px}
+p,li{margin:0 0 12px}ul{padding-left:20px}
+a{color:var(--ovu);text-underline-offset:4px}
+.lead{font-size:19px}
+.promise{background:var(--surface);border:1.5px solid var(--text);border-radius:4px;padding:16px 18px;margin:24px 0}
+.promise p:last-child{margin:0}
+.muted{color:var(--muted);font-size:15px}
+.back{display:inline-flex;min-height:44px;align-items:center}
+</style>
+</head>
+<body>
+<main>
+<a class="back" href="./">‹ Zurück zu aya</a>
+<h1>Datenschutz und Sicherheit</h1>
+<p class="lead">aya ist ein Zyklustagebuch, das deine Daten nicht kennt. Alles, was du einträgst, bleibt verschlüsselt auf deinem Gerät.</p>
+
+<div class="promise">
+<p><strong>Unser Versprechen</strong></p>
+<p>Wir verkaufen deine Daten nicht. Wir geben sie nicht weiter, wir werten sie nicht aus und wir zeigen dir keine Werbung. Das können wir versprechen, weil deine Einträge uns nie erreichen: Es gibt keinen Server, der sie empfängt, und kein Konto, an das sie gebunden wären.</p>
+</div>
+
+<h2>Was mit deinen Einträgen passiert</h2>
+<ul>
+<li>Perioden, Symptome, Stimmung, Temperatur, Tests, Medikamente und Notizen speichert aya nur in deinem Browser auf diesem Gerät.</li>
+<li>Jeder Eintrag ist einzeln verschlüsselt. Niemand außer dir kann ihn lesen, auch wir nicht.</li>
+<li>Nach dem Laden stellt aya keine Verbindung ins Internet her. Eine technische Sperre im Code (Content Security Policy) verbietet der App jede Verbindung zu anderen Adressen.</li>
+<li>aya setzt keine Cookies, nutzt keine Analyse-Werkzeuge, keine Werbenetzwerke und keine Schriften oder Dienste von Dritten.</li>
+<li>Backups und Exporte erstellst nur du selbst. Sie landen als Datei auf deinem Gerät. Wohin du sie danach legst, entscheidest du.</li>
+</ul>
+
+<h2>So funktioniert die Verschlüsselung</h2>
+<p>aya nutzt ausschließlich die eingebaute Verschlüsselung deines Browsers (Web Crypto API). Beim Einrichten entsteht ein zufälliges Geheimnis: ein Schlüssel für die Einträge (AES-GCM, 256 Bit) und ein Schlüssel, der die Datumsangaben unkenntlich macht. Dieses Geheimnis liegt nie im Klartext auf dem Gerät. Du entscheidest beim Einrichten, wie es geschützt wird:</p>
+<h3>Mit diesem iPhone (Standard)</h3>
+<ul>
+<li>Das Geheimnis ist mit einem Geräteschlüssel verschlüsselt, den der Browser erzeugt und den kein Programm auslesen kann, auch aya selbst nicht.</li>
+<li>Deine Daten sind damit an dieses Gerät gebunden. Andere Webseiten und Apps kommen nicht heran.</li>
+<li>Eine optionale PIN schützt vor neugierigen Blicken. Sie ist eine Sperre der App, keine zusätzliche Verschlüsselung.</li>
+</ul>
+<h3>Mit einer Passphrase</h3>
+<ul>
+<li>Das Geheimnis ist zweimal verschlüsselt: mit deiner Passphrase und mit einem Wiederherstellungscode, den aya dir einmal zeigt.</li>
+<li>Aus der Passphrase entsteht der Schlüssel mit PBKDF2-SHA-256 und 600.000 Durchläufen. Das macht Ausprobieren sehr langsam.</li>
+<li>Ohne Passphrase oder Wiederherstellungscode lassen sich die Einträge nicht lesen, auch nicht mit deinem entsperrten iPhone.</li>
+<li>aya sperrt sich nach einigen Minuten ohne Nutzung und nach einer Minute im Hintergrund und vergisst dabei den Schlüssel.</li>
+</ul>
+<h3>In beiden Fällen</h3>
+<ul>
+<li>Jeder Tag wird einzeln mit einem eigenen Zufallswert verschlüsselt. Selbst die Tage, an denen es Einträge gibt, sind nicht ablesbar.</li>
+<li>Backups sind mit einem eigenen Passwort verschlüsselt, das du beim Erstellen wählst.</li>
+<li>„Alle Daten löschen“ entfernt die Einträge und alle Schlüssel von diesem Gerät.</li>
+</ul>
+<p class="muted">Grenzen: aya ersetzt nicht die Gerätesperre deines iPhones. Im Gerätemodus kann jemand mit vollem Zugriff auf dein entsperrtes Gerät und technischem Wissen an die Daten kommen. Dagegen hilft der Passphrase-Modus. Vergisst du dort Passphrase und Wiederherstellungscode, lassen sich die Daten nicht wiederherstellen. Im Gerätemodus ist ein Backup der einzige Weg zurück, wenn das Gerät verloren geht.</p>
+
+<h2>Was beim Aufrufen der Seite passiert</h2>
+<p>Die App-Dateien liegen bei GitHub Pages (GitHub B.V., Prins Bernhardplein 200, 1097 JB Amsterdam, Niederlande; Mutterkonzern GitHub, Inc., USA). Wenn du aya lädst oder aya nach Updates sucht, verarbeitet GitHub technische Daten wie deine IP-Adresse, um die Dateien auszuliefern und den Dienst abzusichern. Deine Einträge sind dabei nie enthalten. Rechtsgrundlage ist unser berechtigtes Interesse an einer sicheren Auslieferung der App (Art. 6 Abs. 1 lit. f DSGVO). GitHub ist nach dem EU-US Data Privacy Framework zertifiziert. Details: <a href="https://docs.github.com/de/site-policy/privacy-policies/github-general-privacy-statement">Datenschutzerklärung von GitHub</a>.</p>
+<p>Nach dem ersten Laden speichert dein Gerät die App-Dateien zwischen, damit aya auch ohne Internet funktioniert. Dieser Zwischenspeicher enthält nie deine Einträge.</p>
+
+<h2>Verantwortlich</h2>
+<p>Verantwortlich für diese Seite ist die im <a href="./impressum.html">Impressum</a> genannte Person.</p>
+
+<h2>Deine Rechte</h2>
+<p>Da wir keine Einträge von dir erhalten, liegen bei uns keine Gesundheitsdaten über dich vor. Du hast trotzdem jederzeit das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch (Art. 15 bis 21 DSGVO) sowie das Recht, dich bei einer Datenschutz-Aufsichtsbehörde zu beschweren. Für Fragen schreib an die Adresse im Impressum.</p>
+
+<p class="muted">Stand: Oktober 2026</p>
+</main>
+</body>
+</html>

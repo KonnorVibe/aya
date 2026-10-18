@@ -1,3 +1,5 @@
+> **aya 1.0:** Layout, Ring und Komponenten folgen diesem Dokument (Sternatlas). Die Farben kommen aus der Palette „Pflanzenfarben“ von vergleichskillweb (Leinen hell, Violett-Schwarz dunkel, Indigo als einziger Akzent statt Bernstein), Werte in `src/ui/theme/tokens.css`.
+
 ---
 name: aya
 description: Cycle tracking read like a star chart, private on the device.

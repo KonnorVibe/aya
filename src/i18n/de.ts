@@ -440,5 +440,7 @@ export const de = {
       'Li et al., JAMIA 2022: vergessene Einträge in Zyklus-Apps.',
     ],
     privacy: 'aya speichert alles verschlüsselt auf diesem Gerät und stellt keine Verbindung ins Internet her.',
+    privacyLink: 'Datenschutz und Sicherheit',
+    imprintLink: 'Impressum',
   },
 } as const;

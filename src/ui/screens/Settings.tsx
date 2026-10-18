@@ -223,6 +223,10 @@ export function Settings({ prediction, today }: { prediction: Prediction | null;
         <h2 id="set-about">{t.aboutSection}</h2>
         <p className="settings-disclaimer">{de.disclaimer}</p>
         <p className="row-hint">{t.privacy}</p>
+        <p className="settings-links">
+          <a href="./datenschutz.html">{t.privacyLink}</a>
+          <a href="./impressum.html">{t.imprintLink}</a>
+        </p>
         <details className="settings-method">
           <summary>{t.methodology}</summary>
           {t.methodologyText.map((p) => (
