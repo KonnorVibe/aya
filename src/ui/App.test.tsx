@@ -101,4 +101,28 @@ describe('App', () => {
     expect(await screen.findByRole('heading', { name: 'Noch keine Periode eingetragen' }, { timeout: 30_000 })).toBeTruthy();
     unmount();
   });
+
+  it('imports a CSV through the mapping preview', { timeout: 30_000 }, async () => {
+    const { readFileSync } = await import('node:fs');
+    const csv = readFileSync(`${process.cwd()}/docs/import-vorlagen/perioden.csv`, 'utf8');
+    render(<App dbName="aya-app-test-import" />);
+    await screen.findByRole('heading', { name: 'Deine Daten bleiben bei dir' });
+    click('Weiter');
+    click('Weiter');
+    await screen.findByRole('heading', { name: /letzte Periode/ });
+    click('Überspringen');
+    click('Weiter');
+    click('Los geht’s');
+    await screen.findByRole('heading', { name: 'Noch keine Periode eingetragen' });
+
+    click('Einstellungen');
+    click('Daten importieren');
+    const input = screen.getByLabelText('Datei');
+    fireEvent.change(input, { target: { files: [new File([csv], 'perioden.csv', { type: 'text/csv' })] } });
+    expect(await screen.findByText('45 Tage gefunden, davon 45 mit Periode.')).toBeTruthy();
+    expect((screen.getByLabelText('Periodenende') as HTMLSelectElement).value).toBe('1');
+    click('Importieren');
+    expect(await screen.findByText('Importiert: 45 Tage.')).toBeTruthy();
+    expect(appStore.getState().logs).toHaveLength(45);
+  });
 });

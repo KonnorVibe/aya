@@ -259,3 +259,35 @@
 .settings-method ul {
   padding-left: var(--space-5);
 }
+
+.panel-field select {
+  min-height: var(--target);
+  max-width: 60%;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--ink);
+}
+.import-preview {
+  max-width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-control);
+}
+.import-preview table {
+  border-collapse: collapse;
+  font-size: var(--text-xs);
+  white-space: nowrap;
+}
+.import-preview th,
+.import-preview td {
+  padding: var(--space-1) var(--space-2);
+  border-bottom: 1px solid var(--rule);
+  text-align: left;
+}
+.import-sources {
+  margin: 0;
+  padding-left: var(--space-5);
+  font-size: var(--text-sm);
+}

@@ -7,6 +7,7 @@ import { useApp } from '../../state/store.ts';
 import { Button } from '../components/Button.tsx';
 import { PinPad } from '../components/PinPad.tsx';
 import { BackupPanel, DeletePanel, IcsPanel, RestorePanel } from './settings/DataPanels.tsx';
+import { CsvExportPanel, ImportPanel } from './settings/ImportPanels.tsx';
 import { ChangePassphrasePanel, NewRecoveryPanel, ToDevicePanel, ToPassphrasePanel } from './settings/ProtectionPanels.tsx';
 import './Settings.css';
 
@@ -15,7 +16,7 @@ const t = de.settings;
 
 const MODES: Mode[] = ['track', 'conceive', 'hormonal_contraception'];
 const THEMES: SettingsType['theme'][] = ['system', 'light', 'dark'];
-type Panel = 'backup' | 'restore' | 'ics' | 'delete' | 'toPassphrase' | 'toDevice' | 'changePass' | 'newRecovery';
+type Panel = 'backup' | 'restore' | 'import' | 'csv' | 'ics' | 'delete' | 'toPassphrase' | 'toDevice' | 'changePass' | 'newRecovery';
 
 function Disclosure({ id, label, open, onToggle, children }: { id: string; label: string; open: boolean; onToggle: () => void; children: ReactNode }) {
   return (
@@ -203,6 +204,12 @@ export function Settings({ prediction, today }: { prediction: Prediction | null;
         </Disclosure>
         <Disclosure id="panel-restore" label={t.restore} open={panel === 'restore'} onToggle={() => toggle('restore')}>
           <RestorePanel />
+        </Disclosure>
+        <Disclosure id="panel-import" label={t.importData} open={panel === 'import'} onToggle={() => toggle('import')}>
+          <ImportPanel />
+        </Disclosure>
+        <Disclosure id="panel-csv" label={t.csvExport} open={panel === 'csv'} onToggle={() => toggle('csv')}>
+          <CsvExportPanel />
         </Disclosure>
         <Disclosure id="panel-ics" label={t.ics} open={panel === 'ics'} onToggle={() => toggle('ics')}>
           <IcsPanel prediction={prediction} today={today} />

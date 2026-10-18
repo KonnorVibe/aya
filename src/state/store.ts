@@ -5,6 +5,7 @@ import { openPeriod } from '../engine/cycles.ts';
 import { eachDay, type ISODate } from '../engine/dates.ts';
 import type { DayLog, Settings } from '../engine/types.ts';
 import { createBackup, restoreBackup } from '../import-export/backup.ts';
+import { mergeImported } from '../import-export/tabular.ts';
 import { WrongSecretError, type Protection } from '../crypto/vault.ts';
 import { Database, DB_NAME, Repository, requestPersistence, type ProtectionChoice } from '../storage/repository.ts';
 import { buildOnboarding, type OnboardingInput } from './onboarding.ts';
@@ -128,7 +129,7 @@ export function createAppStore() {
 
     async importLogs(logs) {
       const r = need();
-      await r.upsertMany(logs);
+      await r.upsertMany(mergeImported(r.dayLogs(), logs));
       set({ logs: r.dayLogs() });
       return logs.length;
     },
