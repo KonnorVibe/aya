@@ -1,0 +1,84 @@
+.today {
+  display: flex;
+  flex-direction: column;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: max(var(--space-5), env(safe-area-inset-top)) var(--gutter) calc(96px + env(safe-area-inset-bottom));
+}
+
+.today-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--rule);
+  font-size: var(--text-sm);
+  color: var(--ink-muted);
+}
+
+.wordmark {
+  font-family: var(--font-name);
+  font-style: italic;
+  font-size: var(--text-lg);
+  color: var(--ink);
+}
+
+.today-statement {
+  padding-top: var(--space-5);
+}
+.today-statement h1 {
+  font-family: var(--font-name);
+  font-style: italic;
+  font-weight: 400;
+  font-size: var(--text-xl);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+.today-statement p {
+  margin-top: var(--space-2);
+  color: var(--ink-muted);
+}
+
+.today-chart {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  margin: var(--space-5) 0 0;
+}
+
+.today-actions {
+  display: grid;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+}
+
+.today-empty p {
+  max-width: 34ch;
+  text-wrap: pretty;
+}
+
+.today-summary {
+  margin-top: var(--space-4);
+  font-size: var(--text-sm);
+  color: var(--ink-muted);
+  text-wrap: pretty;
+}
+.today-summary span {
+  font-family: var(--font-name);
+  font-style: italic;
+  color: var(--ink);
+}
+
+.today-notes {
+  margin: var(--space-5) 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--rule);
+}
+.today-notes li {
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--rule);
+  font-size: var(--text-sm);
+  text-wrap: pretty;
+}

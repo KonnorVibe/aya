@@ -1,0 +1,335 @@
+import { diffDays, type ISODate } from '../engine/dates.ts';
+import type { Confidence, Prediction } from '../engine/prediction.ts';
+
+const dayMonth = new Intl.DateTimeFormat('de-DE', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+const monthYear = new Intl.DateTimeFormat('de-DE', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+const weekdayLong = new Intl.DateTimeFormat('de-DE', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' });
+const toDate = (d: ISODate) => new Date(`${d}T00:00:00Z`);
+
+export function formatDayMonth(d: ISODate): string {
+  return dayMonth.format(toDate(d));
+}
+
+export function formatMonthYear(year: number, month: number): string {
+  return monthYear.format(new Date(Date.UTC(year, month - 1, 1)));
+}
+
+export function formatLongDate(d: ISODate): string {
+  return weekdayLong.format(toDate(d));
+}
+
+/** "20.–22. Okt." or "30. Okt. – 2. Nov." */
+export function formatRange(from: ISODate, to: ISODate): string {
+  if (from === to) return formatDayMonth(from);
+  if (from.slice(0, 7) === to.slice(0, 7)) return `${Number(from.slice(8))}.–${formatDayMonth(to)}`;
+  return `${formatDayMonth(from)} – ${formatDayMonth(to)}`;
+}
+
+const days = (n: number) => (n === 1 ? '1 Tag' : `${n} Tagen`);
+
+export const confidenceLabel: Record<Confidence, string> = {
+  low: 'Sicherheit\u00a0niedrig',
+  medium: 'Sicherheit\u00a0mittel',
+  high: 'Sicherheit\u00a0hoch',
+};
+
+/** The one sentence the Today screen leads with. */
+export function statement(p: Prediction, today: ISODate): string {
+  if (p.periodDay) return `Tag ${p.periodDay} deiner Periode`;
+  if (p.lateByDays !== undefined) return p.lateByDays === 1 ? 'Periode seit 1 Tag später' : `Periode seit ${p.lateByDays} Tagen später`;
+  const until = diffDays(p.nextPeriod.mostLikely, today);
+  if (until <= 0) return 'Periode heute erwartet';
+  if (p.ovulation && p.fertileWindow && today >= p.fertileWindow.peakStart && today <= p.fertileWindow.peakEnd) {
+    return 'Hohe Fruchtbarkeit';
+  }
+  return until === 1 ? 'Periode morgen' : `Periode in ${days(until)}`;
+}
+
+export const de = {
+  appName: 'aya',
+  periodStarted: 'Periode begonnen',
+  periodEnded: 'Periode beendet',
+  logToday: 'Heute eintragen',
+  expected: 'voraussichtlich',
+  cycleDayOf: (n: number) => `Zyklustag von etwa ${n}`,
+  ringLabel: (day: number, length: number, range: string) =>
+    `Zyklustag ${day} von etwa ${length}. Nächste Periode voraussichtlich ${range}.`,
+  legend: {
+    period: 'Periode',
+    fertile: 'fruchtbar',
+    ovulation: 'Eisprung',
+    luteal: 'Lutealphase',
+    forecast: 'Vorhersage',
+    today: 'heute',
+    flow: 'Blutung',
+    flowLight: 'schwach',
+    flowHeavy: 'stark',
+  },
+  ringPhase: { period: 'Periode', fertile: 'fruchtbar', luteal: 'Lutealphase' },
+  log: {
+    title: (date: string, isToday: boolean) => (isToday ? 'Heute' : date),
+    done: 'Fertig',
+    flow: 'Blutung',
+    flows: { none: 'keine', spotting: 'Schmierblutung', light: 'leicht', medium: 'mittel', heavy: 'stark' },
+    symptoms: 'Symptome',
+    mood: 'Stimmung',
+    energy: 'Energie',
+    energyLevels: ['sehr wenig', 'wenig', 'mittel', 'viel', 'sehr viel'],
+    sleep: 'Schlaf',
+    sleepLevels: ['sehr schlecht', 'schlecht', 'okay', 'gut', 'sehr gut'],
+    sex: 'Sex',
+    sexProtected: 'geschützt',
+    sexUnprotected: 'ungeschützt',
+    note: 'Notiz',
+    notePlaceholder: 'Was dir heute auffällt',
+    summary: 'Heute eingetragen',
+  },
+  symptomLabels: {
+    cramps: 'Krämpfe',
+    headache: 'Kopfschmerzen',
+    migraine: 'Migräne',
+    breast_tenderness: 'Brustspannen',
+    bloating: 'Blähungen',
+    back_pain: 'Rückenschmerzen',
+    nausea: 'Übelkeit',
+    acne: 'Akne',
+    fatigue: 'Müdigkeit',
+    cravings: 'Heißhunger',
+    diarrhea: 'Durchfall',
+    constipation: 'Verstopfung',
+    insomnia: 'Schlafprobleme',
+    libido_high: 'Libido hoch',
+    libido_low: 'Libido niedrig',
+    dizziness: 'Schwindel',
+    joint_pain: 'Gelenkschmerzen',
+  },
+  moodLabels: {
+    calm: 'ruhig',
+    happy: 'glücklich',
+    energetic: 'energiegeladen',
+    irritable: 'gereizt',
+    sad: 'traurig',
+    anxious: 'ängstlich',
+    mood_swings: 'Stimmungsschwankungen',
+    stressed: 'gestresst',
+  },
+  notes: {
+    backupNever:
+      'Du hast noch kein Backup. Ein Backup ist der einzige Weg, deine Daten auf ein neues Gerät mitzunehmen. Du findest es in den Einstellungen.',
+    backup: 'Dein letztes Backup ist über 30 Tage alt. Ein aktuelles Backup ist der einzige Weg, deine Daten auf ein neues Gerät mitzunehmen.',
+    late: (n: number) => (n === 1 ? 'Deine Periode ist 1 Tag später als erwartet. Das kommt oft vor.' : `Deine Periode ist ${n} Tage später als erwartet. Das kommt oft vor.`),
+    pregnancyTest:
+      'Du hast in deinem fruchtbaren Fenster ungeschützten Sex eingetragen. Ab jetzt ist ein Schwangerschaftstest aussagekräftig.',
+    refinedBbt: 'Vorhersage verfeinert durch deinen Temperaturanstieg.',
+    refinedLh: 'Vorhersage verfeinert durch deinen positiven LH-Test.',
+    irregular: 'Deine Zyklen schwanken stärker als üblich, deshalb ist die Spanne breiter.',
+    fertileWindow: (range: string) => `Fruchtbares Fenster voraussichtlich ${range}.`,
+    upcoming: (list: string) => `Erfahrungsgemäß könnten in den nächsten Tagen ${list} auftreten.`,
+    health: {
+      short_cycles: 'Deine Zyklen sind meist kürzer als 24 Tage. Sprich bei Gelegenheit mit deiner Ärztin darüber.',
+      long_cycles: 'Deine Zyklen sind meist länger als 38 Tage. Sprich bei Gelegenheit mit deiner Ärztin darüber.',
+      long_periods: 'Deine Perioden dauerten zuletzt öfter länger als 8 Tage. Sprich bei Gelegenheit mit deiner Ärztin darüber.',
+      high_variability: 'Deine Zykluslängen schwanken stark. Sprich bei Gelegenheit mit deiner Ärztin darüber.',
+      absent_period: 'Deine letzte Periode liegt über 90 Tage zurück. Sprich mit deiner Ärztin darüber.',
+    },
+  },
+  calendar: {
+    title: 'Kalender',
+    prev: 'Vorheriger Monat',
+    next: 'Nächster Monat',
+    weekdays: ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'],
+    edit: 'Periode nachtragen',
+    editDone: 'Fertig',
+    editHint: 'Tippe auf die Tage, an denen du deine Periode hattest. Nochmal tippen entfernt sie.',
+    toToday: 'Heute',
+    missed: (from: string, to: string, days: number) =>
+      `Zwischen ${from} und ${to} liegen ${days} Tage ohne Periode. Hast du hier vielleicht eine Periode nicht eingetragen?`,
+    missedAdd: 'Periode nachtragen',
+    missedKeep: 'Stimmt so',
+    legendPredicted: 'erwartete Periode',
+    legendEntry: 'Eintrag',
+    dayLabel: (date: string, parts: string[]) => [date, ...parts].join(', '),
+    states: {
+      logged: 'Periode',
+      spotting: 'Schmierblutung',
+      predicted: 'erwartete Periode',
+      peak: 'hohe Fruchtbarkeit',
+      high: 'fruchtbar',
+      ovulation: 'voraussichtlicher Eisprung',
+      entry: 'Eintrag vorhanden',
+      today: 'heute',
+    },
+  },
+  insights: {
+    title: 'Einblicke',
+    cycleLength: 'Zykluslänge',
+    periodLength: 'Periodendauer',
+    average: 'Durchschnitt',
+    range: 'Spanne',
+    regularity: 'Regelmäßigkeit',
+    regular: 'regelmäßig',
+    irregular: 'unregelmäßig',
+    unknown: 'noch offen',
+    days: (n: number) => (n === 1 ? '1 Tag' : `${n} Tage`),
+    rangeValue: (a: number, b: number) => (a === b ? `${a} Tage` : `${a}–${b} Tage`),
+    regularityText: (variation: number, limit: number) =>
+      `Zwischen deinem kürzesten und längsten Zyklus liegen ${variation} ${variation === 1 ? 'Tag' : 'Tage'}. Bis ${limit} Tage gelten als regelmäßig.`,
+    regularityPending: 'Ab drei vollständigen Zyklen kann aya einschätzen, wie regelmäßig dein Zyklus ist.',
+    cycleChartNote: 'Der hinterlegte Bereich zeigt die übliche Spanne von 24 bis 38 Tagen.',
+    periodChartNote: 'Die Linie markiert 8 Tage, bis dahin gilt eine Periode als üblich.',
+    excluded: 'nicht mitgezählt',
+    normBand: 'üblich 24–38',
+    periodLimit: 'bis 8',
+    empty: 'Sobald du zwei Perioden eingetragen hast, siehst du hier deine Zykluslängen.',
+    patterns: 'Muster bei Symptomen',
+    patternsEmpty: 'Muster erscheinen, wenn du über mindestens drei Zyklen Symptome einträgst.',
+    pattern: (withN: number, total: number, phase: string, symptom: string) =>
+      `In ${withN} von ${total} Zyklen hattest du ${phase} ${symptom}.`,
+    phases: {
+      menstruation: 'während der Periode',
+      follicular: 'in den Tagen nach der Periode',
+      ovulation: 'rund um den Eisprung',
+      luteal: 'in der zweiten Zyklushälfte',
+      premenstrual: 'in den drei Tagen vor der Periode',
+    },
+    table: 'Als Tabelle anzeigen',
+    tableStart: 'Beginn',
+    tableCycle: 'Zyklus',
+    tablePeriod: 'Periode',
+    selected: (date: string, value: string) => `${date}: ${value}`,
+    chartLabel: (title: string, count: number) => `${title} der letzten ${count} Zyklen`,
+  },
+  theme: { label: 'Darstellung', system: 'System', light: 'Hell', dark: 'Dunkel' },
+  disclaimer: 'aya ist kein Verhütungsmittel und kein Medizinprodukt.',
+  tabs: { today: 'Heute', calendar: 'Kalender', insights: 'Einblicke', settings: 'Einstellungen' },
+  emptyToday: {
+    title: 'Noch keine Periode eingetragen',
+    body: 'Trag den ersten Tag deiner Periode ein. Danach zeigt dir aya, wann die nächste wahrscheinlich kommt.',
+  },
+  loadError: 'aya konnte deine Daten nicht öffnen. Schließ die App und öffne sie noch einmal.',
+  onboarding: {
+    step: (n: number, of: number) => `Schritt ${n} von ${of}`,
+    next: 'Weiter',
+    back: 'Zurück',
+    skip: 'Überspringen',
+    finish: 'Los geht’s',
+    welcome: {
+      title: 'Deine Daten bleiben bei dir',
+      points: [
+        'Kein Konto, kein Server, keine Cloud.',
+        'Alles wird verschlüsselt auf diesem Gerät gespeichert.',
+        'aya sendet nichts ins Internet. Nie.',
+      ],
+      homeScreen:
+        'Tipp: Tippe in Safari auf Teilen und dann auf „Zum Home-Bildschirm“. Nur so bleiben deine Daten dauerhaft erhalten.',
+    },
+    period: {
+      title: 'Wann hat deine letzte Periode begonnen?',
+      body: 'Ungefähr reicht. Du kannst das auch überspringen und später eintragen.',
+      startLabel: 'Erster Tag',
+      cycleLabel: 'Zykluslänge',
+      periodLabel: 'Periodendauer',
+      unknown: 'Weiß ich nicht',
+      days: (n: number) => `${n} Tage`,
+      decrease: (label: string) => `${label} verringern`,
+      increase: (label: string) => `${label} erhöhen`,
+    },
+    mode: {
+      title: 'Wofür möchtest du aya nutzen?',
+      options: {
+        track: { label: 'Zyklus verfolgen', hint: 'Periode, Symptome und Vorhersagen.' },
+        conceive: { label: 'Kinderwunsch', hint: 'Fruchtbare Tage stehen im Vordergrund.' },
+        hormonal_contraception: { label: 'Hormonelle Verhütung', hint: 'Blutungen und Symptome, ohne Eisprung-Vorhersage.' },
+      },
+    },
+    note: {
+      title: 'Bevor es losgeht',
+      body: 'Die Vorhersagen beruhen auf Statistik und zeigen immer eine Spanne. Sie ersetzen weder Verhütung noch ärztlichen Rat.',
+      pin: 'Wenn du möchtest, kannst du später in den Einstellungen eine PIN festlegen.',
+    },
+  },
+  lock: {
+    title: 'Gib deine PIN ein',
+    wrong: 'Diese PIN stimmt nicht.',
+    wait: (s: number) => `Zu viele Versuche. Bitte warte noch ${s} Sekunden.`,
+    delete: 'Letzte Ziffer löschen',
+    entered: (n: number, of: number) => `${n} von ${of} Ziffern eingegeben`,
+  },
+  settings: {
+    title: 'Einstellungen',
+    lockSection: 'App-Sperre',
+    pin: 'PIN',
+    pinOn: 'An',
+    pinOff: 'Aus',
+    setPin: 'PIN festlegen',
+    changePin: 'PIN ändern',
+    removePin: 'PIN entfernen',
+    pinHint: 'Die PIN schützt vor neugierigen Blicken. Sie ersetzt nicht die Sperre deines iPhones.',
+    newPin: 'Neue PIN eingeben',
+    confirmPin: 'PIN wiederholen',
+    mismatch: 'Die PINs stimmen nicht überein. Versuch es noch einmal.',
+    cancel: 'Abbrechen',
+    autoLock: 'Automatisch sperren nach',
+    minutes: (n: number) => (n === 1 ? '1 Minute' : `${n} Minuten`),
+    autoLockHint: 'Und immer, wenn aya länger als eine Minute im Hintergrund war.',
+    shield: 'Sichtschutz',
+    shieldHint: 'Macht den Inhalt unscharf, sobald aya in den Hintergrund geht.',
+    aboutSection: 'Über aya',
+    generalSection: 'Allgemein',
+    mode: 'Modus',
+    birthYear: 'Geburtsjahr',
+    birthYearHint: 'Freiwillig. Nur für die altersabhängige Einordnung der Regelmäßigkeit.',
+    birthYearNone: 'keine Angabe',
+    themeLabel: 'Darstellung',
+    dataSection: 'Deine Daten',
+    backup: 'Backup erstellen',
+    backupLast: (date: string) => `Letztes Backup: ${date}`,
+    backupNever: 'Noch kein Backup erstellt.',
+    backupIntro:
+      'Das Backup ist eine verschlüsselte Datei. Wähle ein Passwort dafür. Ohne dieses Passwort lässt sich das Backup nicht öffnen, auch nicht von dir.',
+    password: 'Passwort',
+    passwordRepeat: 'Passwort wiederholen',
+    passwordShort: 'Bitte mindestens 8 Zeichen.',
+    passwordMismatch: 'Die Passwörter stimmen nicht überein.',
+    backupCreate: 'Backup speichern',
+    working: 'Einen Moment …',
+    backupDone: 'Backup erstellt. Bewahre die Datei und das Passwort gut auf.',
+    restore: 'Backup laden',
+    restoreIntro: 'Dein aktueller Stand auf diesem Gerät wird durch das Backup ersetzt.',
+    restoreFile: 'Backup-Datei',
+    restoreStart: 'Backup laden',
+    restoreDone: (n: number) => `Backup geladen: ${n} Tage.`,
+    restoreErrors: {
+      invalid_file: 'Diese Datei ist kein aya-Backup.',
+      unsupported_version: 'Dieses Backup stammt aus einer neueren Version von aya.',
+      wrong_password: 'Das Passwort passt nicht zu diesem Backup.',
+    },
+    ics: 'Kalender-Export',
+    icsIntro:
+      'aya kann ohne Server keine Erinnerungen schicken. Exportiere stattdessen die erwarteten Periodentage in deinen Kalender. Der Termintitel ist neutral und frei wählbar.',
+    icsTitle: 'Termintitel',
+    icsCreate: 'Termine exportieren',
+    icsNone: 'Für einen Export braucht aya mindestens eine eingetragene Periode.',
+    icsDone: 'Kalenderdatei erstellt. Öffne sie, um die Termine zu übernehmen.',
+    deleteAll: 'Alle Daten löschen',
+    deleteIntro:
+      'Alle Einträge, Einstellungen und der Schlüssel auf diesem Gerät werden unwiderruflich gelöscht. Ohne Backup gibt es keinen Weg zurück.',
+    deleteConfirmLabel: 'Tippe LÖSCHEN zur Bestätigung',
+    deleteWord: 'LÖSCHEN',
+    deleteButton: 'Unwiderruflich löschen',
+    methodology: 'Methodik und Quellen',
+    methodologyText: [
+      'Die Vorhersage nutzt deine letzten bis zu 12 Zyklen. Neuere Zyklen zählen stärker, ein gewichteter Median dämpft Ausreißer. Solange wenige Daten vorliegen, fließt ein Durchschnittswert von 29 Tagen oder deine Angabe aus dem Start ein.',
+      'Die Spanne ist ein 80-%-Intervall: In etwa vier von fünf Fällen beginnt die Periode darin.',
+      'Der Eisprung wird nicht auf Tag 14 gesetzt, sondern vom erwarteten Periodenbeginn zurückgerechnet (Lutealphase im Mittel 12,4 Tage). Das fruchtbare Fenster umfasst die fünf Tage davor und den Eisprungtag.',
+      'Zyklen, die wie eine vergessene Periode aussehen, werden zunächst nicht mitgezählt.',
+    ],
+    sources: [
+      'Bull et al., npj Digital Medicine 2019: Zyklus- und Phasenlängen aus rund 600.000 Zyklen.',
+      'FIGO 2018: Normbereiche für Zykluslänge, Periodendauer und Regelmäßigkeit.',
+      'Wilcox et al., New England Journal of Medicine 1995: fruchtbares Fenster.',
+      'Li et al., JAMIA 2022: vergessene Einträge in Zyklus-Apps.',
+    ],
+    privacy: 'aya speichert alles verschlüsselt auf diesem Gerät und stellt keine Verbindung ins Internet her.',
+  },
+} as const;

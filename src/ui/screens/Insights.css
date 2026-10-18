@@ -1,0 +1,97 @@
+.insights {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: max(var(--space-5), env(safe-area-inset-top)) var(--gutter) calc(96px + env(safe-area-inset-bottom));
+}
+.insights h1 {
+  font-family: var(--font-name);
+  font-style: italic;
+  font-weight: 400;
+  font-size: var(--text-xl);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--rule);
+}
+.insights section {
+  margin-top: var(--space-6);
+}
+.insights h2 {
+  margin-bottom: var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--rule-strong);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--ink-muted);
+}
+
+.insights-figures {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin: 0;
+}
+.insights-figures div {
+  padding: var(--space-4) 0;
+  border-bottom: 1px solid var(--rule);
+}
+.insights-figures div:nth-child(odd) {
+  padding-right: var(--space-3);
+}
+.insights-figures div:nth-child(even) {
+  padding-left: var(--space-3);
+  border-left: 1px solid var(--rule);
+}
+.insights-figures dt {
+  font-family: var(--font-name);
+  font-style: italic;
+  font-size: var(--text-sm);
+  color: var(--ink-muted);
+}
+.insights-figures dd {
+  margin: var(--space-1) 0 0;
+  font-size: var(--text-lg);
+  font-weight: 600;
+}
+
+.insights-note {
+  margin-top: var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--ink-muted);
+  text-wrap: pretty;
+}
+
+.insights-patterns {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.insights-patterns li {
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--rule);
+  text-wrap: pretty;
+}
+
+.insights-table {
+  margin-top: var(--space-6);
+  font-size: var(--text-sm);
+}
+.insights-table summary {
+  padding: var(--space-3) 0;
+  cursor: pointer;
+  color: var(--ink-muted);
+}
+.insights-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.insights-table th,
+.insights-table td {
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--rule);
+  text-align: left;
+}
+.insights-table th {
+  font-weight: 600;
+  color: var(--ink-muted);
+}
+.insights-excluded {
+  color: var(--ink-muted);
+}

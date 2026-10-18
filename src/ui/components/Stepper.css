@@ -1,0 +1,35 @@
+.stepper {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.stepper-label {
+  color: var(--ink);
+}
+
+.stepper-control {
+  display: grid;
+  grid-template-columns: var(--target) 1fr var(--target);
+  align-items: center;
+  gap: var(--space-2);
+}
+.stepper-control output {
+  text-align: center;
+  color: var(--ink);
+}
+.stepper-control button {
+  width: var(--target);
+  height: var(--target);
+  border-radius: var(--radius-control);
+  border: 1px solid var(--rule-strong);
+  background: transparent;
+  font-size: var(--text-lg);
+  line-height: 1;
+  cursor: pointer;
+}
+.stepper-control button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}

@@ -1,0 +1,77 @@
+.pinpad {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-5);
+  width: 100%;
+  max-width: 320px;
+  margin: 0 auto;
+}
+
+.pinpad-title {
+  font-family: var(--font-name);
+  font-style: italic;
+  font-weight: 400;
+  font-size: var(--text-lg);
+  text-align: center;
+}
+
+.pinpad-dots {
+  display: flex;
+  gap: var(--space-4);
+}
+.pinpad-dots span {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1.5px solid var(--ink-muted);
+}
+.pinpad-dots span.is-filled {
+  background: var(--ink);
+  border-color: var(--ink);
+}
+
+.pinpad-message {
+  min-height: 2.9em;
+  font-size: var(--text-sm);
+  color: var(--period);
+  text-align: center;
+  text-wrap: pretty;
+}
+
+.pinpad-keys {
+  display: grid;
+  grid-template-columns: repeat(3, 72px);
+  gap: var(--space-3) var(--space-5);
+}
+
+.pinpad-key {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 1px solid var(--rule-strong);
+  background: transparent;
+  font-size: var(--text-lg);
+  font-weight: 300;
+  cursor: pointer;
+  transition: background-color 120ms var(--ease-out);
+}
+.pinpad-key:active {
+  background: var(--ground-raised);
+}
+.pinpad-key:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.pinpad-key.is-del {
+  border-color: transparent;
+}
+.pinpad-key svg {
+  width: 26px;
+  height: 26px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}

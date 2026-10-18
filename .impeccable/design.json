@@ -1,0 +1,530 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-16T00:00:00Z",
+  "title": "Design System: aya",
+  "extensions": {
+    "colorMeta": {
+      "chart-paper": {
+        "role": "neutral",
+        "displayName": "Chart Paper",
+        "canonical": "oklch(95.6% 0.011 275)",
+        "tonalRamp": [
+          "oklch(15% 0.011 275)",
+          "oklch(25% 0.011 275)",
+          "oklch(36% 0.011 275)",
+          "oklch(47% 0.011 275)",
+          "oklch(58% 0.011 275)",
+          "oklch(70% 0.011 275)",
+          "oklch(82% 0.011 275)",
+          "oklch(95% 0.011 275)"
+        ]
+      },
+      "chart-paper-raised": {
+        "role": "neutral",
+        "displayName": "Chart Paper Raised",
+        "canonical": "oklch(92.6% 0.017 275)",
+        "tonalRamp": [
+          "oklch(15% 0.017 275)",
+          "oklch(25% 0.017 275)",
+          "oklch(36% 0.017 275)",
+          "oklch(47% 0.017 275)",
+          "oklch(58% 0.017 275)",
+          "oklch(70% 0.017 275)",
+          "oklch(82% 0.017 275)",
+          "oklch(95% 0.017 275)"
+        ]
+      },
+      "chalk-ink-day": {
+        "role": "neutral",
+        "displayName": "Day Ink (Deep Navy)",
+        "canonical": "oklch(23.4% 0.056 272.5)",
+        "tonalRamp": [
+          "oklch(15% 0.048 272.5)",
+          "oklch(25% 0.055 272.5)",
+          "oklch(36% 0.056 272.5)",
+          "oklch(47% 0.056 272.5)",
+          "oklch(58% 0.056 272.5)",
+          "oklch(70% 0.056 272.5)",
+          "oklch(82% 0.056 272.5)",
+          "oklch(95% 0.048 272.5)"
+        ]
+      },
+      "ink-muted-day": {
+        "role": "neutral",
+        "displayName": "Day Muted Ink",
+        "canonical": "oklch(44.2% 0.070 274)",
+        "tonalRamp": [
+          "oklch(15% 0.055 274)",
+          "oklch(25% 0.064 274)",
+          "oklch(36% 0.070 274)",
+          "oklch(47% 0.070 274)",
+          "oklch(58% 0.070 274)",
+          "oklch(70% 0.070 274)",
+          "oklch(82% 0.066 274)",
+          "oklch(95% 0.055 274)"
+        ]
+      },
+      "rule-day": {
+        "role": "neutral",
+        "displayName": "Day Rule (ink 15%)",
+        "canonical": "#151b3826",
+        "tonalRamp": [
+          "oklch(15% 0.048 272.5)",
+          "oklch(25% 0.055 272.5)",
+          "oklch(36% 0.056 272.5)",
+          "oklch(47% 0.056 272.5)",
+          "oklch(58% 0.056 272.5)",
+          "oklch(70% 0.056 272.5)",
+          "oklch(82% 0.056 272.5)",
+          "oklch(95% 0.048 272.5)"
+        ]
+      },
+      "rule-strong-day": {
+        "role": "neutral",
+        "displayName": "Day Rule Strong (ink 35%)",
+        "canonical": "#151b3859",
+        "tonalRamp": [
+          "oklch(15% 0.048 272.5)",
+          "oklch(25% 0.055 272.5)",
+          "oklch(36% 0.056 272.5)",
+          "oklch(47% 0.056 272.5)",
+          "oklch(58% 0.056 272.5)",
+          "oklch(70% 0.056 272.5)",
+          "oklch(82% 0.056 272.5)",
+          "oklch(95% 0.048 272.5)"
+        ]
+      },
+      "period-rose-day": {
+        "role": "primary",
+        "displayName": "Period Rose (day)",
+        "canonical": "oklch(53.1% 0.148 10.8)",
+        "tonalRamp": [
+          "oklch(15% 0.094 10.8)",
+          "oklch(25% 0.113 10.8)",
+          "oklch(36% 0.133 10.8)",
+          "oklch(47% 0.148 10.8)",
+          "oklch(58% 0.148 10.8)",
+          "oklch(70% 0.140 10.8)",
+          "oklch(82% 0.118 10.8)",
+          "oklch(95% 0.094 10.8)"
+        ]
+      },
+      "fertile-turquoise-day": {
+        "role": "secondary",
+        "displayName": "Fertile Turquoise (day)",
+        "canonical": "oklch(52.4% 0.088 187.7)",
+        "tonalRamp": [
+          "oklch(15% 0.064 187.7)",
+          "oklch(25% 0.075 187.7)",
+          "oklch(36% 0.087 187.7)",
+          "oklch(47% 0.088 187.7)",
+          "oklch(58% 0.088 187.7)",
+          "oklch(70% 0.088 187.7)",
+          "oklch(82% 0.078 187.7)",
+          "oklch(95% 0.064 187.7)"
+        ]
+      },
+      "luteal-violet-day": {
+        "role": "secondary",
+        "displayName": "Luteal Violet (day)",
+        "canonical": "oklch(49.7% 0.136 292.3)",
+        "tonalRamp": [
+          "oklch(15% 0.088 292.3)",
+          "oklch(25% 0.105 292.3)",
+          "oklch(36% 0.124 292.3)",
+          "oklch(47% 0.136 292.3)",
+          "oklch(58% 0.136 292.3)",
+          "oklch(70% 0.131 292.3)",
+          "oklch(82% 0.110 292.3)",
+          "oklch(95% 0.088 292.3)"
+        ]
+      },
+      "signal-amber-day": {
+        "role": "tertiary",
+        "displayName": "Signal Amber (day)",
+        "canonical": "oklch(52.4% 0.124 57.3)",
+        "tonalRamp": [
+          "oklch(15% 0.082 57.3)",
+          "oklch(25% 0.098 57.3)",
+          "oklch(36% 0.115 57.3)",
+          "oklch(47% 0.124 57.3)",
+          "oklch(58% 0.124 57.3)",
+          "oklch(70% 0.121 57.3)",
+          "oklch(82% 0.102 57.3)",
+          "oklch(95% 0.082 57.3)"
+        ]
+      },
+      "idle-point-day": {
+        "role": "neutral",
+        "displayName": "Day Idle Point (ink 55%)",
+        "canonical": "#151b388c",
+        "tonalRamp": [
+          "oklch(15% 0.048 272.5)",
+          "oklch(25% 0.055 272.5)",
+          "oklch(36% 0.056 272.5)",
+          "oklch(47% 0.056 272.5)",
+          "oklch(58% 0.056 272.5)",
+          "oklch(70% 0.056 272.5)",
+          "oklch(82% 0.056 272.5)",
+          "oklch(95% 0.048 272.5)"
+        ]
+      },
+      "night-chart": {
+        "role": "neutral",
+        "displayName": "Night Chart",
+        "canonical": "oklch(20.6% 0.050 272.8)",
+        "tonalRamp": [
+          "oklch(15% 0.045 272.8)",
+          "oklch(25% 0.050 272.8)",
+          "oklch(36% 0.050 272.8)",
+          "oklch(47% 0.050 272.8)",
+          "oklch(58% 0.050 272.8)",
+          "oklch(70% 0.050 272.8)",
+          "oklch(82% 0.050 272.8)",
+          "oklch(95% 0.045 272.8)"
+        ]
+      },
+      "night-chart-raised": {
+        "role": "neutral",
+        "displayName": "Night Chart Raised",
+        "canonical": "oklch(25.6% 0.065 271.2)",
+        "tonalRamp": [
+          "oklch(15% 0.053 271.2)",
+          "oklch(25% 0.061 271.2)",
+          "oklch(36% 0.065 271.2)",
+          "oklch(47% 0.065 271.2)",
+          "oklch(58% 0.065 271.2)",
+          "oklch(70% 0.065 271.2)",
+          "oklch(82% 0.063 271.2)",
+          "oklch(95% 0.053 271.2)"
+        ]
+      },
+      "chalk-ink-night": {
+        "role": "neutral",
+        "displayName": "Chalk Ink",
+        "canonical": "oklch(94.1% 0.014 295.3)",
+        "tonalRamp": [
+          "oklch(15% 0.014 295.3)",
+          "oklch(25% 0.014 295.3)",
+          "oklch(36% 0.014 295.3)",
+          "oklch(47% 0.014 295.3)",
+          "oklch(58% 0.014 295.3)",
+          "oklch(70% 0.014 295.3)",
+          "oklch(82% 0.014 295.3)",
+          "oklch(95% 0.014 295.3)"
+        ]
+      },
+      "ink-muted-night": {
+        "role": "neutral",
+        "displayName": "Night Muted Ink",
+        "canonical": "oklch(75.1% 0.040 280.5)",
+        "tonalRamp": [
+          "oklch(15% 0.040 280.5)",
+          "oklch(25% 0.040 280.5)",
+          "oklch(36% 0.040 280.5)",
+          "oklch(47% 0.040 280.5)",
+          "oklch(58% 0.040 280.5)",
+          "oklch(70% 0.040 280.5)",
+          "oklch(82% 0.040 280.5)",
+          "oklch(95% 0.040 280.5)"
+        ]
+      },
+      "rule-night": {
+        "role": "neutral",
+        "displayName": "Night Rule (chalk 12%)",
+        "canonical": "#eceaf41f",
+        "tonalRamp": [
+          "oklch(15% 0.014 295.3)",
+          "oklch(25% 0.014 295.3)",
+          "oklch(36% 0.014 295.3)",
+          "oklch(47% 0.014 295.3)",
+          "oklch(58% 0.014 295.3)",
+          "oklch(70% 0.014 295.3)",
+          "oklch(82% 0.014 295.3)",
+          "oklch(95% 0.014 295.3)"
+        ]
+      },
+      "rule-strong-night": {
+        "role": "neutral",
+        "displayName": "Night Rule Strong (chalk 28%)",
+        "canonical": "#eceaf447",
+        "tonalRamp": [
+          "oklch(15% 0.014 295.3)",
+          "oklch(25% 0.014 295.3)",
+          "oklch(36% 0.014 295.3)",
+          "oklch(47% 0.014 295.3)",
+          "oklch(58% 0.014 295.3)",
+          "oklch(70% 0.014 295.3)",
+          "oklch(82% 0.014 295.3)",
+          "oklch(95% 0.014 295.3)"
+        ]
+      },
+      "period-rose-night": {
+        "role": "primary",
+        "displayName": "Period Rose (night)",
+        "canonical": "oklch(63.8% 0.121 6.2)",
+        "tonalRamp": [
+          "oklch(15% 0.081 6.2)",
+          "oklch(25% 0.096 6.2)",
+          "oklch(36% 0.112 6.2)",
+          "oklch(47% 0.121 6.2)",
+          "oklch(58% 0.121 6.2)",
+          "oklch(70% 0.118 6.2)",
+          "oklch(82% 0.100 6.2)",
+          "oklch(95% 0.081 6.2)"
+        ]
+      },
+      "fertile-turquoise-night": {
+        "role": "secondary",
+        "displayName": "Fertile Turquoise (night)",
+        "canonical": "oklch(74.8% 0.106 188.2)",
+        "tonalRamp": [
+          "oklch(15% 0.073 188.2)",
+          "oklch(25% 0.086 188.2)",
+          "oklch(36% 0.101 188.2)",
+          "oklch(47% 0.106 188.2)",
+          "oklch(58% 0.106 188.2)",
+          "oklch(70% 0.106 188.2)",
+          "oklch(82% 0.090 188.2)",
+          "oklch(95% 0.073 188.2)"
+        ]
+      },
+      "luteal-violet-night": {
+        "role": "secondary",
+        "displayName": "Luteal Violet (night)",
+        "canonical": "oklch(71.6% 0.107 294.1)",
+        "tonalRamp": [
+          "oklch(15% 0.073 294.1)",
+          "oklch(25% 0.087 294.1)",
+          "oklch(36% 0.102 294.1)",
+          "oklch(47% 0.107 294.1)",
+          "oklch(58% 0.107 294.1)",
+          "oklch(70% 0.107 294.1)",
+          "oklch(82% 0.091 294.1)",
+          "oklch(95% 0.073 294.1)"
+        ]
+      },
+      "signal-amber-night": {
+        "role": "tertiary",
+        "displayName": "Signal Amber (night)",
+        "canonical": "oklch(77.9% 0.138 68.3)",
+        "tonalRamp": [
+          "oklch(15% 0.089 68.3)",
+          "oklch(25% 0.106 68.3)",
+          "oklch(36% 0.125 68.3)",
+          "oklch(47% 0.138 68.3)",
+          "oklch(58% 0.138 68.3)",
+          "oklch(70% 0.132 68.3)",
+          "oklch(82% 0.111 68.3)",
+          "oklch(95% 0.089 68.3)"
+        ]
+      },
+      "idle-point-night": {
+        "role": "neutral",
+        "displayName": "Night Idle Point (chalk 40%)",
+        "canonical": "#eceaf466",
+        "tonalRamp": [
+          "oklch(15% 0.014 295.3)",
+          "oklch(25% 0.014 295.3)",
+          "oklch(36% 0.014 295.3)",
+          "oklch(47% 0.014 295.3)",
+          "oklch(58% 0.014 295.3)",
+          "oklch(70% 0.014 295.3)",
+          "oklch(82% 0.014 295.3)",
+          "oklch(95% 0.014 295.3)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Cycle day numeral at the centre of the ring; serif italic."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "The day's statement; serif italic, balanced wrapping."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Lowercase aya wordmark; serif italic."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Range, confidence, button labels; system sans with tabular figures."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Header date, chip text."
+      },
+      "caption": {
+        "displayName": "Caption",
+        "purpose": "Legend and chart annotations."
+      },
+      "chart-name": {
+        "displayName": "Chart Name",
+        "purpose": "Phase names set beside their run of points on the ring; serif italic."
+      }
+    },
+    "shadows": [],
+    "motion": [
+      {
+        "name": "ease-out",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "All state transitions and the ring light-up."
+      },
+      {
+        "name": "control-transition",
+        "value": "160ms",
+        "purpose": "Button press scale (0.98), hover tint, chip check reveal."
+      },
+      {
+        "name": "ring-light",
+        "value": "520ms fade, 18ms stagger per day",
+        "purpose": "Points light up in day order on first render; off under prefers-reduced-motion."
+      }
+    ],
+    "breakpoints": [],
+    "themes": [
+      {
+        "name": "night",
+        "selector": "prefers-color-scheme: dark, or :root[data-theme='dark']"
+      },
+      {
+        "name": "day",
+        "selector": "default, or :root[data-theme='light']"
+      }
+    ],
+    "focus": {
+      "value": "outline: 2px solid var(--ink); outline-offset: 3px; border-radius: 6px",
+      "purpose": "Global focus ring in ink; caret also ink."
+    },
+    "magnitudeRamp": {
+      "flow": {
+        "spotting": 3,
+        "light": 4.5,
+        "medium": 6,
+        "heavy": 7.5
+      },
+      "noFlow": {
+        "ovulation": 5.5,
+        "peak": 4.5,
+        "fertile": 3.5,
+        "other": 2.5
+      },
+      "unit": "SVG radius in a 300-unit viewBox"
+    }
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Main action (Periode begonnen): Period Rose hairline frame with a 14% tint.",
+      "html": "<button class=\"ds-btn ds-btn-primary\">Periode begonnen</button>",
+      "css": ".ds-btn{min-height:52px;padding:0 var(--space-5,24px);border-radius:var(--radius-control,6px);border:1px solid transparent;font-family:var(--font-ui,-apple-system,system-ui,sans-serif);font-size:var(--text-md,1.0625rem);font-weight:600;cursor:pointer;transition:transform 160ms cubic-bezier(0.16,1,0.3,1),background-color 160ms cubic-bezier(0.16,1,0.3,1);} .ds-btn:active{transform:scale(0.98);} .ds-btn:focus-visible{outline:2px solid var(--ink,#eceaf4);outline-offset:3px;} .ds-btn-primary{background:color-mix(in srgb,var(--period,#c86a80) 14%,transparent);border-color:var(--period,#c86a80);color:var(--ink,#eceaf4);} .ds-btn-primary:hover,.ds-btn-primary:active{background:color-mix(in srgb,var(--period,#c86a80) 24%,transparent);}"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Second action (Heute eintragen): Rule Strong frame, raised ground on hover.",
+      "html": "<button class=\"ds-btn-secondary\">Heute eintragen</button>",
+      "css": ".ds-btn-secondary{min-height:52px;padding:0 24px;border-radius:var(--radius-control,6px);border:1px solid var(--rule-strong,#eceaf447);background:transparent;color:var(--ink,#eceaf4);font-family:var(--font-ui,-apple-system,system-ui,sans-serif);font-size:1.0625rem;font-weight:500;cursor:pointer;transition:transform 160ms cubic-bezier(0.16,1,0.3,1),background-color 160ms cubic-bezier(0.16,1,0.3,1);} .ds-btn-secondary:hover{background:var(--ground-raised,#182042);} .ds-btn-secondary:active{transform:scale(0.98);} .ds-btn-secondary:focus-visible{outline:2px solid var(--ink,#eceaf4);outline-offset:3px;}"
+    },
+    {
+      "name": "Quiet Button",
+      "kind": "button",
+      "refersTo": "button-quiet",
+      "description": "Low-emphasis text action in muted ink.",
+      "html": "<button class=\"ds-btn-quiet\">Abbrechen</button>",
+      "css": ".ds-btn-quiet{min-height:44px;padding:0 12px;border:1px solid transparent;border-radius:6px;background:none;color:var(--ink-muted,#a9acc8);font-family:var(--font-ui,-apple-system,system-ui,sans-serif);font-size:1.0625rem;font-weight:500;cursor:pointer;} .ds-btn-quiet:hover{color:var(--ink,#eceaf4);} .ds-btn-quiet:focus-visible{outline:2px solid var(--ink,#eceaf4);outline-offset:3px;}"
+    },
+    {
+      "name": "Toggle Chip",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Day-log toggle; selected shows tone fill, tone border, weight and a check mark.",
+      "html": "<button class=\"ds-chip\" aria-pressed=\"true\"><svg class=\"ds-chip-check\" viewBox=\"0 0 12 12\" aria-hidden=\"true\"><path d=\"M2.5 6.5 5 9l4.5-6\"/></svg>Mittel</button> <button class=\"ds-chip\" aria-pressed=\"false\"><svg class=\"ds-chip-check\" viewBox=\"0 0 12 12\" aria-hidden=\"true\"><path d=\"M2.5 6.5 5 9l4.5-6\"/></svg>Stark</button>",
+      "css": ".ds-chip{--tone:var(--period,#c86a80);display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 16px;border-radius:6px;border:1px solid var(--rule-strong,#eceaf447);background:transparent;color:var(--ink,#eceaf4);font-family:var(--font-ui,-apple-system,system-ui,sans-serif);font-size:0.875rem;cursor:pointer;} .ds-chip-check{width:0;height:12px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:width 160ms cubic-bezier(0.16,1,0.3,1);} .ds-chip[aria-pressed='true']{background:color-mix(in srgb,var(--tone) 16%,transparent);border-color:var(--tone);font-weight:600;} .ds-chip[aria-pressed='true'] .ds-chip-check{width:12px;} .ds-chip:focus-visible{outline:2px solid var(--ink,#eceaf4);outline-offset:3px;}"
+    },
+    {
+      "name": "Tab Bar",
+      "kind": "nav",
+      "refersTo": "tab",
+      "description": "Fixed bottom navigation; active tab in ink with an amber icon stroke.",
+      "html": "<nav class=\"ds-tabbar\"><button class=\"ds-tab\" aria-current=\"page\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 4.5a7.5 7.5 0 1 0 0 15 7.5 7.5 0 0 0 0-15Zm0 5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5Z\"/></svg><span>Heute</span></button><button class=\"ds-tab\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M4.5 6.5h15v13h-15zM4.5 10.5h15M8.5 4v4M15.5 4v4\"/></svg><span>Kalender</span></button><button class=\"ds-tab\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M5 19.5V13M10 19.5V8M15 19.5v-4.5M20 19.5V5\"/></svg><span>Einblicke</span></button><button class=\"ds-tab\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M4 7h9M17 7h3M4 17h3M11 17h9M15 5v4M9 15v4\"/></svg><span>Einstellungen</span></button></nav>",
+      "css": ".ds-tabbar{display:grid;grid-template-columns:repeat(4,minmax(0,120px));justify-content:center;padding:4px 8px 8px;background:color-mix(in srgb,var(--ground,#10152e) 92%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--rule,#eceaf41f);} .ds-tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:52px;border:0;background:none;color:var(--ink-muted,#a9acc8);font-family:var(--font-ui,-apple-system,system-ui,sans-serif);font-size:11px;cursor:pointer;} .ds-tab svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;} .ds-tab[aria-current='page']{color:var(--ink,#eceaf4);font-weight:600;} .ds-tab[aria-current='page'] svg{stroke:var(--amber,#f0a54a);} .ds-tab:hover{color:var(--ink,#eceaf4);} .ds-tab:focus-visible{outline:2px solid var(--ink,#eceaf4);outline-offset:3px;border-radius:6px;}"
+    },
+    {
+      "name": "Cycle Ring",
+      "kind": "custom",
+      "refersTo": "cycle-ring",
+      "description": "Signature star chart: day points on a hairline orbit, size = flow, hollow = forecast, amber reticle = today, dashed range arc.",
+      "html": "<svg class=\"ds-ring\" viewBox=\"0 0 300 300\" role=\"img\" aria-label=\"Zyklustag 25\"><g class=\"ds-ring-grat\"><circle cx=\"150\" cy=\"150\" r=\"118\"/><line x1=\"18\" y1=\"150\" x2=\"46\" y2=\"150\"/><line x1=\"254\" y1=\"150\" x2=\"282\" y2=\"150\"/><line x1=\"150\" y1=\"18\" x2=\"150\" y2=\"46\"/><line x1=\"150\" y1=\"254\" x2=\"150\" y2=\"282\"/></g><path class=\"ds-ring-range\" d=\"M 116 19 A 136 136 0 0 1 184 19\"/><circle class=\"ds-dot ds-period\" cx=\"150\" cy=\"32\" r=\"7.5\"/><circle class=\"ds-dot ds-period\" cx=\"175\" cy=\"35\" r=\"6\"/><circle class=\"ds-dot ds-period\" cx=\"198\" cy=\"42\" r=\"4.5\"/><circle class=\"ds-dot ds-fertile\" cx=\"258\" cy=\"200\" r=\"3.5\"/><circle class=\"ds-dot ds-ovulation\" cx=\"205\" cy=\"255\" r=\"5.5\"/><circle class=\"ds-dot ds-luteal\" cx=\"60\" cy=\"226\" r=\"2.5\"/><circle class=\"ds-dot ds-luteal ds-predicted\" cx=\"40\" cy=\"110\" r=\"2.5\"/><circle class=\"ds-dot ds-period ds-predicted\" cx=\"110\" cy=\"39\" r=\"4.5\"/><g class=\"ds-reticle\"><circle cx=\"52\" cy=\"170\" r=\"8.5\"/><path d=\"M38.5 170h5 M60.5 170h5 M52 156.5v5 M52 178.5v5\"/></g><text class=\"ds-ring-name ds-name-period\" x=\"150\" y=\"76\" text-anchor=\"middle\">Periode</text><text class=\"ds-ring-num\" x=\"150\" y=\"152\" text-anchor=\"middle\">25</text><text class=\"ds-ring-cap\" x=\"150\" y=\"176\" text-anchor=\"middle\">Zyklustag von etwa 29</text></svg>",
+      "css": ".ds-ring{display:block;width:min(288px,76vw);height:auto;overflow:visible;} .ds-ring-grat circle,.ds-ring-grat line{fill:none;stroke:var(--rule,#eceaf41f);stroke-width:1;} .ds-ring-range{fill:none;stroke:var(--period,#c86a80);stroke-width:1.25;stroke-linecap:round;stroke-dasharray:2 4;} .ds-dot{stroke-width:1.5;animation:ds-light 520ms cubic-bezier(0.16,1,0.3,1) both;} .ds-period{fill:var(--period,#c86a80);stroke:var(--period,#c86a80);} .ds-fertile{fill:var(--fertile,#4cc3ba);stroke:var(--fertile,#4cc3ba);} .ds-ovulation{fill:var(--amber,#f0a54a);stroke:var(--amber,#f0a54a);} .ds-luteal{fill:var(--luteal,#a796e0);stroke:var(--luteal,#a796e0);} .ds-predicted{fill:var(--ground,#10152e);} .ds-reticle circle,.ds-reticle path{fill:none;stroke:var(--amber,#f0a54a);stroke-width:1.25;stroke-linecap:round;} .ds-ring-name{font-family:ui-serif,'New York',Georgia,serif;font-style:italic;font-size:12px;} .ds-name-period{fill:var(--period,#c86a80);} .ds-ring-num{font-family:ui-serif,'New York',Georgia,serif;font-style:italic;font-size:56px;fill:var(--ink,#eceaf4);} .ds-ring-cap{font-family:-apple-system,system-ui,sans-serif;font-size:12px;fill:var(--ink-muted,#a9acc8);} @keyframes ds-light{from{opacity:0;}} @media (prefers-reduced-motion:reduce){.ds-dot{animation:none;}}"
+    },
+    {
+      "name": "Statement",
+      "kind": "custom",
+      "refersTo": "typography-headline",
+      "description": "Day statement in serif italic with sans range and confidence beneath, under a hairline header.",
+      "html": "<header class=\"ds-head\"><span class=\"ds-wordmark\">aya</span><span>Freitag, 16. Oktober</span></header><section class=\"ds-statement\"><h1>Periode in 5 Tagen</h1><p>voraussichtlich 19.–23. Okt.<br>Sicherheit hoch</p></section>",
+      "css": ".ds-head{display:flex;justify-content:space-between;align-items:baseline;padding-bottom:12px;border-bottom:1px solid var(--rule,#eceaf41f);font-family:-apple-system,system-ui,sans-serif;font-size:0.875rem;color:var(--ink-muted,#a9acc8);font-variant-numeric:tabular-nums;} .ds-wordmark{font-family:ui-serif,'New York',Georgia,serif;font-style:italic;font-size:1.375rem;color:var(--ink,#eceaf4);} .ds-statement{padding-top:24px;} .ds-statement h1{margin:0;font-family:ui-serif,'New York',Georgia,serif;font-style:italic;font-weight:400;font-size:2.25rem;line-height:1.1;letter-spacing:-0.01em;color:var(--ink,#eceaf4);text-wrap:balance;} .ds-statement p{margin:8px 0 0;font-family:-apple-system,system-ui,sans-serif;font-size:1.0625rem;line-height:1.45;color:var(--ink-muted,#a9acc8);font-variant-numeric:tabular-nums;}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Star Atlas",
+    "overview": "aya reads the cycle the way an astronomer reads a chart: every day is a point on a hairline orbit, its size carries meaning, and the forecast is drawn as faint unlit points inside an honest, dashed range. The ground is a deep navy night chart in dark mode and pale cool chart paper in light mode; both are complete worlds, not inversions of each other. Ink is chalk-pale on night, deep navy on day.\n\nThe system is quiet and exact. Hairline coordinate rules divide the page instead of cards; there are no shadows and no gradients, and depth is never simulated. A serif italic names things (the statement, the wordmark, the cycle day, the phase names on the chart); the system sans with tabular figures does the work (dates, ranges, confidence, buttons). One night-vision amber is held back for \"today\" and ovulation so the eye always finds now.\n\nThe pull is toward the category's opposite: no pink gradient disc, no stack of cards, no decoration. Meaning is carried by position, magnitude, written names and fill, so colour is never the only signal.",
+    "keyCharacteristics": [
+      "Two full chart grounds (night and day), switched by `prefers-color-scheme` or an explicit `data-theme`.",
+      "Hairline rules and graticule ticks instead of containers.",
+      "Serif italic for names, system sans with tabular figures for data.",
+      "Amber reserved for today and ovulation; phase inks (rose, turquoise, violet) carry the cycle.",
+      "Fixed magnitude ramp: dot size encodes flow; forecast points are hollow.",
+      "System fonts only, zero network."
+    ],
+    "rules": [
+      {
+        "name": "The Night-Vision Rule",
+        "body": "Amber marks today and ovulation, plus the active tab icon that leads to today. If anything else on the screen is amber, it is wrong.",
+        "section": "colors"
+      },
+      {
+        "name": "The Never-Only-Colour Rule",
+        "body": "Every colour-coded meaning has a second channel: phase names written on the ring, a legend for forecast and the flow ramp, hollow versus filled points, a check mark plus fill on selected chips.",
+        "section": "colors"
+      },
+      {
+        "name": "The Ink-Focus Rule",
+        "body": "Focus outlines and the caret use ink, never a phase colour, so focus never reads as data.",
+        "section": "colors"
+      },
+      {
+        "name": "The Names-And-Numbers Rule",
+        "body": "Serif italic names a state; sans with tabular figures reports a value. Never set dates, ranges or controls in the serif, never set the statement in the sans.",
+        "section": "typography"
+      },
+      {
+        "name": "The Hairline Rule",
+        "body": "Separate with a 1px rule, never with a box or a shadow. If a region needs to feel distinct, give it a rule or space, not a surface.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do separate regions with 1px Rule hairlines and space from the 4px scale.",
+      "Do reserve Signal Amber for today and ovulation (and the active tab icon, which points at today's screen).",
+      "Do pair every colour-coded meaning with a second channel: a written name, a legend entry, hollow versus filled, or a check mark.",
+      "Do set names and states in the serif italic and all figures in the sans with tabular numerals.",
+      "Do show forecasts as a range with hollow points, never as a single confident date.",
+      "Do design both chart grounds; every new colour needs a day and a night value.",
+      "Do keep every target at least 44px and turn off the light-up and other motion under reduced motion."
+    ],
+    "donts": [
+      "Don't use cards, drop shadows or gradients; the build has none.",
+      "Don't fill the primary button with solid rose; it is a hairline frame with a 14% tint.",
+      "Don't load webfonts or any network asset; the serif and sans are system faces by brief.",
+      "Don't use a phase colour for focus or caret; those are ink.",
+      "Don't let colour alone carry a state."
+    ]
+  }
+}

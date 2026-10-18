@@ -1,0 +1,89 @@
+/*
+ * aya design tokens. World: star atlas. Dark = night chart, light = day chart.
+ * Phase inks carry meaning; amber is reserved for "today" and ovulation.
+ */
+:root {
+  color-scheme: light dark;
+
+  /* Light: day chart */
+  --ground: #eef0f8;
+  --ground-raised: #e3e6f2;
+  --ink: #151b38;
+  --ink-muted: #47507a;
+  --rule: #151b3826;
+  --rule-strong: #151b3859;
+  --period: #b03f57;
+  --period-ink: #ffffff;
+  --fertile: #0f7a73;
+  --luteal: #6650a8;
+  --amber: #9e5405;
+  --dot-idle: #151b388c;
+  --focus: var(--ink);
+
+  --font-ui: -apple-system, BlinkMacSystemFont, system-ui, 'Segoe UI', sans-serif;
+  --font-name: ui-serif, 'New York', Georgia, 'Times New Roman', serif;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-md: 1.0625rem;
+  --text-lg: 1.375rem;
+  --text-xl: 2.25rem;
+  --text-xxl: 2.75rem;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+
+  --radius-control: 6px;
+  --radius-pill: 999px;
+  --target: 44px;
+  --gutter: 20px;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration: 420ms;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --ground: #10152e;
+    --ground-raised: #182042;
+    --ink: #eceaf4;
+    --ink-muted: #a9acc8;
+    --rule: #eceaf41f;
+    --rule-strong: #eceaf447;
+    --period: #c86a80;
+    --period-ink: #10152e;
+    --fertile: #4cc3ba;
+    --luteal: #a796e0;
+    --amber: #f0a54a;
+    --dot-idle: #eceaf466;
+    --focus: var(--ink);
+  }
+}
+
+:root[data-theme='dark'] {
+  --ground: #10152e;
+  --ground-raised: #182042;
+  --ink: #eceaf4;
+  --ink-muted: #a9acc8;
+  --rule: #eceaf41f;
+  --rule-strong: #eceaf447;
+  --period: #c86a80;
+  --period-ink: #10152e;
+  --fertile: #4cc3ba;
+  --luteal: #a796e0;
+  --amber: #f0a54a;
+  --dot-idle: #eceaf466;
+  --focus: var(--ink);
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+:root[data-theme='dark'] {
+  color-scheme: dark;
+}

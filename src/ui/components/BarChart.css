@@ -1,0 +1,65 @@
+.barchart {
+  margin: 0;
+}
+.barchart svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.barchart-readout {
+  min-height: 1.45em;
+  margin-bottom: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--ink);
+}
+
+.barchart-grid line {
+  stroke: var(--rule);
+  stroke-width: 1;
+}
+.barchart-grid text,
+.barchart-x,
+.barchart-band text,
+.barchart-limit text {
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  fill: var(--ink-muted);
+}
+
+.barchart-band rect {
+  fill: color-mix(in srgb, var(--fertile) 10%, transparent);
+}
+
+.barchart-limit line {
+  stroke: var(--ink-muted);
+  stroke-width: 1;
+}
+
+.barchart-bar {
+  transition: opacity 160ms var(--ease-out);
+}
+.barchart-bar.tone-period { fill: var(--period); stroke: var(--period); }
+.barchart-bar.tone-luteal { fill: var(--luteal); stroke: var(--luteal); }
+.barchart-bar {
+  stroke-width: 0;
+}
+.barchart-bar.is-muted {
+  fill: transparent;
+  stroke-width: 1.25;
+  stroke-dasharray: 3 3;
+}
+.barchart svg:has(.barchart-hit:hover, .barchart-hit:focus-visible) .barchart-bar:not(.is-active) {
+  opacity: 0.55;
+}
+
+.barchart-hit {
+  fill: transparent;
+  cursor: pointer;
+  outline: none;
+}
+.barchart-hit:focus-visible {
+  stroke: var(--focus);
+  stroke-width: 1.5;
+}

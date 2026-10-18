@@ -1,0 +1,95 @@
+.ring {
+  display: block;
+  width: min(288px, 76vw);
+  height: auto;
+  overflow: visible;
+}
+
+.ring-graticule line,
+.ring-graticule circle {
+  fill: none;
+  stroke: var(--rule);
+  stroke-width: 1;
+}
+.ring-graticule .ring-week {
+  stroke: var(--rule-strong);
+}
+
+.ring-range path,
+.ring-range line {
+  fill: none;
+  stroke: var(--period);
+  stroke-width: 1.25;
+  stroke-linecap: round;
+}
+.ring-range path {
+  stroke-dasharray: 2 4;
+}
+.ring-range text {
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  fill: var(--period);
+}
+
+.dot {
+  stroke-width: 1.5;
+}
+.dot-period { fill: var(--period); stroke: var(--period); }
+.dot-fertile,
+.dot-peak { fill: var(--fertile); stroke: var(--fertile); }
+.dot-ovulation { fill: var(--amber); stroke: var(--amber); }
+.dot-luteal { fill: var(--luteal); stroke: var(--luteal); }
+.dot-follicular,
+.dot-neutral { fill: var(--dot-idle); stroke: transparent; }
+.dot.is-predicted { fill: var(--ground); }
+.dot-follicular.is-predicted,
+.dot-neutral.is-predicted { stroke: var(--dot-idle); }
+
+/* Phase names set like star names beside the points. */
+.ring-names text {
+  font-family: var(--font-name);
+  font-style: italic;
+  font-size: 12px;
+}
+.ring-names .name-period { fill: var(--period); }
+.ring-names .name-fertile { fill: var(--fertile); }
+.ring-names .name-luteal { fill: var(--luteal); }
+
+.ring-reticle circle,
+.ring-reticle path {
+  fill: none;
+  stroke: var(--amber);
+  stroke-width: 1.25;
+  stroke-linecap: round;
+}
+
+.ring-day-number {
+  font-family: var(--font-name);
+  font-style: italic;
+  font-size: 56px;
+  fill: var(--ink);
+}
+
+.ring-caption {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  fill: var(--ink-muted);
+}
+
+/* Signature moment: the points light up in day order, like stars appearing at dusk. */
+.ring-day {
+  animation: ring-light 520ms var(--ease-out) both;
+  animation-delay: calc(var(--i) * 18ms);
+}
+
+@keyframes ring-light {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ring-day {
+    animation: none;
+  }
+}
