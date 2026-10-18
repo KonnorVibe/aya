@@ -1,0 +1,63 @@
+.tempchart {
+  margin: 0;
+}
+.tempchart svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.tempchart-readout {
+  min-height: 1.45em;
+  margin-bottom: var(--space-2);
+  font-size: var(--text-sm);
+}
+.tempchart-grid line {
+  stroke: var(--rule);
+  stroke-width: 1;
+}
+.tempchart-grid text,
+.tempchart-x,
+.tempchart-coverline text,
+.tempchart-ovulation text {
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  fill: var(--ink-muted);
+}
+.tempchart-coverline line {
+  stroke: var(--ink-muted);
+  stroke-width: 1;
+  stroke-dasharray: 4 3;
+}
+.tempchart-ovulation line {
+  stroke: var(--accent);
+  stroke-width: 1.5;
+}
+.tempchart-ovulation text {
+  fill: var(--accent);
+}
+.tempchart-line {
+  fill: none;
+  stroke: var(--luteal);
+  stroke-width: 1.75;
+  stroke-linejoin: round;
+}
+.tempchart-dot {
+  fill: var(--luteal);
+  stroke: var(--ground);
+  stroke-width: 1.5;
+  cursor: pointer;
+}
+.tempchart-dot.is-disturbed {
+  fill: var(--ground);
+  stroke: var(--ink-muted);
+  stroke-dasharray: 2 1.5;
+}
+.tempchart-dot.is-active {
+  stroke: var(--ink);
+}
+.tempchart-dot:focus-visible {
+  outline: none;
+  stroke: var(--focus);
+  stroke-width: 2.5;
+}

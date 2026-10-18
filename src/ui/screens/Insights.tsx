@@ -1,7 +1,10 @@
+import { createPortal } from 'react-dom';
 import type { ISODate } from '../../engine/dates.ts';
 import type { DayLog, Settings } from '../../engine/types.ts';
-import { de, formatDayMonth } from '../../i18n/de.ts';
+import { de, formatDayMonth, formatLongDate } from '../../i18n/de.ts';
 import { BarChart } from '../components/BarChart.tsx';
+import { Button } from '../components/Button.tsx';
+import { TempChart } from '../components/TempChart.tsx';
 import { insightsModel, PERIOD_LIMIT } from './insightsModel.ts';
 import './Insights.css';
 
@@ -77,6 +80,27 @@ export function Insights({ logs, settings, today }: Props) {
         </section>
       )}
 
+      {settings.mode !== 'hormonal_contraception' && (
+        <section aria-labelledby="ins-temp">
+          <h2 id="ins-temp">{t.temperature}</h2>
+          {m.temperature.points.length >= 2 ? (
+            <>
+              <TempChart
+                title={t.temperatureLabel(m.temperature.points.length)}
+                points={m.temperature.points}
+                coverline={m.temperature.coverline !== undefined ? { value: m.temperature.coverline, label: t.coverline } : undefined}
+                ovulationDay={m.temperature.ovulationDay !== undefined ? { day: m.temperature.ovulationDay, label: t.ovulationMark } : undefined}
+              />
+              <p className="insights-note">
+                {m.temperature.ovulationDate ? t.temperatureRise(formatDayMonth(m.temperature.ovulationDate)) : t.temperatureNoRise}
+              </p>
+            </>
+          ) : (
+            <p className="insights-note">{t.temperatureEmpty}</p>
+          )}
+        </section>
+      )}
+
       <section aria-labelledby="ins-patterns">
         <h2 id="ins-patterns">{t.patterns}</h2>
         {m.patterns.length ? (
@@ -89,6 +113,25 @@ export function Insights({ logs, settings, today }: Props) {
           <p className="insights-note">{t.patternsEmpty}</p>
         )}
       </section>
+
+      <section aria-labelledby="ins-accuracy">
+        <h2 id="ins-accuracy">{t.accuracy}</h2>
+        <p className="insights-note">
+          {m.accuracy
+            ? t.accuracyText(m.accuracy.n, t.accuracyDays(m.accuracy.mae), Math.round(m.accuracy.coverage * m.accuracy.n))
+            : t.accuracyPending}
+        </p>
+      </section>
+
+      <section aria-labelledby="ins-print" className="insights-print">
+        <h2 id="ins-print" className="visually-hidden">{t.print}</h2>
+        <Button variant="secondary" onClick={() => window.print()}>
+          {t.print}
+        </Button>
+        <p className="insights-note">{t.printHint}</p>
+      </section>
+
+      {createPortal(<PrintReport model={m} today={today} />, document.body)}
 
       {m.rows.length > 0 && (
         <details className="insights-table">
@@ -117,5 +160,51 @@ export function Insights({ logs, settings, today }: Props) {
         </details>
       )}
     </main>
+  );
+}
+
+/** Plain, printable summary for a doctor's appointment. Hidden on screen, shown only by window.print(). */
+function PrintReport({ model: m, today }: { model: ReturnType<typeof insightsModel>; today: ISODate }) {
+  const s = m.stats;
+  return (
+    <article className="print-report" aria-hidden="true">
+      <h1>{t.printTitle}</h1>
+      <p>{t.printCreated(formatLongDate(today))}</p>
+      <dl>
+        <dt>{t.cycleLength}</dt>
+        <dd>{s.medianLength !== undefined ? t.days(Math.round(s.medianLength)) : '–'}</dd>
+        <dt>{t.range}</dt>
+        <dd>{s.minLength !== undefined ? t.rangeValue(s.minLength, s.maxLength!) : '–'}</dd>
+        <dt>{t.periodLength}</dt>
+        <dd>{s.medianPeriodLength !== undefined ? t.days(Math.round(s.medianPeriodLength)) : '–'}</dd>
+        <dt>{t.regularity}</dt>
+        <dd>{t[s.regularity]}</dd>
+      </dl>
+      {m.rows.length > 0 && (
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">{t.tableStart}</th>
+              <th scope="col">{t.tableCycle}</th>
+              <th scope="col">{t.tablePeriod}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {m.rows.map((r) => (
+              <tr key={r.start}>
+                <td>{formatLongDate(r.start)}</td>
+                <td>{r.cycle !== undefined ? t.days(r.cycle) : '–'}{r.excluded ? ` (${t.excluded})` : ''}</td>
+                <td>{t.days(r.period)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+      <h2>{t.patterns}</h2>
+      {m.patterns.length ? <ul>{m.patterns.map((p) => <li key={p}>{p}</li>)}</ul> : <p>{t.patternsEmpty}</p>}
+      <h2>{t.printHealth}</h2>
+      {m.health.length ? <ul>{m.health.map((h) => <li key={h}>{de.notes.health[h]}</li>)}</ul> : <p>{t.printNoHealth}</p>}
+      <p className="print-disclaimer">{de.disclaimer}</p>
+    </article>
   );
 }
