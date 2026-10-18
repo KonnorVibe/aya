@@ -1,3 +1,4 @@
+import { Brand } from '../components/Brand.tsx';
 import { useState } from 'react';
 import { groupCode } from '../../crypto/base32.ts';
 import { isStrongPassphrase, type Protection } from '../../crypto/vault.ts';
@@ -112,7 +113,7 @@ export function Onboarding({ today, protection, onProtect, onDone }: Props) {
   return (
     <main className="onboarding">
       <header className="onboarding-head">
-        <span className="wordmark">{de.appName}</span>
+        <Brand />
         <span className="onboarding-progress" aria-label={t.step(index + 1, steps.length)}>
           {steps.map((s, i) => (
             <span key={s} className={i <= index ? 'is-done' : undefined} />

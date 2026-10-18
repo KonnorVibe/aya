@@ -37,7 +37,7 @@
 .dot-period { fill: var(--period); stroke: var(--period); }
 .dot-fertile,
 .dot-peak { fill: var(--fertile); stroke: var(--fertile); }
-.dot-ovulation { fill: var(--amber); stroke: var(--amber); }
+.dot-ovulation { fill: var(--accent); stroke: var(--accent); }
 .dot-luteal { fill: var(--luteal); stroke: var(--luteal); }
 .dot-follicular,
 .dot-neutral { fill: var(--dot-idle); stroke: transparent; }
@@ -58,7 +58,7 @@
 .ring-reticle circle,
 .ring-reticle path {
   fill: none;
-  stroke: var(--amber);
+  stroke: var(--accent);
   stroke-width: 1.25;
   stroke-linecap: round;
 }

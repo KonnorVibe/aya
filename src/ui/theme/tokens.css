@@ -1,23 +1,24 @@
 /*
- * aya design tokens. World: star atlas. Dark = night chart, light = day chart.
- * Phase inks carry meaning; amber is reserved for "today" and ovulation.
+ * aya design tokens. Layout and motifs: star atlas (test-a). Palette: plant dyes (vergleichskillweb).
+ * Light = linen, dark = violet-black. Phase inks carry meaning; the indigo accent is reserved for
+ * "today" and ovulation.
  */
 :root {
   color-scheme: light dark;
 
-  /* Light: day chart */
-  --ground: #eef0f8;
-  --ground-raised: #e3e6f2;
-  --ink: #151b38;
-  --ink-muted: #47507a;
-  --rule: #151b3826;
-  --rule-strong: #151b3859;
-  --period: #b03f57;
+  /* Light: linen (plant dyes) */
+  --ground: #eeece4;
+  --ground-raised: #f7f5ef;
+  --ink: #232323;
+  --ink-muted: #5d5953;
+  --rule: #23232326;
+  --rule-strong: #23232359;
+  --period: #a8473f;
   --period-ink: #ffffff;
-  --fertile: #0f7a73;
-  --luteal: #6650a8;
-  --amber: #9e5405;
-  --dot-idle: #151b388c;
+  --fertile: #2a7471; /* #2e7f7c darkened to 4.6:1 on linen */
+  --luteal: #755e9c; /* #7d66a3 darkened to 4.6:1 on linen */
+  --accent: #283c8c;
+  --dot-idle: #2323238c;
   --focus: var(--ink);
 
   --font-ui: -apple-system, BlinkMacSystemFont, system-ui, 'Segoe UI', sans-serif;
@@ -49,35 +50,35 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --ground: #10152e;
-    --ground-raised: #182042;
-    --ink: #eceaf4;
-    --ink-muted: #a9acc8;
-    --rule: #eceaf41f;
-    --rule-strong: #eceaf447;
-    --period: #c86a80;
-    --period-ink: #10152e;
-    --fertile: #4cc3ba;
-    --luteal: #a796e0;
-    --amber: #f0a54a;
-    --dot-idle: #eceaf466;
+    --ground: #0a0812;
+    --ground-raised: #15121e;
+    --ink: #efebf7;
+    --ink-muted: #a19cb3;
+    --rule: #efebf71f;
+    --rule-strong: #efebf747;
+    --period: #e0847b;
+    --period-ink: #0a0812;
+    --fertile: #5fc4bd;
+    --luteal: #b9a2e6;
+    --accent: #9d96ff;
+    --dot-idle: #efebf766;
     --focus: var(--ink);
   }
 }
 
 :root[data-theme='dark'] {
-  --ground: #10152e;
-  --ground-raised: #182042;
-  --ink: #eceaf4;
-  --ink-muted: #a9acc8;
-  --rule: #eceaf41f;
-  --rule-strong: #eceaf447;
-  --period: #c86a80;
-  --period-ink: #10152e;
-  --fertile: #4cc3ba;
-  --luteal: #a796e0;
-  --amber: #f0a54a;
-  --dot-idle: #eceaf466;
+  --ground: #0a0812;
+  --ground-raised: #15121e;
+  --ink: #efebf7;
+  --ink-muted: #a19cb3;
+  --rule: #efebf71f;
+  --rule-strong: #efebf747;
+  --period: #e0847b;
+  --period-ink: #0a0812;
+  --fertile: #5fc4bd;
+  --luteal: #b9a2e6;
+  --accent: #9d96ff;
+  --dot-idle: #efebf766;
   --focus: var(--ink);
 }
 

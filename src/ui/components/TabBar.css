@@ -38,5 +38,5 @@
   font-weight: 600;
 }
 .tab[aria-current='page'] svg {
-  stroke: var(--amber);
+  stroke: var(--accent);
 }

@@ -130,7 +130,7 @@
   content: '';
   position: absolute;
   inset: -3px;
-  border: 1.25px solid var(--amber);
+  border: 1.25px solid var(--accent);
   border-radius: 50%;
 }
 
@@ -138,7 +138,7 @@
   background: var(--fertile);
 }
 .mark-ovulation {
-  background: var(--amber);
+  background: var(--accent);
 }
 .mark-entry {
   background: var(--ink-muted);

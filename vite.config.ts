@@ -25,8 +25,8 @@ export default defineConfig({
         scope: './',
         display: 'standalone',
         description: 'Private Zyklus-App. Alles bleibt verschlüsselt auf deinem Gerät.',
-        background_color: '#10152e',
-        theme_color: '#10152e',
+        background_color: '#283c8c',
+        theme_color: '#283c8c',
         orientation: 'portrait',
         icons: [
           { src: 'icon-192.png', sizes: '192x192', type: 'image/png' },

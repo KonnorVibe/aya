@@ -1,3 +1,4 @@
+import { Brand } from '../components/Brand.tsx';
 import type { ISODate } from '../../engine/dates.ts';
 import type { Prediction } from '../../engine/prediction.ts';
 import type { DayLog, Settings } from '../../engine/types.ts';
@@ -28,7 +29,7 @@ export function Today({ prediction, logs, settings, today, lastBackupAt, onPerio
     return (
       <main className="today">
         <header className="today-head">
-          <span className="wordmark">{de.appName}</span>
+          <Brand />
           <span>{formatLongDate(today)}</span>
         </header>
         <section className="today-statement today-empty">
@@ -54,7 +55,7 @@ export function Today({ prediction, logs, settings, today, lastBackupAt, onPerio
   return (
     <main className="today">
       <header className="today-head">
-        <span className="wordmark">{de.appName}</span>
+        <Brand />
         <span>{formatLongDate(today)}</span>
       </header>
 

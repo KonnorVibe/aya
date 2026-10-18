@@ -1,3 +1,4 @@
+import { Brand } from '../components/Brand.tsx';
 import { useEffect, useState, type FormEvent } from 'react';
 import { de } from '../../i18n/de.ts';
 import { useApp } from '../../state/store.ts';
@@ -56,7 +57,7 @@ export function LockScreen() {
   if (passphraseMode) {
     return (
       <main className="lockscreen">
-        <span className="wordmark">{de.appName}</span>
+        <Brand />
         <form className="lock-form" onSubmit={(e) => void submitPassphrase(e)}>
           <h1>{de.lock.passphraseTitle}</h1>
           <label className="lock-field">
@@ -82,7 +83,7 @@ export function LockScreen() {
 
   return (
     <main className="lockscreen">
-      <span className="wordmark">{de.appName}</span>
+      <Brand />
       <PinPad title={de.lock.title} {...(message ? { message } : {})} disabled={waiting} onComplete={submit} />
     </main>
   );
