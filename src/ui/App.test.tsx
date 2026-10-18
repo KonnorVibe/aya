@@ -31,10 +31,20 @@ describe('App', () => {
     expect(await screen.findByRole('heading', { name: 'Tag 1 deiner Periode' })).toBeTruthy();
     click('Heute eintragen');
     const sheet = await screen.findByRole('dialog', { name: 'Heute' });
+    // Conceive mode: temperature and tests come before the symptoms.
+    const headings = within(sheet).getAllByRole('heading', { level: 3 }).map((h) => h.textContent);
+    expect(headings.indexOf('Basaltemperatur')).toBeLessThan(headings.indexOf('Symptome'));
+    const temp = within(sheet).getByLabelText('Temperatur in °C');
+    fireEvent.change(temp, { target: { value: '36,48' } });
+    fireEvent.blur(temp);
+    fireEvent.click(within(sheet).getAllByRole('button', { name: 'positiv' })[0]!); // LH test
     fireEvent.click(within(sheet).getByRole('button', { name: 'Krämpfe' }));
     fireEvent.click(within(sheet).getByRole('button', { name: 'stark' }));
     fireEvent.click(within(sheet).getByRole('button', { name: 'Fertig' }));
     expect(await screen.findByText((_, el) => el?.className === 'today-summary' && /stark, Krämpfe$/.test(el.textContent ?? ''))).toBeTruthy();
+    const saved = appStore.getState().logs.at(-1)!;
+    expect(saved.bbt).toEqual({ value: 36.48 });
+    expect(saved.lhTest).toBe('positive');
     click('Periode beendet');
     expect(await screen.findByRole('button', { name: 'Periode begonnen' })).toBeTruthy();
 

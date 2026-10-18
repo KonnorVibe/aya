@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ISODate } from '../../engine/dates.ts';
-import { MOOD_IDS, SYMPTOM_IDS, type DayLog, type Flow, type MoodId, type SymptomId } from '../../engine/types.ts';
+import { MOOD_IDS, SYMPTOM_IDS, type DayLog, type Flow, type Mode, type MoodId, type SymptomId } from '../../engine/types.ts';
 import { de, formatLongDate } from '../../i18n/de.ts';
+import { AdvancedLog, hasAdvanced } from './AdvancedLog.tsx';
 import { Button } from './Button.tsx';
 import { Chip } from './Chip.tsx';
 import './DayLogSheet.css';
@@ -18,6 +19,8 @@ interface Props {
   log: DayLog | undefined;
   /** All logs, used to put frequently used symptoms first. */
   history: readonly DayLog[];
+  /** In "conceive" mode the advanced fields come first; otherwise they sit folded at the end. */
+  mode: Mode;
   onSave: (log: DayLog) => void;
   onClose: () => void;
 }
@@ -38,7 +41,7 @@ function toggle<T>(list: readonly T[] | undefined, item: T): T[] {
 }
 
 /** Bottom sheet for one day. Every tap saves; the goal is an entry in under 10 seconds. */
-export function DayLogSheet({ date, today, log, history, onSave, onClose }: Props) {
+export function DayLogSheet({ date, today, log, history, mode, onSave, onClose }: Props) {
   const ref = useRef<HTMLDialogElement>(null);
   // Local draft so rapid taps build on each other instead of on a stale prop.
   const [current, setCurrent] = useState<DayLog>(() => log ?? { date });
@@ -116,6 +119,8 @@ export function DayLogSheet({ date, today, log, history, onSave, onClose }: Prop
           </div>
         </section>
 
+        {mode === 'conceive' && <AdvancedLog log={current} onChange={update} />}
+
         <section aria-labelledby="log-symptoms">
           <h3 id="log-symptoms">{t.symptoms}</h3>
           <div className="sheet-chips">
@@ -168,6 +173,16 @@ export function DayLogSheet({ date, today, log, history, onSave, onClose }: Prop
             </Chip>
           </div>
         </section>
+
+        {mode !== 'conceive' && (
+          <details className="sheet-more" open={hasAdvanced(current) || undefined}>
+            <summary>
+              <span>{t.more}</span>
+              <span className="sheet-hint">{t.moreHint}</span>
+            </summary>
+            <AdvancedLog log={current} onChange={update} />
+          </details>
+        )}
 
         <section>
           <label className="sheet-note">

@@ -81,3 +81,72 @@
 .sheet-note textarea::placeholder {
   color: var(--ink-muted);
 }
+
+.sheet-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+.sheet-field {
+  display: grid;
+  gap: var(--space-1);
+  font-size: var(--text-sm);
+  color: var(--ink-muted);
+}
+.sheet-field h3 {
+  margin: 0;
+}
+.sheet-field input {
+  min-height: var(--target);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--ink);
+  font-size: 1rem;
+}
+.sheet-field input[aria-invalid='true'] {
+  border-color: var(--period);
+}
+.sheet-field-wide {
+  margin-top: var(--space-3);
+}
+.sheet-hint {
+  margin-top: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--ink-muted);
+}
+.sheet-error {
+  margin-top: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--period);
+}
+.sheet-bbt + .sheet-chips,
+section .sheet-chips + .sheet-field {
+  margin-top: var(--space-3);
+}
+.sheet-more {
+  border-bottom: 1px solid var(--rule);
+}
+.sheet-more > summary {
+  display: grid;
+  gap: 2px;
+  min-height: 60px;
+  padding: var(--space-3) 0;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+.sheet-more > summary::-webkit-details-marker {
+  display: none;
+}
+.sheet-more > summary .sheet-hint {
+  margin: 0;
+  font-weight: 400;
+}
+.sheet-more[open] > summary {
+  border-bottom: 1px solid var(--rule);
+}
+.sheet-more > section:last-child {
+  border-bottom: 0;
+}

@@ -25,6 +25,8 @@ interface Props {
   onOpenDay: (date: ISODate) => void;
   onTogglePeriod: (date: ISODate) => void;
   onIncludeCycle: (start: ISODate) => void;
+  /** Opens directly in back-entry mode at this flagged cycle (from the card on Today). */
+  focus?: { start: ISODate; length: number } | undefined;
 }
 
 function dayLabel(d: CalendarDay): string {
@@ -38,9 +40,9 @@ function dayLabel(d: CalendarDay): string {
   return t.dayLabel(formatLongDate(d.date), parts);
 }
 
-export function Calendar({ logs, settings, prediction, today, onOpenDay, onTogglePeriod, onIncludeCycle }: Props) {
-  const [month, setMonth] = useState(() => monthIndex(today));
-  const [editing, setEditing] = useState(false);
+export function Calendar({ logs, settings, prediction, today, onOpenDay, onTogglePeriod, onIncludeCycle, focus }: Props) {
+  const [month, setMonth] = useState(() => monthIndex(focus ? addDays(focus.start, Math.round(focus.length / 2)) : today));
+  const [editing, setEditing] = useState(!!focus);
   const { year, month: m } = fromMonthIndex(month);
 
   const predicted = predictedPeriodDays(prediction, expectedPeriodLength(logs, settings), today);

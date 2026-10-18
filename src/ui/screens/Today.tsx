@@ -1,8 +1,9 @@
 import { Brand } from '../components/Brand.tsx';
+import { deriveCycles } from '../../engine/cycles.ts';
 import type { ISODate } from '../../engine/dates.ts';
 import type { Prediction } from '../../engine/prediction.ts';
-import type { DayLog, Settings } from '../../engine/types.ts';
-import { confidenceLabel, de, formatLongDate, formatRange, statement } from '../../i18n/de.ts';
+import { overridesFrom, type DayLog, type Settings } from '../../engine/types.ts';
+import { confidenceLabel, de, formatDayMonth, formatLongDate, formatRange, statement } from '../../i18n/de.ts';
 import { Button } from '../components/Button.tsx';
 import { CycleRing } from '../components/CycleRing.tsx';
 import { Legend } from '../components/Legend.tsx';
@@ -21,9 +22,12 @@ interface Props {
   onPeriodStart: () => void;
   onPeriodEnd: () => void;
   onLog: () => void;
+  /** "Periode nachtragen" on the missed-period card. */
+  onAddMissed: (start: ISODate, length: number) => void;
+  onIncludeCycle: (start: ISODate) => void;
 }
 
-export function Today({ prediction, logs, settings, today, lastBackupAt, onPeriodStart, onPeriodEnd, onLog }: Props) {
+export function Today({ prediction, logs, settings, today, lastBackupAt, onPeriodStart, onPeriodEnd, onLog, onAddMissed, onIncludeCycle }: Props) {
   const summary = logSummary(logs.find((l) => l.date === today));
   if (!prediction) {
     return (
@@ -90,6 +94,8 @@ export function Today({ prediction, logs, settings, today, lastBackupAt, onPerio
 
       {summary && <TodaySummary text={summary} />}
 
+      <MissedCards logs={logs} settings={settings} today={today} onAdd={onAddMissed} onInclude={onIncludeCycle} />
+
       {notes.length > 0 && (
         <ul className="today-notes">
           {notes.map((n) => (
@@ -106,5 +112,36 @@ function TodaySummary({ text }: { text: string }) {
     <p className="today-summary">
       <span>{de.log.summary}</span> {text}
     </p>
+  );
+}
+
+/** Asks about cycles that look like a forgotten period (Li et al. 2022) where it is seen most: here. */
+function MissedCards({ logs, settings, today, onAdd, onInclude }: {
+  logs: readonly DayLog[];
+  settings: Props['settings'];
+  today: ISODate;
+  onAdd: Props['onAddMissed'];
+  onInclude: Props['onIncludeCycle'];
+}) {
+  const missed = deriveCycles(logs.filter((l) => l.date <= today), { mode: settings.mode, overrides: overridesFrom(settings) })
+    .filter((c) => c.excluded?.reason === 'possible_missed_log');
+  if (!missed.length) return null;
+  const t = de.calendar;
+  return (
+    <>
+      {missed.map((c) => (
+        <section key={c.startDate} className="today-missed" aria-live="polite">
+          <p>{t.missed(formatDayMonth(c.startDate), formatDayMonth(c.endDate!), c.length!)}</p>
+          <div>
+            <Button variant="secondary" onClick={() => onAdd(c.startDate, c.length!)}>
+              {t.missedAdd}
+            </Button>
+            <Button variant="quiet" onClick={() => onInclude(c.startDate)}>
+              {t.missedKeep}
+            </Button>
+          </div>
+        </section>
+      ))}
+    </>
   );
 }

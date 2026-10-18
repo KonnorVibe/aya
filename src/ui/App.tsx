@@ -33,7 +33,12 @@ export function App({ dbName }: { dbName?: string }) {
   const includeCycle = useApp((s) => s.includeCycle);
   const [sheetDate, setSheetDate] = useState<string | null>(null);
   const lockNow = useApp((s) => s.lock);
-  const [tab, setTab] = useState<TabId>('today');
+  const [tab, setTabState] = useState<TabId>('today');
+  const [calendarFocus, setCalendarFocus] = useState<{ start: string; length: number } | undefined>();
+  const setTab = (next: TabId) => {
+    setCalendarFocus(undefined);
+    setTabState(next);
+  };
   const today = todayLocal();
 
   useEffect(() => {
@@ -73,6 +78,11 @@ export function App({ dbName }: { dbName?: string }) {
           onPeriodStart={() => void startPeriod(today)}
           onPeriodEnd={() => void endPeriod(today)}
           onLog={() => setSheetDate(today)}
+          onAddMissed={(start, length) => {
+            setCalendarFocus({ start, length });
+            setTabState('calendar');
+          }}
+          onIncludeCycle={(c) => void includeCycle(c)}
         />
       )}
       {tab === 'calendar' && settings && (
@@ -84,6 +94,7 @@ export function App({ dbName }: { dbName?: string }) {
           onOpenDay={setSheetDate}
           onTogglePeriod={(d) => void togglePeriodDay(d)}
           onIncludeCycle={(c) => void includeCycle(c)}
+          focus={calendarFocus}
         />
       )}
       {tab === 'insights' && settings && <Insights logs={logs} settings={settings} today={today} />}
@@ -95,6 +106,7 @@ export function App({ dbName }: { dbName?: string }) {
           today={today}
           log={logs.find((l) => l.date === sheetDate)}
           history={logs}
+          mode={settings?.mode ?? 'track'}
           onSave={(log) => void saveDayLog(log)}
           onClose={() => setSheetDate(null)}
         />
