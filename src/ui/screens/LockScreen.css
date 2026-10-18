@@ -7,3 +7,37 @@
   min-height: 100dvh;
   padding: max(var(--space-5), env(safe-area-inset-top)) var(--gutter) max(var(--space-5), env(safe-area-inset-bottom));
 }
+
+.lock-form {
+  display: grid;
+  gap: var(--space-4);
+  width: 100%;
+  max-width: 360px;
+  margin: auto 0;
+}
+.lock-form h1 {
+  font-family: var(--font-name);
+  font-style: italic;
+  font-weight: 400;
+  font-size: var(--text-xl);
+  line-height: 1.12;
+}
+.lock-field {
+  display: grid;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--ink-muted);
+}
+.lock-field input {
+  min-height: var(--target);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--ink);
+  font-size: 1rem;
+}
+.lock-message {
+  color: var(--period);
+  font-size: var(--text-sm);
+}

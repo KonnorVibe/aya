@@ -7,6 +7,7 @@ import { useApp } from '../../state/store.ts';
 import { Button } from '../components/Button.tsx';
 import { PinPad } from '../components/PinPad.tsx';
 import { BackupPanel, DeletePanel, IcsPanel, RestorePanel } from './settings/DataPanels.tsx';
+import { ChangePassphrasePanel, NewRecoveryPanel, ToDevicePanel, ToPassphrasePanel } from './settings/ProtectionPanels.tsx';
 import './Settings.css';
 
 const LOCK_OPTIONS = [1, 5, 15] as const;
@@ -14,7 +15,7 @@ const t = de.settings;
 
 const MODES: Mode[] = ['track', 'conceive', 'hormonal_contraception'];
 const THEMES: SettingsType['theme'][] = ['system', 'light', 'dark'];
-type Panel = 'backup' | 'restore' | 'ics' | 'delete';
+type Panel = 'backup' | 'restore' | 'ics' | 'delete' | 'toPassphrase' | 'toDevice' | 'changePass' | 'newRecovery';
 
 function Disclosure({ id, label, open, onToggle, children }: { id: string; label: string; open: boolean; onToggle: () => void; children: ReactNode }) {
   return (
@@ -35,6 +36,7 @@ type PinFlow = { step: 'enter' } | { step: 'confirm'; first: string; mismatch?: 
 export function Settings({ prediction, today }: { prediction: Prediction | null; today: ISODate }) {
   const settings = useApp((s) => s.settings)!;
   const pinSet = useApp((s) => s.pinSet);
+  const passphraseMode = useApp((s) => s.protection) === 'passphrase';
   const updateSettings = useApp((s) => s.updateSettings);
   const setPin = useApp((s) => s.setPin);
   const removePin = useApp((s) => s.removePin);
@@ -118,22 +120,32 @@ export function Settings({ prediction, today }: { prediction: Prediction | null;
       <section aria-labelledby="set-lock">
         <h2 id="set-lock">{t.lockSection}</h2>
         <div className="row">
-          <span>{t.pin}</span>
-          <span className="row-value">{pinSet ? t.pinOn : t.pinOff}</span>
+          <span>{t.protection}</span>
+          <span className="row-value">{passphraseMode ? t.protectionPassphrase : t.protectionDevice}</span>
         </div>
-        <div className="row-actions">
-          <Button variant="secondary" onClick={() => setFlow({ step: 'enter' })}>
-            {pinSet ? t.changePin : t.setPin}
-          </Button>
-          {pinSet && (
-            <Button variant="quiet" onClick={() => void removePin()}>
-              {t.removePin}
-            </Button>
-          )}
-        </div>
-        <p className="row-hint">{t.pinHint}</p>
+        <p className="row-hint">{passphraseMode ? t.protectionPassphraseHint : t.protectionDeviceHint}</p>
 
-        {pinSet && (
+        {!passphraseMode && (
+          <>
+            <div className="row">
+              <span>{t.pin}</span>
+              <span className="row-value">{pinSet ? t.pinOn : t.pinOff}</span>
+            </div>
+            <div className="row-actions">
+              <Button variant="secondary" onClick={() => setFlow({ step: 'enter' })}>
+                {pinSet ? t.changePin : t.setPin}
+              </Button>
+              {pinSet && (
+                <Button variant="quiet" onClick={() => void removePin()}>
+                  {t.removePin}
+                </Button>
+              )}
+            </div>
+            <p className="row-hint">{t.pinHint}</p>
+          </>
+        )}
+
+        {(pinSet || passphraseMode) && (
           <>
             <label className="row">
               <span>{t.autoLock}</span>
@@ -163,6 +175,24 @@ export function Settings({ prediction, today }: { prediction: Prediction | null;
           />
         </label>
         <p className="row-hint">{t.shieldHint}</p>
+
+        {passphraseMode ? (
+          <>
+            <Disclosure id="panel-change-pass" label={t.changePassphrase} open={panel === 'changePass'} onToggle={() => toggle('changePass')}>
+              <ChangePassphrasePanel />
+            </Disclosure>
+            <Disclosure id="panel-new-recovery" label={t.newRecovery} open={panel === 'newRecovery'} onToggle={() => toggle('newRecovery')}>
+              <NewRecoveryPanel onClose={() => setPanel(null)} />
+            </Disclosure>
+            <Disclosure id="panel-to-device" label={t.toDevice} open={panel === 'toDevice'} onToggle={() => toggle('toDevice')}>
+              <ToDevicePanel onClose={() => setPanel(null)} />
+            </Disclosure>
+          </>
+        ) : (
+          <Disclosure id="panel-to-pass" label={t.toPassphrase} open={panel === 'toPassphrase'} onToggle={() => toggle('toPassphrase')}>
+            <ToPassphrasePanel onClose={() => setPanel(null)} />
+          </Disclosure>
+        )}
       </section>
 
       <section aria-labelledby="set-data">

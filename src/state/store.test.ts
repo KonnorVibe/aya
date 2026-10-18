@@ -41,6 +41,7 @@ describe('app store', () => {
     const a = createAppStore();
     await a.getState().init(name);
     expect(a.getState().status).toBe('onboarding');
+    await a.getState().setupProtection({ kind: 'device' });
     await a.getState().completeOnboarding({ lastPeriodStart: '2026-10-10', mode: 'track' }, '2026-10-16');
     expect(a.getState().status).toBe('ready');
     expect(a.getState().logs).toHaveLength(5);
@@ -55,6 +56,7 @@ describe('app store', () => {
     const name = db();
     const s = createAppStore();
     await s.getState().init(name);
+    await s.getState().setupProtection({ kind: 'device' });
     await s.getState().completeOnboarding({ mode: 'track' }, '2026-10-16');
     await s.getState().setPin('246810');
     s.getState().lock();
@@ -75,6 +77,7 @@ describe('app store', () => {
   it('does not lock without a PIN', async () => {
     const s = createAppStore();
     await s.getState().init(db());
+    await s.getState().setupProtection({ kind: 'device' });
     await s.getState().completeOnboarding({ mode: 'track' }, '2026-10-16');
     s.getState().lock();
     expect(s.getState().status).toBe('ready');
@@ -89,6 +92,7 @@ describe('period actions', () => {
   it('starts a period today and ends it, filling the days in between', async () => {
     const s = createAppStore();
     await s.getState().init(db());
+    await s.getState().setupProtection({ kind: 'device' });
     await s.getState().completeOnboarding({ mode: 'track' }, '2026-10-10');
     await s.getState().startPeriod('2026-10-10');
     await s.getState().saveDayLog({ date: '2026-10-11', symptoms: ['cramps'] });
@@ -104,6 +108,7 @@ describe('period actions', () => {
   it('keeps an existing heavier flow when starting', async () => {
     const s = createAppStore();
     await s.getState().init(db());
+    await s.getState().setupProtection({ kind: 'device' });
     await s.getState().completeOnboarding({ mode: 'track' }, '2026-10-10');
     await s.getState().saveDayLog({ date: '2026-10-10', flow: 'heavy' });
     await s.getState().startPeriod('2026-10-10');
@@ -115,6 +120,7 @@ describe('calendar actions', () => {
   it('toggles past period days and keeps other entries', async () => {
     const s = createAppStore();
     await s.getState().init(db());
+    await s.getState().setupProtection({ kind: 'device' });
     await s.getState().completeOnboarding({ mode: 'track' }, '2026-10-16');
     await s.getState().saveDayLog({ date: '2026-09-02', mood: ['calm'] });
     await s.getState().togglePeriodDay('2026-09-02');
@@ -129,6 +135,7 @@ describe('calendar actions', () => {
   it('records included cycles once', async () => {
     const s = createAppStore();
     await s.getState().init(db());
+    await s.getState().setupProtection({ kind: 'device' });
     await s.getState().completeOnboarding({ mode: 'track' }, '2026-10-16');
     await s.getState().includeCycle('2026-05-01');
     await s.getState().includeCycle('2026-05-01');
@@ -140,12 +147,14 @@ describe('data actions', () => {
   it('exports, restores elsewhere and wipes', async () => {
     const a = createAppStore();
     await a.getState().init(db());
+    await a.getState().setupProtection({ kind: 'device' });
     await a.getState().completeOnboarding({ lastPeriodStart: '2026-10-01', mode: 'track' }, '2026-10-16');
     const { text } = await a.getState().exportBackup('lange-passphrase');
     expect(a.getState().lastBackupAt).toBeTypeOf('string');
 
     const b = createAppStore();
     await b.getState().init(db());
+    await b.getState().setupProtection({ kind: 'device' });
     await b.getState().completeOnboarding({ mode: 'conceive' }, '2026-10-16');
     expect(await b.getState().importBackup(text, 'lange-passphrase')).toBe(5);
     expect(b.getState().settings?.mode).toBe('track');
@@ -154,5 +163,75 @@ describe('data actions', () => {
     await b.getState().wipeAll();
     expect(b.getState().status).toBe('onboarding');
     expect(b.getState().logs).toEqual([]);
+  });
+});
+
+describe('passphrase protection', () => {
+  const PASS = 'vier ganz normale woerter';
+
+  it('keeps data encrypted until unlocked and drops it again on lock', async () => {
+    const name = db();
+    const s = createAppStore();
+    await s.getState().init(name, 1000);
+    const { recoveryCode } = await s.getState().setupProtection({ kind: 'passphrase', passphrase: PASS });
+    expect(recoveryCode).toMatch(/^[A-Z2-7]{26}$/);
+    await s.getState().completeOnboarding({ lastPeriodStart: '2026-10-10', mode: 'track' }, '2026-10-16');
+    expect(s.getState().status).toBe('ready');
+    await expect(s.getState().setPin('123456')).rejects.toThrow();
+
+    s.getState().lock();
+    expect(s.getState().status).toBe('locked');
+    expect(s.getState().logs).toEqual([]);
+    expect(s.getState().settings).toBeUndefined();
+
+    const r = createAppStore();
+    await r.getState().init(name, 1000);
+    expect(r.getState().status).toBe('locked');
+    expect(r.getState().protection).toBe('passphrase');
+    expect(r.getState().logs).toEqual([]);
+    expect(await r.getState().unlock('falsch falsch falsch falsch', 0)).toEqual({ result: 'wrong', waitMs: 0 });
+    expect(await r.getState().unlock(recoveryCode!, 0)).toEqual({ result: 'ok' });
+    expect(r.getState().logs).toHaveLength(5);
+    expect(r.getState().status).toBe('ready');
+  });
+
+  it('resumes onboarding after a reload between protection and cycle step', async () => {
+    const name = db();
+    const s = createAppStore();
+    await s.getState().init(name, 1000);
+    await s.getState().setupProtection({ kind: 'passphrase', passphrase: PASS });
+
+    const r = createAppStore();
+    await r.getState().init(name, 1000);
+    expect(r.getState().status).toBe('locked');
+    await r.getState().unlock(PASS, 0);
+    expect(r.getState().status).toBe('onboarding');
+    expect(r.getState().protection).toBe('passphrase');
+  });
+
+  it('switches device → passphrase → device in the running app', async () => {
+    const name = db();
+    const s = createAppStore();
+    await s.getState().init(name, 1000);
+    await s.getState().setupProtection({ kind: 'device' });
+    await s.getState().completeOnboarding({ lastPeriodStart: '2026-10-10', mode: 'track' }, '2026-10-16');
+    await s.getState().setPin('246810');
+
+    const { recoveryCode } = await s.getState().changeProtection({ kind: 'passphrase', passphrase: PASS });
+    expect(recoveryCode).toBeTruthy();
+    expect(s.getState().pinSet).toBe(false);
+    await s.getState().saveDayLog({ date: '2026-10-16', mood: ['calm'] });
+
+    const r = createAppStore();
+    await r.getState().init(name, 1000);
+    expect(r.getState().status).toBe('locked');
+    await r.getState().unlock(PASS, 0);
+    expect(r.getState().logs).toHaveLength(6);
+
+    await r.getState().changeProtection({ kind: 'device' }, PASS);
+    const t = createAppStore();
+    await t.getState().init(name, 1000);
+    expect(t.getState().status).toBe('ready');
+    expect(t.getState().logs).toHaveLength(6);
   });
 });

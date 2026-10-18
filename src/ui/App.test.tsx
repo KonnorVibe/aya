@@ -1,11 +1,13 @@
 import 'fake-indexeddb/auto';
-import { act, fireEvent, render, screen, within } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import { afterEach, describe, expect, it } from 'vitest';
 import { appStore } from '../state/store.ts';
 import { App } from './App.tsx';
 
 const click = (name: string | RegExp) => fireEvent.click(screen.getByRole('button', { name }));
 const typePin = (pin: string) => [...pin].forEach((d) => click(d));
+
+afterEach(cleanup);
 
 describe('App', () => {
   it('runs onboarding, sets a PIN, locks and unlocks', async () => {
@@ -13,7 +15,9 @@ describe('App', () => {
 
     expect(await screen.findByRole('heading', { name: 'Deine Daten bleiben bei dir' })).toBeTruthy();
     click('Weiter');
-    expect(screen.getByRole('heading', { name: /letzte Periode/ })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'Wie soll aya deine Daten schützen?' })).toBeTruthy();
+    click('Weiter');
+    expect(await screen.findByRole('heading', { name: /letzte Periode/ })).toBeTruthy();
     click('Überspringen');
     fireEvent.click(screen.getByLabelText(/Kinderwunsch/));
     click('Weiter');
@@ -47,5 +51,44 @@ describe('App', () => {
     expect(await screen.findByText('Diese PIN stimmt nicht.')).toBeTruthy();
     typePin('135790');
     expect(await screen.findByRole('heading', { name: 'Einstellungen' })).toBeTruthy();
+  });
+
+  it('sets up a passphrase, shows the recovery code once and unlocks with it', { timeout: 60_000 }, async () => {
+    const { unmount } = render(<App dbName="aya-app-test-pass" />);
+    expect(await screen.findByRole('heading', { name: 'Deine Daten bleiben bei dir' })).toBeTruthy();
+    click('Weiter');
+    fireEvent.click(screen.getByLabelText(/Mit einer Passphrase/));
+    const pass = screen.getByLabelText('Passphrase');
+    const repeat = screen.getByLabelText('Noch einmal eingeben');
+    fireEvent.change(pass, { target: { value: 'kurz' } });
+    fireEvent.change(repeat, { target: { value: 'kurz' } });
+    click('Weiter');
+    expect(await screen.findByRole('alert')).toBeTruthy();
+    fireEvent.change(pass, { target: { value: 'mein geheimer satz fuer aya' } });
+    fireEvent.change(repeat, { target: { value: 'mein geheimer satz fuer aya' } });
+    click('Weiter');
+
+    expect(await screen.findByRole('heading', { name: 'Dein Wiederherstellungscode' }, { timeout: 30_000 })).toBeTruthy();
+    const code = document.querySelector('.recovery-code')!.textContent!;
+    expect(code.replace(/ /g, '')).toMatch(/^[A-Z2-7]{26}$/);
+    expect((screen.getByRole('button', { name: 'Weiter' }) as HTMLButtonElement).disabled).toBe(true);
+    fireEvent.click(screen.getByLabelText('Ich habe den Code notiert.'));
+    click('Weiter');
+    expect(screen.queryByText(code)).toBeNull();
+    click('Überspringen');
+    click('Weiter');
+    click('Los geht’s');
+    expect(await screen.findByRole('heading', { name: 'Noch keine Periode eingetragen' })).toBeTruthy();
+
+    act(() => appStore.getState().lock());
+    expect(await screen.findByRole('heading', { name: 'aya ist gesperrt' })).toBeTruthy();
+    const field = screen.getByLabelText('Passphrase oder Wiederherstellungscode');
+    fireEvent.change(field, { target: { value: 'falscher satz fuer aya hier' } });
+    click('Entsperren');
+    expect(await screen.findByRole('alert', {}, { timeout: 30_000 })).toBeTruthy();
+    fireEvent.change(field, { target: { value: code.toLowerCase() } });
+    click('Entsperren');
+    expect(await screen.findByRole('heading', { name: 'Noch keine Periode eingetragen' }, { timeout: 30_000 })).toBeTruthy();
+    unmount();
   });
 });

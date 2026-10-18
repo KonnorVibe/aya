@@ -141,3 +141,15 @@
   justify-content: space-between;
   min-height: var(--target);
 }
+
+.field input[type='password'] {
+  flex: 1;
+  min-width: 0;
+  max-width: 60%;
+}
+
+.onboarding-error {
+  margin-top: var(--space-4);
+  color: var(--period);
+  font-weight: 600;
+}

@@ -21,6 +21,8 @@ export function App({ dbName }: { dbName?: string }) {
   const settings = useApp((s) => s.settings);
   const logs = useApp((s) => s.logs);
   const pinSet = useApp((s) => s.pinSet);
+  const protection = useApp((s) => s.protection);
+  const setupProtection = useApp((s) => s.setupProtection);
   const lastBackupAt = useApp((s) => s.lastBackupAt);
   const init = useApp((s) => s.init);
   const completeOnboarding = useApp((s) => s.completeOnboarding);
@@ -40,12 +42,22 @@ export function App({ dbName }: { dbName?: string }) {
 
   const lock = useCallback(() => lockNow(), [lockNow]);
   useTheme(settings?.theme);
-  useAutoLock(pinSet && status === 'ready', settings?.lockMinutes ?? 5, lock);
+  // Passphrase mode always locks itself; device mode only with a PIN.
+  useAutoLock((pinSet || protection === 'passphrase') && status === 'ready', settings?.lockMinutes ?? 5, lock);
   usePrivacyShield(!!settings?.privacyShield);
 
   if (status === 'loading') return null;
   if (status === 'error') return <p className="load-error">{de.loadError}</p>;
-  if (status === 'onboarding') return <Onboarding today={today} onDone={(input) => void completeOnboarding(input, today)} />;
+  if (status === 'onboarding') {
+    return (
+      <Onboarding
+        today={today}
+        protection={protection}
+        onProtect={setupProtection}
+        onDone={(input) => void completeOnboarding(input, today)}
+      />
+    );
+  }
   if (status === 'locked') return <LockScreen />;
 
   const prediction = settings ? predict({ logs, settings, today, overrides: overridesFrom(settings) }) : null;

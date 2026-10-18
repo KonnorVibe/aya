@@ -5,20 +5,32 @@ import { openPeriod } from '../engine/cycles.ts';
 import { eachDay, type ISODate } from '../engine/dates.ts';
 import type { DayLog, Settings } from '../engine/types.ts';
 import { createBackup, restoreBackup } from '../import-export/backup.ts';
-import { DB_NAME, Repository, requestPersistence } from '../storage/repository.ts';
+import { WrongSecretError, type Protection } from '../crypto/vault.ts';
+import { Database, DB_NAME, Repository, requestPersistence, type ProtectionChoice } from '../storage/repository.ts';
 import { buildOnboarding, type OnboardingInput } from './onboarding.ts';
 
 export type Status = 'loading' | 'onboarding' | 'locked' | 'ready' | 'error';
 export type UnlockResult = { result: 'ok' } | { result: 'wrong'; waitMs: number } | { result: 'wait'; waitMs: number };
+export type { Protection };
 
 export interface AppState {
   status: Status;
   logs: DayLog[];
   settings?: Settings | undefined;
   pinSet: boolean;
+  /** Set once the vault exists. 'passphrase' = data stays encrypted until unlocked. */
+  protection?: Protection | undefined;
   /** ISO timestamp of the last backup export. */
   lastBackupAt?: string | undefined;
-  init: (dbName?: string) => Promise<void>;
+  init: (dbName?: string, iterations?: number) => Promise<void>;
+  /** First onboarding step: creates the vault. Returns the recovery code in passphrase mode. */
+  setupProtection: (choice: ProtectionChoice) => Promise<{ recoveryCode?: string }>;
+  /** Switches protection; `secret` = current passphrase or recovery code in passphrase mode. */
+  changeProtection: (choice: ProtectionChoice, secret?: string) => Promise<{ recoveryCode?: string }>;
+  changePassphrase: (current: string, next: string) => Promise<void>;
+  renewRecovery: (passphrase: string) => Promise<string>;
+  /** Adds or overwrites imported days. */
+  importLogs: (logs: DayLog[]) => Promise<number>;
   completeOnboarding: (input: OnboardingInput, today: ISODate) => Promise<void>;
   /** Merges the patch; a key set to undefined is removed. */
   updateSettings: (patch: { [K in keyof Settings]?: Settings[K] | undefined }) => Promise<void>;
@@ -40,8 +52,9 @@ export interface AppState {
   /** Deletes the database including the device key and starts over. */
   wipeAll: () => Promise<void>;
   lock: () => void;
-  unlock: (pin: string, now?: number) => Promise<UnlockResult>;
-  /** Milliseconds until the next PIN attempt is allowed. */
+  /** PIN in device mode, passphrase or recovery code in passphrase mode. */
+  unlock: (secret: string, now?: number) => Promise<UnlockResult>;
+  /** Milliseconds until the next attempt is allowed. */
   lockoutRemaining: (now?: number) => Promise<number>;
 }
 
@@ -51,7 +64,9 @@ export interface AppState {
  */
 export function createAppStore() {
   let repo: Repository | undefined;
+  let database: Database | undefined;
   let name = DB_NAME;
+  let kdfIterations: number | undefined;
   const need = () => {
     if (!repo) throw new Error('Repository not open');
     return repo;
@@ -62,23 +77,60 @@ export function createAppStore() {
     logs: [],
     pinSet: false,
 
-    async init(dbName) {
+    async init(dbName, iterations) {
       try {
         name = dbName ?? DB_NAME;
-        repo = await Repository.open(name);
+        kdfIterations = iterations;
+        database = await Database.open(name, iterations);
+        const protection = await database.protection();
+        const lastBackupAt = await database.getMeta('lastBackupAt');
+        const pinSet = protection === 'device' && !!(await database.getMeta('pin'));
+        const base = { protection, pinSet, ...(lastBackupAt ? { lastBackupAt } : {}) };
+        if (!protection) return set({ ...base, status: 'onboarding' });
+        if (protection === 'passphrase') return set({ ...base, status: 'locked' });
+        repo = await database.unlock();
         const settings = repo.settings();
-        const pinSet = !!(await repo.getMeta('pin'));
-        const lastBackupAt = await repo.getMeta('lastBackupAt');
         set({
-          ...(lastBackupAt ? { lastBackupAt } : {}),
+          ...base,
           logs: repo.dayLogs(),
-          pinSet,
           status: !settings ? 'onboarding' : pinSet ? 'locked' : 'ready',
           ...(settings ? { settings } : {}),
         });
       } catch {
         set({ status: 'error' });
       }
+    },
+
+    async setupProtection(choice) {
+      if (!database) throw new Error('Database not open');
+      const created = await database.create(choice);
+      repo = created.repo;
+      set({ protection: choice.kind, pinSet: false });
+      return created.recoveryCode ? { recoveryCode: created.recoveryCode } : {};
+    },
+
+    async changeProtection(choice, secret) {
+      if (!database) throw new Error('Database not open');
+      const result = await database.changeProtection(choice, secret);
+      set({ protection: choice.kind, pinSet: false });
+      return result;
+    },
+
+    async changePassphrase(current, next) {
+      if (!database) throw new Error('Database not open');
+      await database.changePassphrase(current, next);
+    },
+
+    async renewRecovery(passphrase) {
+      if (!database) throw new Error('Database not open');
+      return database.renewRecovery(passphrase);
+    },
+
+    async importLogs(logs) {
+      const r = need();
+      await r.upsertMany(logs);
+      set({ logs: r.dayLogs() });
+      return logs.length;
     },
 
     async completeOnboarding(input, today) {
@@ -148,6 +200,7 @@ export function createAppStore() {
     },
 
     async setPin(pin) {
+      if (get().protection !== 'device') throw new Error('PIN only in device mode');
       const r = need();
       await r.setMeta('pin', await hashPin(pin));
       await r.setMeta('lockout', undefined);
@@ -176,38 +229,61 @@ export function createAppStore() {
     },
 
     async wipeAll() {
-      await Repository.wipe(name, repo);
+      await Database.wipe(name, database);
       repo = undefined;
-      set({ status: 'loading', logs: [], settings: undefined, pinSet: false, lastBackupAt: undefined });
-      await get().init(name);
+      database = undefined;
+      set({ status: 'loading', logs: [], settings: undefined, pinSet: false, protection: undefined, lastBackupAt: undefined });
+      await get().init(name, kdfIterations);
     },
 
     lock() {
-      if (get().pinSet && get().status === 'ready') set({ status: 'locked' });
+      const { status, protection, pinSet } = get();
+      if (status !== 'ready') return;
+      if (protection === 'passphrase') {
+        // Drop the keys and all plaintext; unlocking decrypts again.
+        repo = undefined;
+        set({ status: 'locked', logs: [], settings: undefined });
+      } else if (pinSet) set({ status: 'locked' });
     },
 
     async lockoutRemaining(now = Date.now()) {
-      const lockout = (await need().getMeta('lockout')) ?? { failures: 0 };
+      const lockout = (await database?.getMeta('lockout')) ?? { failures: 0 };
       return remainingLockoutMs(lockout, now);
     },
 
-    async unlock(pin, now = Date.now()) {
-      const r = need();
-      const record = await r.getMeta('pin');
-      if (!record) {
+    async unlock(secret, now = Date.now()) {
+      const db = database;
+      if (!db) throw new Error('Database not open');
+      const passphraseMode = get().protection === 'passphrase';
+      const record = passphraseMode ? undefined : await db.getMeta('pin');
+      if (!passphraseMode && !record) {
         set({ status: 'ready' });
         return { result: 'ok' };
       }
-      const lockout: LockoutState = (await r.getMeta('lockout')) ?? { failures: 0 };
+      const lockout: LockoutState = (await db.getMeta('lockout')) ?? { failures: 0 };
       const waiting = remainingLockoutMs(lockout, now);
       if (waiting > 0) return { result: 'wait', waitMs: waiting };
-      if (await verifyPin(pin, record)) {
-        await r.setMeta('lockout', undefined);
-        set({ status: 'ready' });
+
+      let ok = false;
+      if (passphraseMode) {
+        try {
+          repo = await db.unlock(secret);
+          ok = true;
+        } catch (e) {
+          if (!(e instanceof WrongSecretError)) throw e;
+        }
+      } else ok = await verifyPin(secret, record!);
+
+      if (ok) {
+        await db.setMeta('lockout', undefined);
+        const r = need();
+        const settings = r.settings();
+        set({ logs: r.dayLogs(), status: settings ? 'ready' : 'onboarding', ...(settings ? { settings } : {}) });
+        if (passphraseMode) void requestPersistence();
         return { result: 'ok' };
       }
       const next = { failures: lockout.failures + 1, lastFailureAt: now };
-      await r.setMeta('lockout', next);
+      await db.setMeta('lockout', next);
       return { result: 'wrong', waitMs: remainingLockoutMs(next, now) };
     },
   }));
