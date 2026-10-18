@@ -11,7 +11,8 @@
     "typecheck": "tsc -b",
     "test": "vitest run",
     "test:watch": "vitest",
-    "privacy-check": "node scripts/privacy-check.ts"
+    "privacy-check": "node scripts/privacy-check.ts",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "date-fns": "^4.4.0",
@@ -22,6 +23,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.64.1",
     "@testing-library/react": "^16.3.3",
     "@types/node": "^26.6.5",
     "@types/react": "^19.3.0",
