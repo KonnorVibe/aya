@@ -8,3 +8,7 @@ coverage
 .impeccable/questions
 .impeccable/scratch
 .impeccable/review
+
+# Playwright output
+test-results
+playwright-report
