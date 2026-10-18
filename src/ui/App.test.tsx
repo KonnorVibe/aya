@@ -1,5 +1,5 @@
 import 'fake-indexeddb/auto';
-import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { appStore } from '../state/store.ts';
 import { App } from './App.tsx';
@@ -125,4 +125,30 @@ describe('App', () => {
     expect(await screen.findByText('Importiert: 45 Tage.')).toBeTruthy();
     expect(appStore.getState().logs).toHaveLength(45);
   });
+
+  it('shows the recovery code after switching to passphrase in the settings', { timeout: 60_000 }, async () => {
+    render(<App dbName="aya-app-test-switch" />);
+    await screen.findByRole('heading', { name: 'Deine Daten bleiben bei dir' });
+    click('Weiter');
+    click('Weiter');
+    await screen.findByRole('heading', { name: /letzte Periode/ });
+    click('Überspringen');
+    click('Weiter');
+    click('Los geht’s');
+    await screen.findByRole('heading', { name: 'Noch keine Periode eingetragen' });
+    await act(async () => void (await appStore.getState().exportBackup('backup-passwort')));
+
+    click('Einstellungen');
+    click('Mit Passphrase schützen');
+    fireEvent.change(screen.getByLabelText('Neue Passphrase'), { target: { value: 'mein geheimer satz fuer aya' } });
+    fireEvent.change(screen.getByLabelText('Noch einmal eingeben'), { target: { value: 'mein geheimer satz fuer aya' } });
+    click('Bestätigen');
+    await waitFor(() => expect(document.querySelector('.recovery-code')?.textContent).toMatch(/^([A-Z2-7]{4} ){6}[A-Z2-7]{2}$/), { timeout: 30_000 });
+    expect(appStore.getState().protection).toBe('passphrase');
+    fireEvent.click(screen.getByLabelText('Ich habe den Code notiert.'));
+    click('Fertig');
+    expect(document.querySelector('.recovery-code')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Passphrase ändern' })).toBeTruthy();
+  });
 });
+

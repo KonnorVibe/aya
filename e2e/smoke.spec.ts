@@ -107,7 +107,7 @@ test('onboarding, logging, encryption at rest, passphrase switch, lock, offline 
   await page.getByLabel('Datei').setInputFiles('docs/import-vorlagen/apple-health-export.xml');
   await expect(page.getByText(/Tage gefunden, davon 45 mit Periode/)).toBeVisible();
   await expect(page.getByText('Flo: 68 Einträge')).toBeVisible();
-  await page.getByRole('button', { name: 'Importieren' }).click();
+  await page.getByRole('button', { name: 'Importieren', exact: true }).click();
   await expect(page.getByText(/^Importiert: \d+ Tage\.$/)).toBeVisible();
   await context.setOffline(false);
 

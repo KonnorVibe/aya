@@ -31,7 +31,7 @@ function PassField({ label, value, onChange, autoComplete }: { label: string; va
 }
 
 /** Shows a new recovery code once, until the user confirms it is written down. */
-function RecoveryView({ code, onDone }: { code: string; onDone: () => void }) {
+export function RecoveryView({ code, onDone }: { code: string; onDone: () => void }) {
   const [noted, setNoted] = useState(false);
   return (
     <div className="panel">
@@ -55,15 +55,17 @@ function useBackupFresh(): boolean {
 
 const wrongOr = (err: unknown, fallback: string) => (err instanceof WrongSecretError ? de.lock.passphraseWrong : fallback);
 
-export function ToPassphrasePanel({ onClose }: { onClose: () => void }) {
+/**
+ * The switch flips the protection at once, which re-renders the settings without this panel. The
+ * recovery code is therefore handed up (`onCode`) and shown by the settings screen itself.
+ */
+export function ToPassphrasePanel({ onCode }: { onCode: (code: string) => void }) {
   const changeProtection = useApp((s) => s.changeProtection);
   const fresh = useBackupFresh();
   const [pass, setPass] = useState('');
   const [pass2, setPass2] = useState('');
-  const [code, setCode] = useState('');
   const [status, setStatus] = useState<Status>({ kind: 'idle' });
 
-  if (code) return <RecoveryView code={code} onDone={() => { setCode(''); onClose(); }} />;
   if (!fresh) return <div className="panel"><p>{t.backupFirst}</p></div>;
 
   const submit = async (e: FormEvent) => {
@@ -72,10 +74,7 @@ export function ToPassphrasePanel({ onClose }: { onClose: () => void }) {
     if (pass !== pass2) return setStatus({ kind: 'error', text: ob.protect.mismatch });
     setStatus({ kind: 'working' });
     const r = await changeProtection({ kind: 'passphrase', passphrase: pass });
-    setPass('');
-    setPass2('');
-    setStatus({ kind: 'idle' });
-    setCode(r.recoveryCode ?? '');
+    if (r.recoveryCode) onCode(r.recoveryCode);
   };
 
   return (

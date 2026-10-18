@@ -8,7 +8,7 @@ import { Button } from '../components/Button.tsx';
 import { PinPad } from '../components/PinPad.tsx';
 import { BackupPanel, DeletePanel, IcsPanel, RestorePanel } from './settings/DataPanels.tsx';
 import { CsvExportPanel, ImportPanel } from './settings/ImportPanels.tsx';
-import { ChangePassphrasePanel, NewRecoveryPanel, ToDevicePanel, ToPassphrasePanel } from './settings/ProtectionPanels.tsx';
+import { ChangePassphrasePanel, NewRecoveryPanel, RecoveryView, ToDevicePanel, ToPassphrasePanel } from './settings/ProtectionPanels.tsx';
 import './Settings.css';
 
 const LOCK_OPTIONS = [1, 5, 15] as const;
@@ -44,6 +44,7 @@ export function Settings({ prediction, today }: { prediction: Prediction | null;
   const lastBackupAt = useApp((s) => s.lastBackupAt);
   const [flow, setFlow] = useState<PinFlow | null>(null);
   const [panel, setPanel] = useState<Panel | null>(null);
+  const [newRecovery, setNewRecovery] = useState('');
   const toggle = (p: Panel) => setPanel((cur) => (cur === p ? null : p));
   const thisYear = Number(today.slice(0, 4));
 
@@ -177,7 +178,15 @@ export function Settings({ prediction, today }: { prediction: Prediction | null;
         </label>
         <p className="row-hint">{t.shieldHint}</p>
 
-        {passphraseMode ? (
+        {newRecovery ? (
+          <RecoveryView
+            code={newRecovery}
+            onDone={() => {
+              setNewRecovery('');
+              setPanel(null);
+            }}
+          />
+        ) : passphraseMode ? (
           <>
             <Disclosure id="panel-change-pass" label={t.changePassphrase} open={panel === 'changePass'} onToggle={() => toggle('changePass')}>
               <ChangePassphrasePanel />
@@ -191,7 +200,7 @@ export function Settings({ prediction, today }: { prediction: Prediction | null;
           </>
         ) : (
           <Disclosure id="panel-to-pass" label={t.toPassphrase} open={panel === 'toPassphrase'} onToggle={() => toggle('toPassphrase')}>
-            <ToPassphrasePanel onClose={() => setPanel(null)} />
+            <ToPassphrasePanel onCode={setNewRecovery} />
           </Disclosure>
         )}
       </section>
