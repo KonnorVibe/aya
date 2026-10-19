@@ -150,3 +150,10 @@
     font-weight: 600;
   }
 }
+
+.insights-subtitle {
+  margin-top: var(--space-3);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  color: var(--ink-muted);
+}

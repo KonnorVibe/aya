@@ -1,0 +1,165 @@
+/* Long-form pages: Methodik und Quellen, Der Zyklus. Same column and type as the tab screens. */
+.article {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: max(var(--space-5), env(safe-area-inset-top)) var(--gutter) calc(96px + env(safe-area-inset-bottom));
+}
+
+.article-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--rule);
+}
+.article-back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: var(--target);
+  margin-left: -8px;
+  padding: 0 var(--space-2);
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font-size: var(--text-md);
+  cursor: pointer;
+}
+.article-back svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.article h1 {
+  margin-top: var(--space-6);
+  font-family: var(--font-name);
+  font-style: italic;
+  font-weight: 400;
+  font-size: var(--text-xl);
+  line-height: 1.1;
+}
+.article-intro {
+  margin-top: var(--space-3);
+  color: var(--ink-muted);
+  line-height: 1.5;
+}
+
+.article-section {
+  margin-top: var(--space-6);
+}
+.article-section h2 {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--rule-strong);
+  font-size: var(--text-md);
+  font-weight: 600;
+}
+.article-num {
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: var(--text-xs);
+  font-weight: 400;
+  color: var(--accent);
+}
+.article-section p {
+  line-height: 1.55;
+}
+.article-section p + p {
+  margin-top: var(--space-3);
+}
+
+.article-sources {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: src;
+}
+.article-sources li {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-3) 0 var(--space-3) var(--space-6);
+  border-bottom: 1px solid var(--rule);
+  position: relative;
+  font-size: var(--text-sm);
+  color: var(--ink-muted);
+  counter-increment: src;
+}
+.article-sources li::before {
+  content: '[' counter(src) ']';
+  position: absolute;
+  left: 0;
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  color: var(--accent);
+}
+.article-cite {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.article-phases {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.article-phases li {
+  --tone: var(--ink-muted);
+  padding: var(--space-4) 0 var(--space-4) var(--space-4);
+  border-left: 3px solid var(--tone);
+  margin-bottom: var(--space-3);
+}
+.article-phases .tone-period { --tone: var(--period); }
+.article-phases .tone-fertile { --tone: var(--fertile); }
+.article-phases .tone-luteal { --tone: var(--luteal); }
+.article-phases h3 {
+  font-family: var(--font-name);
+  font-style: italic;
+  font-weight: 400;
+  font-size: var(--text-lg);
+}
+.article-phases .article-when {
+  margin: var(--space-1) 0 var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--tone);
+}
+
+.article-list {
+  margin: 0;
+  padding-left: 1.2em;
+}
+.article-list li {
+  padding: var(--space-2) 0;
+  line-height: 1.5;
+}
+
+.article-terms {
+  margin: 0;
+}
+.article-terms div {
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--rule);
+}
+.article-terms dt {
+  font-weight: 600;
+}
+.article-terms dd {
+  margin: var(--space-1) 0 0;
+  color: var(--ink-muted);
+  line-height: 1.5;
+}
+
+.article-disclaimer {
+  margin-top: var(--space-6);
+  font-size: var(--text-sm);
+  color: var(--ink-muted);
+}
+.article-link {
+  margin-top: var(--space-4);
+  border-top: 1px solid var(--rule);
+}

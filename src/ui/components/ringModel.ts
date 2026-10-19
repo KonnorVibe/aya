@@ -18,8 +18,21 @@ export interface RingDay {
 export interface RingModel {
   length: number;
   days: RingDay[];
-  /** Next-period range as offsets from cycle start (may exceed length). */
-  range: { earliest: number; latest: number };
+  /** Next-period range as offsets from cycle start (may exceed length); null before any data. */
+  range: { earliest: number; latest: number } | null;
+}
+
+/** A quiet placeholder ring for the first start: a typical cycle, no phases, no forecast. */
+export function emptyRingModel(today: ISODate, length = 28): RingModel {
+  const days: RingDay[] = Array.from({ length }, (_, offset) => ({
+    offset,
+    date: addDays(today, offset),
+    kind: 'neutral',
+    magnitude: 0,
+    predicted: true,
+    isToday: false,
+  }));
+  return { length, days, range: null };
 }
 
 const FLOW_MAGNITUDE: Record<Flow, 1 | 2 | 3 | 4> = { spotting: 1, light: 2, medium: 3, heavy: 4 };

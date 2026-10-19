@@ -18,6 +18,8 @@ export interface Meta {
   pin?: PinRecord;
   lockout?: LockoutState;
   lastBackupAt?: string;
+  /** Set while onboarding runs after the vault exists; a reload then starts over. */
+  setupPending?: true;
 }
 
 type Doc = { type: 'day'; data: DayLog } | { type: 'settings'; data: Settings };
@@ -63,11 +65,15 @@ export class Database {
   ) {}
 
   static async open(name = DB_NAME, iterations = PBKDF2_ITERATIONS): Promise<Database> {
-    const db = await openDB<AyaDB>(name, 1, {
+    const db: IDBPDatabase<AyaDB> = await openDB<AyaDB>(name, 1, {
       upgrade(d) {
         d.createObjectStore('keys');
         d.createObjectStore('records', { keyPath: 'id' });
         d.createObjectStore('meta');
+      },
+      // Another instance wants to delete the database (restart of a half-done onboarding): let it.
+      blocking() {
+        db.close();
       },
     });
     return new Database(name, db, iterations);

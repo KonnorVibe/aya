@@ -48,10 +48,11 @@ function phaseRuns(days: readonly RingDay[]) {
 
 interface Props {
   model: RingModel;
-  cycleDay: number;
+  /** Undefined on the placeholder ring: the centre shows a dash. */
+  cycleDay?: number | undefined;
   label: string;
   dayCaption: string;
-  rangeLabels: [string, string];
+  rangeLabels?: [string, string] | undefined;
 }
 
 /**
@@ -80,6 +81,7 @@ export function CycleRing({ model, cycleDay, label, dayCaption, rangeLabels }: P
         })}
       </g>
 
+      {range && rangeLabels && (
       <g className="ring-range" aria-hidden="true">
         <path d={arcPath(range.earliest, range.latest, length, RANGE_ORBIT)} />
         {[range.earliest, range.latest].map((o, i) => {
@@ -96,6 +98,7 @@ export function CycleRing({ model, cycleDay, label, dayCaption, rangeLabels }: P
           );
         })}
       </g>
+      )}
 
       {days.map((day) => {
         const p = point(day.offset, length, ORBIT);
@@ -137,7 +140,7 @@ export function CycleRing({ model, cycleDay, label, dayCaption, rangeLabels }: P
       })()}
 
       <text className="ring-day-number" x={C} y={C + 2} textAnchor="middle">
-        {cycleDay}
+        {cycleDay ?? '–'}
       </text>
       <text className="ring-caption" x={C} y={C + 26} textAnchor="middle">
         {dayCaption}

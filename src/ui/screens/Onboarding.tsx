@@ -8,6 +8,7 @@ import { de } from '../../i18n/de.ts';
 import type { OnboardingInput } from '../../state/onboarding.ts';
 import type { ProtectionChoice } from '../../storage/repository.ts';
 import { Button } from '../components/Button.tsx';
+import { DoctorHint } from '../components/DoctorHint.tsx';
 import { Stepper } from '../components/Stepper.tsx';
 import { isStandalone } from '../hooks/useAppEnvironment.ts';
 import './Onboarding.css';
@@ -219,6 +220,7 @@ export function Onboarding({ today, protection, onProtect, onDone }: Props) {
           <p className="onboarding-statement">{de.disclaimer}</p>
           <p className="onboarding-body">{t.note.body}</p>
           {choice === 'device' && <p className="onboarding-body">{t.note.pin}</p>}
+          <DoctorHint />
         </section>
       )}
 

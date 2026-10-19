@@ -1,0 +1,46 @@
+.doctor-hint {
+  margin-top: var(--space-5);
+  padding: var(--space-4);
+  border-left: 3px solid var(--accent);
+  background: var(--ground-raised);
+  border-radius: 0 var(--radius-control) var(--radius-control) 0;
+}
+.doctor-hint h2,
+.doctor-hint h3 {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-md);
+  font-weight: 600;
+}
+.doctor-hint p {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  color: var(--ink-muted);
+}
+.doctor-hint ul {
+  margin: var(--space-3) 0;
+  padding: 0;
+  list-style: none;
+}
+.doctor-hint a {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--target);
+  color: var(--accent);
+  font-size: var(--text-sm);
+  text-underline-offset: 0.2em;
+}
+.doctor-hint svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.doctor-hint .doctor-hint-urgent {
+  font-size: var(--text-xs);
+}

@@ -6,7 +6,7 @@ Geprüft: 146 Unit- und UI-Tests grün, ESLint ohne Befund, TypeScript strict, B
 
 | Punkt | Ergebnis |
 |---|---|
-| 1. Zero Network, CSP | erfüllt. CSP mit `connect-src 'none'` per Meta-Tag, keine CDNs, Webfonts, Analyse. Privacy-Check prüft Quellcode und Build, der E2E-Test prüft, dass keine Anfrage an fremde Adressen geht. Einzige Ausnahme: Der Service Worker sucht beim Öffnen auf der eigenen Adresse nach Updates. |
+| 1. Zero Network, CSP | erfüllt. CSP mit `connect-src 'none'` per Meta-Tag, keine CDNs, Webfonts, Analyse. Privacy-Check prüft Quellcode und Build, der E2E-Test prüft, dass keine Anfrage an fremde Adressen geht. Einzige Ausnahme: Der Service Worker sucht beim Öffnen auf der eigenen Adresse nach Updates. Die zwei Links zur Arztsuche (Doctolib, 116117) öffnen erst beim Antippen den Browser, ohne Referrer und ohne Daten; der Privacy-Check lässt genau diese zwei Adressen zu. |
 | 2. Verschlüsselung im Ruhezustand | erfüllt. Jeder Datensatz einzeln mit AES-GCM, Datums-IDs als HMAC, Service Worker cacht nur die App-Shell. Tests: `repository.test.ts` und E2E. |
 | 3. Export, Import, Löschen in zwei Taps | erfüllt ab dem Einstellungs-Tab. Löschen verlangt zusätzlich „LÖSCHEN“. |
 | 4. Ehrlichkeit | erfüllt. Jede Vorhersage zeigt Spanne und Sicherheit. Hinweis „kein Verhütungsmittel, kein Medizinprodukt“ im Onboarding, in den Einstellungen und in der Druckansicht. |

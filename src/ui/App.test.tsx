@@ -61,6 +61,42 @@ describe('App', () => {
     expect(await screen.findByText('Diese PIN stimmt nicht.')).toBeTruthy();
     typePin('135790');
     expect(await screen.findByRole('heading', { name: 'Einstellungen' })).toBeTruthy();
+
+    // Removing the PIN asks for it first.
+    click('PIN entfernen');
+    expect(await screen.findByRole('heading', { name: 'Aktuelle PIN eingeben' })).toBeTruthy();
+    typePin('000000');
+    expect(await screen.findByText('Diese PIN stimmt nicht.')).toBeTruthy();
+    expect(appStore.getState().pinSet).toBe(true);
+    typePin('135790');
+    expect(await screen.findByText('Aus')).toBeTruthy();
+    expect(appStore.getState().pinSet).toBe(false);
+  });
+
+  it('opens Methodik from the logo and import from the empty Today screen', async () => {
+    render(<App dbName="aya-app-test-pages" />);
+    await screen.findByRole('heading', { name: 'Deine Daten bleiben bei dir' });
+    click('Weiter');
+    click('Weiter');
+    await screen.findByRole('heading', { name: /letzte Periode/ });
+    click('Überspringen');
+    click('Weiter');
+    expect(screen.getByRole('heading', { name: 'Wann du zur Ärztin gehen solltest' })).toBeTruthy();
+    click('Los geht’s');
+    await screen.findByRole('heading', { name: 'Noch keine Periode eingetragen' });
+    expect(screen.getByRole('img', { name: /sobald du eine Periode einträgst/ })).toBeTruthy();
+
+    click('Methodik und Quellen');
+    expect(screen.getByRole('heading', { level: 1, name: 'Methodik und Quellen' })).toBeTruthy();
+    click('Mehr über den Zyklus');
+    expect(screen.getByRole('heading', { level: 1, name: 'Der Zyklus' })).toBeTruthy();
+    click('Zurück');
+    click('Zurück');
+    expect(screen.getByRole('heading', { name: 'Noch keine Periode eingetragen' })).toBeTruthy();
+
+    click('Alte Daten importieren');
+    expect(screen.getByLabelText('Datei')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Muster' })).toBeTruthy();
   });
 
   it('sets up a passphrase, shows the recovery code once and unlocks with it', { timeout: 60_000 }, async () => {
@@ -139,7 +175,7 @@ describe('App', () => {
     await act(async () => void (await appStore.getState().exportBackup('backup-passwort')));
 
     click('Einstellungen');
-    click('Mit Passphrase schützen');
+    fireEvent.click(screen.getByLabelText(/Mit einer Passphrase/));
     fireEvent.change(screen.getByLabelText('Neue Passphrase'), { target: { value: 'mein geheimer satz fuer aya' } });
     fireEvent.change(screen.getByLabelText('Noch einmal eingeben'), { target: { value: 'mein geheimer satz fuer aya' } });
     click('Bestätigen');

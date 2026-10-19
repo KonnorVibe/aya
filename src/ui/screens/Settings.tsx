@@ -9,14 +9,17 @@ import { PinPad } from '../components/PinPad.tsx';
 import { BackupPanel, DeletePanel, IcsPanel, RestorePanel } from './settings/DataPanels.tsx';
 import { CsvExportPanel, ImportPanel } from './settings/ImportPanels.tsx';
 import { ChangePassphrasePanel, NewRecoveryPanel, RecoveryView, ToDevicePanel, ToPassphrasePanel } from './settings/ProtectionPanels.tsx';
+import type { Protection } from '../../crypto/vault.ts';
 import './Settings.css';
 
 const LOCK_OPTIONS = [1, 5, 15] as const;
+const FIRST_BIRTH_YEAR = 1920;
 const t = de.settings;
 
 const MODES: Mode[] = ['track', 'conceive', 'hormonal_contraception'];
 const THEMES: SettingsType['theme'][] = ['system', 'light', 'dark'];
-type Panel = 'backup' | 'restore' | 'import' | 'csv' | 'ics' | 'delete' | 'toPassphrase' | 'toDevice' | 'changePass' | 'newRecovery';
+export type Panel = 'backup' | 'restore' | 'import' | 'csv' | 'ics' | 'delete' | 'changePass' | 'newRecovery';
+const PROTECTIONS: Protection[] = ['device', 'passphrase'];
 
 function Disclosure({ id, label, open, onToggle, children }: { id: string; label: string; open: boolean; onToggle: () => void; children: ReactNode }) {
   return (
@@ -32,24 +35,50 @@ function Disclosure({ id, label, open, onToggle, children }: { id: string; label
   );
 }
 
-type PinFlow = { step: 'enter' } | { step: 'confirm'; first: string; mismatch?: false } | { step: 'enter'; mismatch: true };
+/** Changing or removing a PIN starts with the current one ('verify'). */
+type PinFlow =
+  | { step: 'verify'; then: 'change' | 'remove'; message?: string }
+  | { step: 'enter' }
+  | { step: 'confirm'; first: string; mismatch?: false }
+  | { step: 'enter'; mismatch: true };
 
-export function Settings({ prediction, today }: { prediction: Prediction | null; today: ISODate }) {
+interface Props {
+  prediction: Prediction | null;
+  today: ISODate;
+  /** Opens this panel right away (e.g. "Alte Daten importieren" on Today). */
+  initialPanel?: Panel | undefined;
+  onMethod: () => void;
+}
+
+export function Settings({ prediction, today, initialPanel, onMethod }: Props) {
   const settings = useApp((s) => s.settings)!;
   const pinSet = useApp((s) => s.pinSet);
   const passphraseMode = useApp((s) => s.protection) === 'passphrase';
   const updateSettings = useApp((s) => s.updateSettings);
   const setPin = useApp((s) => s.setPin);
   const removePin = useApp((s) => s.removePin);
+  const checkPin = useApp((s) => s.checkPin);
+  const protection = useApp((s) => s.protection) ?? 'device';
+  const [target, setTarget] = useState<Protection | null>(null);
   const lastBackupAt = useApp((s) => s.lastBackupAt);
   const [flow, setFlow] = useState<PinFlow | null>(null);
-  const [panel, setPanel] = useState<Panel | null>(null);
+  const [panel, setPanel] = useState<Panel | null>(initialPanel ?? null);
   const [newRecovery, setNewRecovery] = useState('');
   const toggle = (p: Panel) => setPanel((cur) => (cur === p ? null : p));
   const thisYear = Number(today.slice(0, 4));
 
   if (flow) {
     const done = async (pin: string) => {
+      if (flow.step === 'verify') {
+        const r = await checkPin(pin);
+        if (r.result !== 'ok') {
+          const message = r.waitMs > 0 ? de.lock.wait(Math.ceil(r.waitMs / 1000)) : de.lock.wrong;
+          return setFlow({ ...flow, message });
+        }
+        if (flow.then === 'change') return setFlow({ step: 'enter' });
+        await removePin();
+        return setFlow(null);
+      }
       if (flow.step === 'enter') return setFlow({ step: 'confirm', first: pin });
       if (pin !== flow.first) return setFlow({ step: 'enter', mismatch: true });
       await setPin(pin);
@@ -58,9 +87,10 @@ export function Settings({ prediction, today }: { prediction: Prediction | null;
     return (
       <main className="settings settings-pin">
         <PinPad
-          key={flow.step}
-          title={flow.step === 'enter' ? t.newPin : t.confirmPin}
+          key={flow.step + ('message' in flow ? (flow.message ?? '') : '')}
+          title={flow.step === 'verify' ? t.currentPin : flow.step === 'enter' ? t.newPin : t.confirmPin}
           {...('mismatch' in flow && flow.mismatch ? { message: t.mismatch } : {})}
+          {...(flow.step === 'verify' && flow.message ? { message: flow.message } : {})}
           onComplete={done}
         />
         <Button variant="quiet" onClick={() => setFlow(null)}>
@@ -109,7 +139,7 @@ export function Settings({ prediction, today }: { prediction: Prediction | null;
             onChange={(e) => void updateSettings({ birthYear: e.target.value ? Number(e.target.value) : undefined })}
           >
             <option value="">{t.birthYearNone}</option>
-            {Array.from({ length: 50 }, (_, i) => thisYear - 12 - i).map((y) => (
+            {Array.from({ length: thisYear - FIRST_BIRTH_YEAR + 1 }, (_, i) => thisYear - i).map((y) => (
               <option key={y} value={y}>
                 {y}
               </option>
@@ -121,11 +151,32 @@ export function Settings({ prediction, today }: { prediction: Prediction | null;
 
       <section aria-labelledby="set-lock">
         <h2 id="set-lock">{t.lockSection}</h2>
-        <div className="row">
-          <span>{t.protection}</span>
-          <span className="row-value">{passphraseMode ? t.protectionPassphrase : t.protectionDevice}</span>
-        </div>
-        <p className="row-hint">{passphraseMode ? t.protectionPassphraseHint : t.protectionDeviceHint}</p>
+        <fieldset className="choices" disabled={!!newRecovery}>
+          <legend className="row-legend">{t.protection}</legend>
+          {PROTECTIONS.map((p) => (
+            <label key={p} className="choice">
+              <input
+                type="radio"
+                name="protection"
+                checked={(target ?? protection) === p}
+                onChange={() => setTarget(p === protection ? null : p)}
+              />
+              <span className="choice-text">
+                <span className="choice-label">{de.onboarding.protect[p].label}</span>
+                <span className="choice-hint">{p === protection ? (passphraseMode ? t.protectionPassphraseHint : t.protectionDeviceHint) : de.onboarding.protect[p].hint}</span>
+              </span>
+            </label>
+          ))}
+        </fieldset>
+        {target === 'passphrase' && !newRecovery && (
+          <ToPassphrasePanel
+            onCode={(code) => {
+              setTarget(null);
+              setNewRecovery(code);
+            }}
+          />
+        )}
+        {target === 'device' && <ToDevicePanel onClose={() => setTarget(null)} />}
 
         {!passphraseMode && (
           <>
@@ -134,11 +185,11 @@ export function Settings({ prediction, today }: { prediction: Prediction | null;
               <span className="row-value">{pinSet ? t.pinOn : t.pinOff}</span>
             </div>
             <div className="row-actions">
-              <Button variant="secondary" onClick={() => setFlow({ step: 'enter' })}>
+              <Button variant="secondary" onClick={() => setFlow(pinSet ? { step: 'verify', then: 'change' } : { step: 'enter' })}>
                 {pinSet ? t.changePin : t.setPin}
               </Button>
               {pinSet && (
-                <Button variant="quiet" onClick={() => void removePin()}>
+                <Button variant="quiet" onClick={() => setFlow({ step: 'verify', then: 'remove' })}>
                   {t.removePin}
                 </Button>
               )}
@@ -194,15 +245,8 @@ export function Settings({ prediction, today }: { prediction: Prediction | null;
             <Disclosure id="panel-new-recovery" label={t.newRecovery} open={panel === 'newRecovery'} onToggle={() => toggle('newRecovery')}>
               <NewRecoveryPanel onClose={() => setPanel(null)} />
             </Disclosure>
-            <Disclosure id="panel-to-device" label={t.toDevice} open={panel === 'toDevice'} onToggle={() => toggle('toDevice')}>
-              <ToDevicePanel onClose={() => setPanel(null)} />
-            </Disclosure>
           </>
-        ) : (
-          <Disclosure id="panel-to-pass" label={t.toPassphrase} open={panel === 'toPassphrase'} onToggle={() => toggle('toPassphrase')}>
-            <ToPassphrasePanel onCode={setNewRecovery} />
-          </Disclosure>
-        )}
+        ) : null}
       </section>
 
       <section aria-labelledby="set-data">
@@ -236,17 +280,12 @@ export function Settings({ prediction, today }: { prediction: Prediction | null;
           <a href="./datenschutz.html">{t.privacyLink}</a>
           <a href="./impressum.html">{t.imprintLink}</a>
         </p>
-        <details className="settings-method">
-          <summary>{t.methodology}</summary>
-          {t.methodologyText.map((p) => (
-            <p key={p}>{p}</p>
-          ))}
-          <ul>
-            {t.sources.map((src) => (
-              <li key={src}>{src}</li>
-            ))}
-          </ul>
-        </details>
+        <button type="button" className="row row-button" onClick={onMethod}>
+          <span>{t.methodology}</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M9 6l6 6-6 6" />
+          </svg>
+        </button>
       </section>
     </main>
   );

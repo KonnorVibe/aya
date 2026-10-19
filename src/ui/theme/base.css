@@ -78,9 +78,23 @@ a {
   }
 }
 
-/* Privacy shield: blurred while the app is in the background. */
+/* Privacy shield: an opaque cover while the app is in the background. A blur filter alone is often
+   not painted yet when iOS takes the app-switcher snapshot; a plain cover is. */
 :root[data-shield] #root {
   filter: blur(28px);
+}
+:root[data-shield] body::after {
+  content: 'aya';
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  display: grid;
+  place-items: center;
+  background: var(--ground);
+  color: var(--ink-muted);
+  font-family: var(--font-name);
+  font-style: italic;
+  font-size: var(--text-xl);
 }
 
 .load-error {

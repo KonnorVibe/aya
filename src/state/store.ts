@@ -46,6 +46,8 @@ export interface AppState {
   endPeriod: (today: ISODate) => Promise<void>;
   setPin: (pin: string) => Promise<void>;
   removePin: () => Promise<void>;
+  /** Confirms the current PIN before it is changed or removed; counts towards the lockout. */
+  checkPin: (pin: string, now?: number) => Promise<UnlockResult>;
   /** Encrypts all data with the password; returns the file text and name. */
   exportBackup: (password: string) => Promise<{ text: string; filename: string }>;
   /** Replaces all data with the backup's content. Throws BackupError. */
@@ -83,6 +85,11 @@ export function createAppStore() {
         name = dbName ?? DB_NAME;
         kdfIterations = iterations;
         database = await Database.open(name, iterations);
+        // Onboarding was left halfway: drop the half-made vault so every step comes again.
+        if ((await database.protection()) && (await database.getMeta('setupPending'))) {
+          await Database.wipe(name, database);
+          database = await Database.open(name, iterations);
+        }
         const protection = await database.protection();
         const lastBackupAt = await database.getMeta('lastBackupAt');
         const pinSet = protection === 'device' && !!(await database.getMeta('pin'));
@@ -91,11 +98,17 @@ export function createAppStore() {
         if (protection === 'passphrase') return set({ ...base, status: 'locked' });
         repo = await database.unlock();
         const settings = repo.settings();
+        if (!settings) {
+          // Left halfway before setupPending existed: start over as well.
+          repo = undefined;
+          await Database.wipe(name, database);
+          return get().init(name, iterations);
+        }
         set({
           ...base,
           logs: repo.dayLogs(),
-          status: !settings ? 'onboarding' : pinSet ? 'locked' : 'ready',
-          ...(settings ? { settings } : {}),
+          status: pinSet ? 'locked' : 'ready',
+          settings,
         });
       } catch {
         set({ status: 'error' });
@@ -105,6 +118,7 @@ export function createAppStore() {
     async setupProtection(choice) {
       if (!database) throw new Error('Database not open');
       const created = await database.create(choice);
+      await database.setMeta('setupPending', true);
       repo = created.repo;
       set({ protection: choice.kind, pinSet: false });
       return created.recoveryCode ? { recoveryCode: created.recoveryCode } : {};
@@ -139,6 +153,7 @@ export function createAppStore() {
       const { settings, logs } = buildOnboarding(input, today);
       for (const log of logs) await r.saveDayLog(log);
       await r.saveSettings(settings);
+      await database?.setMeta('setupPending', undefined);
       void requestPersistence();
       set({ settings, logs: r.dayLogs(), status: 'ready' });
     },
@@ -213,6 +228,22 @@ export function createAppStore() {
       await r.setMeta('pin', undefined);
       await r.setMeta('lockout', undefined);
       set({ pinSet: false });
+    },
+
+    async checkPin(pin, now = Date.now()) {
+      const r = need();
+      const record = await r.getMeta('pin');
+      if (!record) return { result: 'ok' };
+      const lockout: LockoutState = (await r.getMeta('lockout')) ?? { failures: 0 };
+      const waiting = remainingLockoutMs(lockout, now);
+      if (waiting > 0) return { result: 'wait', waitMs: waiting };
+      if (await verifyPin(pin, record)) {
+        await r.setMeta('lockout', undefined);
+        return { result: 'ok' };
+      }
+      const next = { failures: lockout.failures + 1, lastFailureAt: now };
+      await r.setMeta('lockout', next);
+      return { result: 'wrong', waitMs: remainingLockoutMs(next, now) };
     },
 
     async exportBackup(password) {

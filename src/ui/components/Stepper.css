@@ -15,9 +15,31 @@
   align-items: center;
   gap: var(--space-2);
 }
+.stepper-value {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: var(--target);
+}
 .stepper-control output {
   text-align: center;
   color: var(--ink);
+  text-decoration: underline dotted var(--rule-strong);
+  text-underline-offset: 0.3em;
+}
+/* Invisible native select over the number: the tap target for the picker wheel. */
+.stepper-value select {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  opacity: 0;
+  font-size: 16px; /* no zoom on iOS */
+  cursor: pointer;
+}
+.stepper-value:focus-within output {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+  border-radius: 4px;
 }
 .stepper-control button {
   width: var(--target);

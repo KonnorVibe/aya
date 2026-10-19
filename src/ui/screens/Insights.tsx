@@ -14,9 +14,22 @@ interface Props {
   logs: readonly DayLog[];
   settings: Settings;
   today: ISODate;
+  onMethod: () => void;
+  onLearn: () => void;
 }
 
-export function Insights({ logs, settings, today }: Props) {
+function LinkRow({ label, onClick }: { label: string; onClick: () => void }) {
+  return (
+    <button type="button" className="row row-button" onClick={onClick}>
+      <span>{label}</span>
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M9 6l6 6-6 6" />
+      </svg>
+    </button>
+  );
+}
+
+export function Insights({ logs, settings, today, onMethod, onLearn }: Props) {
   const m = insightsModel(logs, settings, today);
   const s = m.stats;
   const cycleMax = Math.max(45, ...m.cycleBars.map((b) => b.value));
@@ -25,6 +38,7 @@ export function Insights({ logs, settings, today }: Props) {
   return (
     <main className="insights">
       <h1>{t.title}</h1>
+      <p className="insights-subtitle">{t.subtitle}</p>
 
       <dl className="insights-figures">
         <div>
@@ -159,6 +173,12 @@ export function Insights({ logs, settings, today }: Props) {
           </table>
         </details>
       )}
+
+      <section aria-labelledby="ins-more">
+        <h2 id="ins-more">{t.more}</h2>
+        <LinkRow label={de.method.title} onClick={onMethod} />
+        <LinkRow label={de.method.learn} onClick={onLearn} />
+      </section>
     </main>
   );
 }

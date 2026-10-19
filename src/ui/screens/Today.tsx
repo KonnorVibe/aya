@@ -7,7 +7,8 @@ import { confidenceLabel, de, formatDayMonth, formatLongDate, formatRange, state
 import { Button } from '../components/Button.tsx';
 import { CycleRing } from '../components/CycleRing.tsx';
 import { Legend } from '../components/Legend.tsx';
-import { ringModel } from '../components/ringModel.ts';
+import { emptyRingModel, ringModel } from '../components/ringModel.ts';
+import { phaseQuote } from './phaseQuote.ts';
 import { logSummary, todayNotes } from './todayNotes.ts';
 import './Today.css';
 
@@ -25,32 +26,51 @@ interface Props {
   /** "Periode nachtragen" on the missed-period card. */
   onAddMissed: (start: ISODate, length: number) => void;
   onIncludeCycle: (start: ISODate) => void;
+  /** "Alte Daten importieren" on the empty screen. */
+  onImport: () => void;
+  /** The logo opens Methodik und Quellen. */
+  onMethod: () => void;
 }
 
-export function Today({ prediction, logs, settings, today, lastBackupAt, onPeriodStart, onPeriodEnd, onLog, onAddMissed, onIncludeCycle }: Props) {
+export function Today({ prediction, logs, settings, today, lastBackupAt, onPeriodStart, onPeriodEnd, onLog, onAddMissed, onIncludeCycle, onImport, onMethod }: Props) {
+  const head = (
+    <header className="today-head">
+      <button type="button" className="today-brand" aria-label={de.method.title} onClick={onMethod}>
+        <Brand />
+      </button>
+      <span>{formatLongDate(today)}</span>
+    </header>
+  );
   const summary = logSummary(logs.find((l) => l.date === today));
   if (!prediction) {
     return (
       <main className="today">
-        <header className="today-head">
-          <Brand />
-          <span>{formatLongDate(today)}</span>
-        </header>
+        {head}
         <section className="today-statement today-empty">
           <h1>{de.emptyToday.title}</h1>
           <p>{de.emptyToday.body}</p>
         </section>
+        <figure className="today-chart is-empty">
+          <CycleRing model={emptyRingModel(today)} label={de.emptyToday.ring} dayCaption={de.emptyToday.ringCaption} />
+        </figure>
         <div className="today-actions">
           <Button onClick={onPeriodStart}>{de.periodStarted}</Button>
           <Button variant="secondary" onClick={onLog}>
             {de.logToday}
           </Button>
         </div>
+        <div className="today-import">
+          <Button variant="quiet" onClick={onImport}>
+            {de.emptyToday.import}
+          </Button>
+          <p>{de.emptyToday.importHint}</p>
+        </div>
         {summary && <TodaySummary text={summary} />}
       </main>
     );
   }
   const notes = todayNotes(prediction, logs, settings, today, lastBackupAt);
+  const quote = phaseQuote(prediction, today, settings.mode);
   const model = ringModel(prediction, logs, today);
   const range = formatRange(prediction.nextPeriod.earliest, prediction.nextPeriod.latest);
   // Once "Periode beendet" was tapped, the button offers a new start again.
@@ -58,10 +78,9 @@ export function Today({ prediction, logs, settings, today, lastBackupAt, onPerio
   const inPeriod = prediction.periodDay !== undefined && !ended;
   return (
     <main className="today">
-      <header className="today-head">
-        <Brand />
-        <span>{formatLongDate(today)}</span>
-      </header>
+      {head}
+
+      <p className={`today-quote quote-${quote.phase}`}>{quote.text}</p>
 
       <section className="today-statement" aria-live="polite">
         <h1>{statement(prediction, today)}</h1>

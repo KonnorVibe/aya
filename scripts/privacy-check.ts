@@ -10,8 +10,9 @@ export interface Finding {
   excerpt: string;
 }
 
-// Allowlist: SVG/XML namespaces and inert URLs inside library error messages (never requested;
-// connect-src 'none' would block them anyway).
+// Allowlist: SVG/XML namespaces, inert URLs inside library error messages (never requested;
+// connect-src 'none' would block them anyway) and the doctor-search links, which only open in the
+// browser when tapped (target=_blank, no referrer) and never carry data.
 const RULES: { name: string; pattern: RegExp }[] = [
   { name: 'fetch', pattern: /\bfetch\s*\(/ },
   { name: 'XMLHttpRequest', pattern: /\bXMLHttpRequest\b/ },
@@ -19,7 +20,7 @@ const RULES: { name: string; pattern: RegExp }[] = [
   { name: 'EventSource', pattern: /\bEventSource\b/ },
   { name: 'sendBeacon', pattern: /\bsendBeacon\b/ },
   { name: 'RTCPeerConnection', pattern: /\bRTCPeerConnection\b/ },
-  { name: 'external-url', pattern: /\b(?:https?:|wss?:)\/\/(?!(?:www\.w3\.org|react\.dev\/errors|bit\.ly\/wb-precache|docs\.github\.com\/de\/site-policy)\b)[^\s'"`)]+/ },
+  { name: 'external-url', pattern: /\b(?:https?:|wss?:)\/\/(?!(?:www\.w3\.org|react\.dev\/errors|bit\.ly\/wb-precache|docs\.github\.com\/de\/site-policy)\b|(?:www\.doctolib\.de\/frauenarzt|arztsuche\.116117\.de\/)['"`])[^\s'"`)]+/ },
 ];
 
 // Build output from third-party code (React, Workbox) mentions these names without using

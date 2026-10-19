@@ -75,7 +75,7 @@ test('onboarding, logging, encryption at rest, passphrase switch, lock, offline 
   await page.getByRole('button', { name: 'Backup speichern' }).click();
   expect((await download).suggestedFilename()).toMatch(/^aya-backup-.*\.aya$/);
 
-  await page.getByRole('button', { name: 'Mit Passphrase schützen' }).click();
+  await page.getByLabel(/Mit einer Passphrase/).check();
   await page.getByLabel('Neue Passphrase').fill(PASSPHRASE);
   await page.getByLabel('Noch einmal eingeben').fill(PASSPHRASE);
   await page.getByRole('button', { name: 'Bestätigen' }).click();

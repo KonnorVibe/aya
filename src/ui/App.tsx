@@ -11,7 +11,8 @@ import { LockScreen } from './screens/LockScreen.tsx';
 import { Onboarding } from './screens/Onboarding.tsx';
 import { Calendar } from './screens/Calendar.tsx';
 import { Insights } from './screens/Insights.tsx';
-import { Settings } from './screens/Settings.tsx';
+import { Learn, Method } from './screens/Article.tsx';
+import { Settings, type Panel } from './screens/Settings.tsx';
 import { Today } from './screens/Today.tsx';
 import './theme/tokens.css';
 import './theme/base.css';
@@ -35,8 +36,18 @@ export function App({ dbName }: { dbName?: string }) {
   const lockNow = useApp((s) => s.lock);
   const [tab, setTabState] = useState<TabId>('today');
   const [calendarFocus, setCalendarFocus] = useState<{ start: string; length: number } | undefined>();
+  const [settingsPanel, setSettingsPanel] = useState<Panel | undefined>();
+  /** Long-form pages over the current tab; the last one is shown, "Zurück" pops it. */
+  const [pages, setPages] = useState<('method' | 'learn')[]>([]);
+  const openPage = (p: 'method' | 'learn') => {
+    setPages((cur) => [...cur, p]);
+    window.scrollTo?.(0, 0);
+  };
+  const back = () => setPages((cur) => cur.slice(0, -1));
   const setTab = (next: TabId) => {
     setCalendarFocus(undefined);
+    setSettingsPanel(undefined);
+    setPages([]);
     setTabState(next);
   };
   const today = todayLocal();
@@ -66,9 +77,12 @@ export function App({ dbName }: { dbName?: string }) {
   if (status === 'locked') return <LockScreen />;
 
   const prediction = settings ? predict({ logs, settings, today, overrides: overridesFrom(settings) }) : null;
+  const page = pages.at(-1);
   return (
     <>
-      {tab === 'today' && (
+      {page === 'method' && <Method onBack={back} onLearn={() => openPage('learn')} />}
+      {page === 'learn' && <Learn onBack={back} />}
+      {!page && tab === 'today' && (
         <Today
           prediction={prediction}
           logs={logs}
@@ -83,9 +97,14 @@ export function App({ dbName }: { dbName?: string }) {
             setTabState('calendar');
           }}
           onIncludeCycle={(c) => void includeCycle(c)}
+          onImport={() => {
+            setTab('settings');
+            setSettingsPanel('import');
+          }}
+          onMethod={() => openPage('method')}
         />
       )}
-      {tab === 'calendar' && settings && (
+      {!page && tab === 'calendar' && settings && (
         <Calendar
           logs={logs}
           settings={settings}
@@ -97,8 +116,12 @@ export function App({ dbName }: { dbName?: string }) {
           focus={calendarFocus}
         />
       )}
-      {tab === 'insights' && settings && <Insights logs={logs} settings={settings} today={today} />}
-      {tab === 'settings' && <Settings prediction={prediction} today={today} />}
+      {!page && tab === 'insights' && settings && (
+        <Insights logs={logs} settings={settings} today={today} onMethod={() => openPage('method')} onLearn={() => openPage('learn')} />
+      )}
+      {!page && tab === 'settings' && (
+        <Settings key={settingsPanel ?? ''} prediction={prediction} today={today} initialPanel={settingsPanel} onMethod={() => openPage('method')} />
+      )}
       <TabBar active={tab} onSelect={setTab} />
       {sheetDate && (
         <DayLogSheet

@@ -74,6 +74,35 @@ describe('app store', () => {
     expect(restarted.getState().status).toBe('locked');
   });
 
+  it('starts onboarding over when it was left after choosing the protection', async () => {
+    const name = db();
+    const a = createAppStore();
+    await a.getState().init(name);
+    await a.getState().setupProtection({ kind: 'device' });
+
+    const b = createAppStore();
+    await b.getState().init(name);
+    expect(b.getState().status).toBe('onboarding');
+    expect(b.getState().protection).toBeUndefined();
+    await b.getState().setupProtection({ kind: 'device' });
+    await b.getState().completeOnboarding({ mode: 'track' }, '2026-10-16');
+
+    const c = createAppStore();
+    await c.getState().init(name);
+    expect(c.getState().status).toBe('ready');
+  });
+
+  it('checks the current PIN before it is changed or removed', async () => {
+    const s = createAppStore();
+    await s.getState().init(db());
+    await s.getState().setupProtection({ kind: 'device' });
+    await s.getState().completeOnboarding({ mode: 'track' }, '2026-10-16');
+    await s.getState().setPin('246810');
+    expect(await s.getState().checkPin('000000', 1_000)).toEqual({ result: 'wrong', waitMs: 0 });
+    expect(await s.getState().checkPin('246810', 2_000)).toEqual({ result: 'ok' });
+    expect(s.getState().pinSet).toBe(true);
+  });
+
   it('does not lock without a PIN', async () => {
     const s = createAppStore();
     await s.getState().init(db());
@@ -195,7 +224,7 @@ describe('passphrase protection', () => {
     expect(r.getState().status).toBe('ready');
   });
 
-  it('resumes onboarding after a reload between protection and cycle step', async () => {
+  it('starts over after a reload between protection and cycle step', async () => {
     const name = db();
     const s = createAppStore();
     await s.getState().init(name, 1000);
@@ -203,10 +232,8 @@ describe('passphrase protection', () => {
 
     const r = createAppStore();
     await r.getState().init(name, 1000);
-    expect(r.getState().status).toBe('locked');
-    await r.getState().unlock(PASS, 0);
     expect(r.getState().status).toBe('onboarding');
-    expect(r.getState().protection).toBe('passphrase');
+    expect(r.getState().protection).toBeUndefined();
   });
 
   it('switches device → passphrase → device in the running app', async () => {

@@ -243,23 +243,6 @@
   color: var(--period);
 }
 
-.settings-method {
-  font-size: var(--text-sm);
-}
-.settings-method summary {
-  padding: var(--space-3) 0;
-  cursor: pointer;
-}
-.settings-method p,
-.settings-method li {
-  margin-top: var(--space-2);
-  color: var(--ink-muted);
-  text-wrap: pretty;
-}
-.settings-method ul {
-  padding-left: var(--space-5);
-}
-
 .panel-field select {
   min-height: var(--target);
   max-width: 60%;

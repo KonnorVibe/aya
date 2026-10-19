@@ -179,7 +179,9 @@ export const de = {
     },
   },
   insights: {
-    title: 'Einblicke',
+    title: 'Muster',
+    subtitle: 'aya, 綾: ein gewebtes Muster. Hier siehst du das Muster, das dein Zyklus über die Monate webt.',
+    more: 'Mehr erfahren',
     cycleLength: 'Zykluslänge',
     periodLength: 'Periodendauer',
     average: 'Durchschnitt',
@@ -237,12 +239,163 @@ export const de = {
     printHealth: 'Hinweise',
     printNoHealth: 'Keine Auffälligkeiten nach den FIGO-Grenzen.',
   },
+  /**
+   * The line above the statement on Today. Each one follows what the body is actually doing in that
+   * phase (see the Wissen page) and says "viele" rather than "du": cycles differ.
+   */
+  quotes: {
+    menstruation: [
+      'Dein Körper erneuert gerade die Gebärmutterschleimhaut. Ruhe ist jetzt keine Faulheit.',
+      'Östrogen und Progesteron sind gerade am niedrigsten. Wärme und Bewegung im eigenen Tempo helfen vielen.',
+      'Ein neuer Zyklus beginnt heute schon. Gönn dir einen langsamen Start.',
+      'Eisenreiches Essen tut jetzt gut. Linsen, Spinat und ein Glas Orangensaft dazu.',
+    ],
+    follicular: [
+      'Das Östrogen steigt. Viele spüren jetzt mehr Energie und Lust auf Neues.',
+      'Gute Tage, um etwas anzufangen. Dein Körper baut gerade auf.',
+      'Mit dem Östrogen kehrt bei vielen die Leichtigkeit zurück. Nimm sie mit.',
+      'Ein Eibläschen reift heran. Du darfst heute auch etwas wachsen lassen.',
+    ],
+    ovulation: [
+      'Rund um den Eisprung fühlen sich viele besonders wach und gesellig.',
+      'Östrogen auf dem Höhepunkt. Ein guter Tag für das Gespräch, das du aufgeschoben hast.',
+      'Dein Körper ist gerade auf Hochtouren. Genieß den Schwung.',
+      'Deine Temperatur steigt bald leicht an. Dein Körper hält sich an seinen Plan.',
+    ],
+    luteal: [
+      'Jetzt übernimmt das Progesteron. Es macht ruhiger und manchmal müder. Beides ist in Ordnung.',
+      'Zeit zum Fertigmachen statt Anfangen. Die zweite Zyklushälfte mag Ordnung.',
+      'Dein Grundumsatz ist gerade etwas höher. Hunger ist jetzt ein Signal, kein Fehler.',
+      'Etwas mehr Schlaf tut vielen jetzt gut. Hör auf dich.',
+    ],
+    premenstrual: [
+      'Die Hormone sinken, bald beginnt ein neuer Zyklus. Sei heute besonders freundlich zu dir.',
+      'Gereizt oder dünnhäutig? Das ist bei vielen jetzt so, und es geht vorbei.',
+      'Ein warmes Getränk, ein früher Abend. Du musst heute nichts beweisen.',
+      'Bewegung und genug Schlaf machen die Tage vor der Periode für viele leichter.',
+    ],
+    late: [
+      'Später als gedacht kommt oft vor. Stress, Reisen oder Krankheit verschieben den Eisprung.',
+      'Ein Zyklus darf mal aus der Reihe tanzen. aya rechnet weiter mit.',
+    ],
+    hormonal: [
+      'Schön, dass du da bist. Jeder Eintrag hilft dir, deinen Körper besser zu kennen.',
+      'Auch mit hormoneller Verhütung lohnt es sich, Symptome und Stimmung festzuhalten.',
+      'Hör heute auf das, was dein Körper dir sagt.',
+    ],
+  },
+  method: {
+    title: 'Methodik und Quellen',
+    back: 'Zurück',
+    intro: 'So rechnet aya. Alles läuft auf deinem Gerät, mit offenen und überprüfbaren Methoden aus der Forschung.',
+    sections: [
+      {
+        title: 'Nächste Periode',
+        body: [
+          'aya schaut auf deine letzten bis zu 12 Zyklen. Neuere Zyklen zählen stärker als ältere, und ein gewichteter Median sorgt dafür, dass ein einzelner Ausreißer die Vorhersage nicht verzieht.',
+          'Solange erst wenige Zyklen vorliegen, mischt aya einen Durchschnittswert von 29 Tagen oder deine Angabe aus dem Start dazu. Mit jedem Zyklus zählt dein eigener Wert mehr, ab dem sechsten nur noch er.',
+        ],
+      },
+      {
+        title: 'Die Spanne',
+        body: [
+          'aya nennt nie nur einen Tag. Die Spanne ist ein 80-%-Intervall: In etwa vier von fünf Fällen beginnt die Periode darin. Je regelmäßiger dein Zyklus, desto schmaler wird sie.',
+          'Die Sicherheit (niedrig, mittel, hoch) hängt davon ab, wie viele Zyklen vorliegen und wie breit die Spanne ist.',
+        ],
+      },
+      {
+        title: 'Eisprung und fruchtbares Fenster',
+        body: [
+          'Der Eisprung liegt nicht bei allen an Tag 14. aya rechnet ihn deshalb vom erwarteten Beginn der nächsten Periode zurück: Die Lutealphase dauert im Mittel 12,4 Tage und schwankt deutlich weniger als die Zeit davor.',
+          'Das fruchtbare Fenster umfasst die fünf Tage vor dem Eisprung und den Eisprungtag selbst, denn Spermien überleben bis zu fünf Tage.',
+          'Trägst du Basaltemperatur oder LH-Tests ein, verfeinert aya den Eisprung damit. Ein Temperaturanstieg zählt nach der 3-über-6-Regel: drei Messungen über den sechs davor.',
+        ],
+      },
+      {
+        title: 'Vergessene Einträge',
+        body: [
+          'Ein Zyklus, der etwa doppelt so lang ist wie sonst, sieht oft nach einer nicht eingetragenen Periode aus. aya zählt ihn zunächst nicht mit und fragt nach.',
+        ],
+      },
+      {
+        title: 'Normbereiche',
+        body: [
+          'Als üblich gelten Zyklen von 24 bis 38 Tagen, Perioden bis 8 Tage und Schwankungen bis 7 bis 9 Tage zwischen kürzestem und längstem Zyklus, je nach Alter. aya weist dich darauf hin, wenn deine Werte länger außerhalb liegen.',
+        ],
+      },
+      {
+        title: 'Wie genau aya bei dir ist',
+        body: [
+          'Ab drei Zyklen sagt aya deine vergangenen Zyklen nachträglich vorher, jeweils nur mit den Daten davor, und vergleicht mit dem echten Beginn. Das Ergebnis siehst du unter Muster.',
+        ],
+      },
+    ],
+    sourcesTitle: 'Quellen',
+    sources: [
+      { cite: 'Bull et al., npj Digital Medicine 2019', what: 'Zyklus- und Phasenlängen aus rund 600.000 Zyklen, Lutealphase im Mittel 12,4 Tage.' },
+      { cite: 'Munro et al. (FIGO), Int. J. Gynecology & Obstetrics 2018', what: 'Normbereiche für Zykluslänge, Periodendauer und Regelmäßigkeit.' },
+      { cite: 'Wilcox et al., New England Journal of Medicine 1995', what: 'Das fruchtbare Fenster: sechs Tage bis einschließlich Eisprung.' },
+      { cite: 'Li et al., JAMIA 2022', what: 'Wie oft Einträge in Zyklus-Apps fehlen und wie man das erkennt.' },
+    ],
+    disclaimer: 'aya ist kein Verhütungsmittel und kein Medizinprodukt. Die Vorhersagen ersetzen keinen ärztlichen Rat.',
+    learn: 'Mehr über den Zyklus',
+  },
+  learn: {
+    title: 'Der Zyklus',
+    intro: 'Was in deinem Körper in einem Zyklus passiert, verständlich erklärt.',
+    phasesTitle: 'Die vier Phasen',
+    phases: [
+      {
+        name: 'Menstruation',
+        when: 'etwa Tag 1 bis 5',
+        body: 'Ohne Schwangerschaft fallen Östrogen und Progesteron ab, und die Gebärmutter stößt ihre Schleimhaut ab. Krämpfe entstehen durch Prostaglandine, die die Muskulatur zusammenziehen. Wärme und leichte Bewegung lindern sie bei vielen.',
+      },
+      {
+        name: 'Follikelphase',
+        when: 'vom ersten Tag bis zum Eisprung',
+        body: 'Das follikelstimulierende Hormon (FSH) lässt Eibläschen reifen. Das führende Bläschen bildet Östrogen, die Schleimhaut baut sich wieder auf. Diese Phase ist unterschiedlich lang und der Hauptgrund, warum Zyklen verschieden lang sind.',
+      },
+      {
+        name: 'Eisprung',
+        when: 'etwa 12 bis 14 Tage vor der nächsten Periode',
+        body: 'Ein Anstieg des luteinisierenden Hormons (LH) löst den Eisprung aus. Die Eizelle ist danach etwa 12 bis 24 Stunden befruchtungsfähig. Der Zervixschleim wird klar und spinnbar, damit Spermien leichter durchkommen.',
+      },
+      {
+        name: 'Lutealphase',
+        when: 'vom Eisprung bis zur Periode',
+        body: 'Aus dem leeren Bläschen wird der Gelbkörper und bildet Progesteron. Die Basaltemperatur steigt um etwa 0,2 bis 0,5 °C. In den Tagen vor der Periode sinken die Hormone wieder, was bei vielen zu PMS-Beschwerden führt.',
+      },
+    ],
+    normalTitle: 'Was ist normal?',
+    normal: [
+      'Zykluslänge: 24 bis 38 Tage. Nur bei wenigen sind es genau 28.',
+      'Periodendauer: bis 8 Tage.',
+      'Schwankung: Bis 7 bis 9 Tage Unterschied zwischen kürzestem und längstem Zyklus gelten als regelmäßig.',
+      'In den ersten Jahren nach der ersten Periode und in den Jahren vor den Wechseljahren schwankt der Zyklus oft stärker.',
+    ],
+    mythsTitle: 'Drei verbreitete Irrtümer',
+    myths: [
+      { myth: 'Der Eisprung ist an Tag 14.', fact: 'Nur bei einem Teil der Zyklen. Er hängt an der Länge deiner Follikelphase und verschiebt sich von Zyklus zu Zyklus.' },
+      { myth: 'Während der Periode kann man nicht schwanger werden.', fact: 'Unwahrscheinlich, aber möglich, vor allem bei kurzen Zyklen, weil Spermien bis zu fünf Tage überleben.' },
+      { myth: 'Eine App kann sicher verhüten.', fact: 'Kalenderrechnung allein ist keine sichere Verhütung. aya ist dafür nicht gemacht.' },
+    ],
+    signsTitle: 'Signale deines Körpers',
+    signs: [
+      { name: 'Basaltemperatur', body: 'Morgens vor dem Aufstehen gemessen, steigt sie nach dem Eisprung an und bleibt bis zur Periode erhöht. Sie bestätigt den Eisprung im Nachhinein.' },
+      { name: 'LH-Test', body: 'Zeigt den LH-Anstieg 24 bis 36 Stunden vor dem Eisprung. Hilfreich bei Kinderwunsch.' },
+      { name: 'Zervixschleim', body: 'Wird zum Eisprung hin wässrig und spinnbar wie rohes Eiweiß, danach wieder trockener.' },
+    ],
+  },
   theme: { label: 'Darstellung', system: 'System', light: 'Hell', dark: 'Dunkel' },
   disclaimer: 'aya ist kein Verhütungsmittel und kein Medizinprodukt.',
-  tabs: { today: 'Heute', calendar: 'Kalender', insights: 'Einblicke', settings: 'Einstellungen' },
+  tabs: { today: 'Heute', calendar: 'Kalender', insights: 'Muster', settings: 'Einstellungen' },
   emptyToday: {
     title: 'Noch keine Periode eingetragen',
     body: 'Trag den ersten Tag deiner Periode ein. Danach zeigt dir aya, wann die nächste wahrscheinlich kommt.',
+    import: 'Alte Daten importieren',
+    importHint: 'Aus Apple Health, Flo oder einer CSV-Datei.',
+    ring: 'Dein Zyklus erscheint hier, sobald du eine Periode einträgst.',
+    ringCaption: 'noch keine Daten',
   },
   loadError: 'aya konnte deine Daten nicht öffnen. Schließ die App und öffne sie noch einmal.',
   onboarding: {
@@ -287,9 +440,10 @@ export const de = {
       cycleLabel: 'Zykluslänge',
       periodLabel: 'Periodendauer',
       unknown: 'Weiß ich nicht',
-      days: (n: number) => `${n} Tage`,
+      days: (n: number) => (n === 1 ? '1 Tag' : `${n} Tage`),
       decrease: (label: string) => `${label} verringern`,
       increase: (label: string) => `${label} erhöhen`,
+      choose: (label: string) => `${label} auswählen`,
     },
     mode: {
       title: 'Wofür möchtest du aya nutzen?',
@@ -305,6 +459,16 @@ export const de = {
       pin: 'Wenn du möchtest, kannst du später in den Einstellungen eine PIN festlegen.',
     },
   },
+  doctor: {
+    title: 'Wann du zur Ärztin gehen solltest',
+    body: 'aya hilft dir, deinen Zyklus zu verstehen. Für eine ernsthafte Beratung ist eine Frauenärztin oder ein Frauenarzt da: bei starken Schmerzen, sehr starken oder ausbleibenden Blutungen, bei Fragen zur Verhütung, nach einem positiven Schwangerschaftstest und wenn ein Kinderwunsch länger als ein Jahr unerfüllt bleibt.',
+    links: [
+      { label: 'Termin über Doctolib finden', href: 'https://www.doctolib.de/frauenarzt' },
+      { label: 'Arztsuche der Kassenärztlichen Vereinigungen (116117)', href: 'https://arztsuche.116117.de/' },
+    ],
+    urgent: 'Außerhalb der Sprechzeiten: ärztlicher Bereitschaftsdienst 116 117. Im Notfall 112.',
+    opens: 'öffnet im Browser',
+  },
   lock: {
     passphraseTitle: 'aya ist gesperrt',
     passphraseLabel: 'Passphrase oder Wiederherstellungscode',
@@ -319,14 +483,13 @@ export const de = {
   },
   settings: {
     title: 'Einstellungen',
-    lockSection: 'Schutz',
+    lockSection: 'Datenschutz',
     protection: 'Schutzart',
+    protectionHow: 'Wie sich aya öffnet',
     protectionDevice: 'Dieses iPhone',
     protectionPassphrase: 'Passphrase',
     protectionDeviceHint: 'Deine Daten sind mit einem Schlüssel verschlüsselt, der dieses Gerät nie verlässt. Die PIN schützt zusätzlich vor neugierigen Blicken.',
     protectionPassphraseHint: 'Deine Daten öffnen sich nur mit deiner Passphrase oder dem Wiederherstellungscode. aya sperrt sich automatisch.',
-    toPassphrase: 'Mit Passphrase schützen',
-    toDevice: 'Zurück zum Geräteschutz',
     toDeviceIntro: 'Danach öffnet sich aya ohne Passphrase. Dein Wiederherstellungscode gilt nicht mehr.',
     changePassphrase: 'Passphrase ändern',
     newRecovery: 'Neuen Wiederherstellungscode erzeugen',
@@ -342,6 +505,7 @@ export const de = {
     setPin: 'PIN festlegen',
     changePin: 'PIN ändern',
     removePin: 'PIN entfernen',
+    currentPin: 'Aktuelle PIN eingeben',
     pinHint: 'Die PIN schützt vor neugierigen Blicken. Sie ersetzt nicht die Sperre deines iPhones.',
     newPin: 'Neue PIN eingeben',
     confirmPin: 'PIN wiederholen',
@@ -427,18 +591,6 @@ export const de = {
     deleteWord: 'LÖSCHEN',
     deleteButton: 'Unwiderruflich löschen',
     methodology: 'Methodik und Quellen',
-    methodologyText: [
-      'Die Vorhersage nutzt deine letzten bis zu 12 Zyklen. Neuere Zyklen zählen stärker, ein gewichteter Median dämpft Ausreißer. Solange wenige Daten vorliegen, fließt ein Durchschnittswert von 29 Tagen oder deine Angabe aus dem Start ein.',
-      'Die Spanne ist ein 80-%-Intervall: In etwa vier von fünf Fällen beginnt die Periode darin.',
-      'Der Eisprung wird nicht auf Tag 14 gesetzt, sondern vom erwarteten Periodenbeginn zurückgerechnet (Lutealphase im Mittel 12,4 Tage). Das fruchtbare Fenster umfasst die fünf Tage davor und den Eisprungtag.',
-      'Zyklen, die wie eine vergessene Periode aussehen, werden zunächst nicht mitgezählt.',
-    ],
-    sources: [
-      'Bull et al., npj Digital Medicine 2019: Zyklus- und Phasenlängen aus rund 600.000 Zyklen.',
-      'FIGO 2018: Normbereiche für Zykluslänge, Periodendauer und Regelmäßigkeit.',
-      'Wilcox et al., New England Journal of Medicine 1995: fruchtbares Fenster.',
-      'Li et al., JAMIA 2022: vergessene Einträge in Zyklus-Apps.',
-    ],
     privacy: 'aya speichert alles verschlüsselt auf diesem Gerät und stellt keine Verbindung ins Internet her.',
     privacyLink: 'Datenschutz und Sicherheit',
     imprintLink: 'Impressum',

@@ -1,15 +1,13 @@
 .calendar {
   max-width: 480px;
   margin: 0 auto;
-  padding: max(var(--space-5), env(safe-area-inset-top)) var(--gutter) calc(96px + env(safe-area-inset-bottom));
+  padding: 0 var(--gutter) calc(96px + env(safe-area-inset-bottom));
 }
 
 .calendar-head {
   display: grid;
   grid-template-columns: var(--target) 1fr var(--target);
   align-items: center;
-  padding-bottom: var(--space-3);
-  border-bottom: 1px solid var(--rule);
 }
 .calendar-head h1 {
   font-family: var(--font-name);
@@ -185,7 +183,43 @@
 }
 
 .calendar-actions {
-  display: grid;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: var(--space-2);
-  margin-top: var(--space-5);
+  margin-top: var(--space-3);
+}
+
+/* Header, actions and weekdays stay put while the months scroll underneath. */
+.calendar-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  margin: 0 calc(var(--gutter) * -1);
+  padding: max(var(--space-2), env(safe-area-inset-top)) var(--gutter) 0;
+  background: var(--ground);
+  border-bottom: 1px solid var(--rule);
+}
+.calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  padding: var(--space-3) 0 var(--space-2);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  text-align: center;
+  color: var(--ink-muted);
+}
+.calendar-month {
+  /* Leaves room for the sticky header when a month is scrolled to. */
+  scroll-margin-top: 190px;
+  padding-top: var(--space-5);
+}
+.calendar-month-name {
+  font-family: var(--font-name);
+  font-style: italic;
+  font-weight: 400;
+  font-size: var(--text-lg);
+}
+.calendar-month .calendar-grid {
+  margin-top: var(--space-2);
 }

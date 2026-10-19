@@ -59,15 +59,19 @@ export function usePrivacyShield(enabled: boolean) {
       if (!document.hidden) root.removeAttribute('data-shield');
     };
     const visibility = () => (document.hidden ? on() : off());
-    window.addEventListener('blur', on);
-    window.addEventListener('pagehide', on);
-    window.addEventListener('focus', off);
+    // iOS fires these in different orders (or only some of them) when the app switcher opens, so
+    // the shield goes up on whichever comes first and only comes down once aya is visible again.
+    const hide = ['blur', 'pagehide', 'freeze'] as const;
+    const show = ['focus', 'pageshow', 'pointerdown'] as const;
+    hide.forEach((e) => window.addEventListener(e, on, { capture: true }));
+    show.forEach((e) => window.addEventListener(e, off, { capture: true }));
     document.addEventListener('visibilitychange', visibility);
+    document.addEventListener('freeze', on);
     return () => {
-      window.removeEventListener('blur', on);
-      window.removeEventListener('pagehide', on);
-      window.removeEventListener('focus', off);
+      hide.forEach((e) => window.removeEventListener(e, on, { capture: true }));
+      show.forEach((e) => window.removeEventListener(e, off, { capture: true }));
       document.removeEventListener('visibilitychange', visibility);
+      document.removeEventListener('freeze', on);
       root.removeAttribute('data-shield');
     };
   }, [enabled]);

@@ -10,6 +10,11 @@ describe('scanText', () => {
   it('allows SVG namespace URLs and clean code', () => {
     expect(scanText('x.ts', 'xmlns="http://www.w3.org/2000/svg"\nconst a = 1;')).toEqual([]);
   });
+
+  it('allows exactly the two doctor-search links, nothing else on those hosts', () => {
+    expect(scanText('x.ts', "href: 'https://www.doctolib.de/frauenarzt'\nhref:`https://arztsuche.116117.de/`")).toEqual([]);
+    expect(scanText('x.ts', "'https://www.doctolib.de/frauenarzt?q=1'\n'https://arztsuche.116117.de/track'")).toHaveLength(2);
+  });
 });
 
 describe('checkCsp', () => {
