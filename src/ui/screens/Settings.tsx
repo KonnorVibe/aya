@@ -7,7 +7,8 @@ import { useApp } from '../../state/store.ts';
 import { Button } from '../components/Button.tsx';
 import { PinPad } from '../components/PinPad.tsx';
 import { BackupPanel, DeletePanel, IcsPanel, RestorePanel } from './settings/DataPanels.tsx';
-import { CsvExportPanel, ImportPanel } from './settings/ImportPanels.tsx';
+import { CsvExportPanel } from './settings/ImportPanels.tsx';
+import type { ImportSource } from './ImportPage.tsx';
 import { ChangePassphrasePanel, NewRecoveryPanel, RecoveryView, ToDevicePanel, ToPassphrasePanel } from './settings/ProtectionPanels.tsx';
 import type { Protection } from '../../crypto/vault.ts';
 import './Settings.css';
@@ -18,7 +19,9 @@ const t = de.settings;
 
 const MODES: Mode[] = ['track', 'conceive', 'hormonal_contraception'];
 const THEMES: SettingsType['theme'][] = ['system', 'light', 'dark'];
-export type Panel = 'backup' | 'restore' | 'import' | 'csv' | 'ics' | 'delete' | 'changePass' | 'newRecovery';
+type Panel = 'backup' | 'restore' | 'csv' | 'ics' | 'delete' | 'changePass' | 'newRecovery';
+/** File imports; the aya backup has its own place under Backup. */
+const FILE_SOURCES: Exclude<ImportSource, 'backup'>[] = ['health', 'flo', 'other'];
 const PROTECTIONS: Protection[] = ['device', 'passphrase'];
 
 function Disclosure({ id, label, open, onToggle, children }: { id: string; label: string; open: boolean; onToggle: () => void; children: ReactNode }) {
@@ -45,12 +48,11 @@ type PinFlow =
 interface Props {
   prediction: Prediction | null;
   today: ISODate;
-  /** Opens this panel right away (e.g. "Alte Daten importieren" on Today). */
-  initialPanel?: Panel | undefined;
   onMethod: () => void;
+  onImport: (source: ImportSource) => void;
 }
 
-export function Settings({ prediction, today, initialPanel, onMethod }: Props) {
+export function Settings({ prediction, today, onMethod, onImport }: Props) {
   const settings = useApp((s) => s.settings)!;
   const pinSet = useApp((s) => s.pinSet);
   const passphraseMode = useApp((s) => s.protection) === 'passphrase';
@@ -62,7 +64,7 @@ export function Settings({ prediction, today, initialPanel, onMethod }: Props) {
   const [target, setTarget] = useState<Protection | null>(null);
   const lastBackupAt = useApp((s) => s.lastBackupAt);
   const [flow, setFlow] = useState<PinFlow | null>(null);
-  const [panel, setPanel] = useState<Panel | null>(initialPanel ?? null);
+  const [panel, setPanel] = useState<Panel | null>(null);
   const [newRecovery, setNewRecovery] = useState('');
   const toggle = (p: Panel) => setPanel((cur) => (cur === p ? null : p));
   const thisYear = Number(today.slice(0, 4));
@@ -249,8 +251,8 @@ export function Settings({ prediction, today, initialPanel, onMethod }: Props) {
         ) : null}
       </section>
 
-      <section aria-labelledby="set-data">
-        <h2 id="set-data">{t.dataSection}</h2>
+      <section aria-labelledby="set-backup">
+        <h2 id="set-backup">{t.backupSection}</h2>
         <p className="row-hint">{lastBackupAt ? t.backupLast(formatLongDate(lastBackupAt.slice(0, 10))) : t.backupNever}</p>
         <Disclosure id="panel-backup" label={t.backup} open={panel === 'backup'} onToggle={() => toggle('backup')}>
           <BackupPanel />
@@ -258,15 +260,36 @@ export function Settings({ prediction, today, initialPanel, onMethod }: Props) {
         <Disclosure id="panel-restore" label={t.restore} open={panel === 'restore'} onToggle={() => toggle('restore')}>
           <RestorePanel />
         </Disclosure>
-        <Disclosure id="panel-import" label={t.importData} open={panel === 'import'} onToggle={() => toggle('import')}>
-          <ImportPanel />
-        </Disclosure>
+      </section>
+
+      <section aria-labelledby="set-import">
+        <h2 id="set-import">{t.importSection}</h2>
+        <p className="row-hint">{t.importSectionHint}</p>
+        {FILE_SOURCES.map((source) => (
+          <button key={source} type="button" className="row row-button row-two-line" onClick={() => onImport(source)}>
+            <span>
+              <span className="row-title">{de.importPage.sources[source].label}</span>
+              <span className="row-sub">{de.importPage.sources[source].hint}</span>
+            </span>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M9 6l6 6-6 6" />
+            </svg>
+          </button>
+        ))}
+      </section>
+
+      <section aria-labelledby="set-export">
+        <h2 id="set-export">{t.exportSection}</h2>
         <Disclosure id="panel-csv" label={t.csvExport} open={panel === 'csv'} onToggle={() => toggle('csv')}>
           <CsvExportPanel />
         </Disclosure>
         <Disclosure id="panel-ics" label={t.ics} open={panel === 'ics'} onToggle={() => toggle('ics')}>
           <IcsPanel prediction={prediction} today={today} />
         </Disclosure>
+      </section>
+
+      <section aria-labelledby="set-delete">
+        <h2 id="set-delete">{t.deleteSection}</h2>
         <Disclosure id="panel-delete" label={t.deleteAll} open={panel === 'delete'} onToggle={() => toggle('delete')}>
           <DeletePanel />
         </Disclosure>

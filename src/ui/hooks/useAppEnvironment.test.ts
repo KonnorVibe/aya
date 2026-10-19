@@ -17,9 +17,17 @@ describe('usePrivacyShield', () => {
     expect(shielded()).toBe(true);
     expect(document.body.getAttribute('data-shield-hint')).toBe('Tippen zum Anzeigen');
 
-    window.dispatchEvent(new Event('pointerdown'));
+    // The start of a swipe does not uncover, only a finished tap does.
+    window.dispatchEvent(new MouseEvent('pointerdown', { clientY: 400 }));
+    expect(shielded()).toBe(true);
+    window.dispatchEvent(new MouseEvent('click'));
     expect(shielded()).toBe(false);
     window.dispatchEvent(new Event('blur'));
+    expect(shielded()).toBe(true);
+    window.dispatchEvent(new MouseEvent('click'));
+
+    // A touch at the very bottom (swipe home) covers at once.
+    window.dispatchEvent(new MouseEvent('pointerdown', { clientY: window.innerHeight - 5 }));
     expect(shielded()).toBe(true);
 
     unmount();

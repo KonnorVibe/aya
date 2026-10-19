@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { deriveCycles } from '../../engine/cycles.ts';
-import { addDays, type ISODate } from '../../engine/dates.ts';
+import { addDays, diffDays, type ISODate } from '../../engine/dates.ts';
 import type { Prediction } from '../../engine/prediction.ts';
 import { overridesFrom, type DayLog, type Settings } from '../../engine/types.ts';
 import { de, formatDayMonth, formatLongDate, formatMonthYear } from '../../i18n/de.ts';
@@ -13,6 +13,17 @@ import {
   predictedPeriodDays,
   type CalendarDay,
 } from './calendarModel.ts';
+import {
+  draftChanges,
+  draftFrom,
+  draftLogs,
+  draftWarnings,
+  runs,
+  tapDay,
+  type DraftChanges,
+  type DraftWarning,
+  type PeriodDraft,
+} from './periodDraft.ts';
 import './Calendar.css';
 
 const t = de.calendar;
@@ -23,7 +34,8 @@ interface Props {
   prediction: Prediction | null;
   today: ISODate;
   onOpenDay: (date: ISODate) => void;
-  onTogglePeriod: (date: ISODate) => void;
+  /** Saves the back-entry after the confirmation. */
+  onSavePeriods: (add: ISODate[], remove: ISODate[]) => void;
   onIncludeCycle: (start: ISODate) => void;
   /** Opens directly in back-entry mode at this flagged cycle (from the card on Today). */
   focus?: { start: ISODate; length: number } | undefined;
@@ -49,15 +61,30 @@ function monthSpan(logs: readonly DayLog[], today: ISODate, extra: number): numb
   return Array.from({ length: last - first + 1 }, (_, i) => first + i);
 }
 
-export function Calendar({ logs, settings, prediction, today, onOpenDay, onTogglePeriod, onIncludeCycle, focus }: Props) {
+export function Calendar({ logs, settings, prediction, today, onOpenDay, onSavePeriods, onIncludeCycle, focus }: Props) {
   const [month, setMonth] = useState(() => monthIndex(focus ? addDays(focus.start, Math.round(focus.length / 2)) : today));
-  const [editing, setEditing] = useState(!!focus);
+  /** While editing: the periods as they would be, not saved until confirmed. */
+  const [draft, setDraft] = useState<PeriodDraft | null>(() => (focus ? draftFrom(logs) : null));
+  const [confirming, setConfirming] = useState(false);
+  const editing = !!draft;
+  const shown = draft ? draftLogs(logs, draft) : logs;
+  const changes = draft ? draftChanges(logs, draft) : null;
+  const startEditing = () => setDraft(draftFrom(logs));
+  const stopEditing = () => {
+    setDraft(null);
+    setConfirming(false);
+  };
+  const finish = () => (changes && (changes.added.length || changes.removed.length) ? setConfirming(true) : stopEditing());
+  const save = () => {
+    if (changes) onSavePeriods(changes.added, changes.removed);
+    stopEditing();
+  };
   const { year, month: m } = fromMonthIndex(month);
   const refs = useRef(new Map<number, HTMLElement>());
   // Set while a jump scrolls, so the observer does not report the months it passes.
   const jumping = useRef(false);
 
-  const predicted = predictedPeriodDays(prediction, expectedPeriodLength(logs, settings), today);
+  const predicted = editing ? new Set<ISODate>() : predictedPeriodDays(prediction, expectedPeriodLength(logs, settings), today);
   const months = monthSpan(logs, today, month);
   const missed = deriveCycles(
     logs.filter((l) => l.date <= today),
@@ -94,7 +121,7 @@ export function Calendar({ logs, settings, prediction, today, onOpenDay, onToggl
 
   const startAdding = (start: ISODate, length: number) => {
     scrollTo(monthIndex(addDays(start, Math.round(length / 2))), true);
-    setEditing(true);
+    startEditing();
   };
 
   return (
@@ -115,10 +142,15 @@ export function Calendar({ logs, settings, prediction, today, onOpenDay, onToggl
         </header>
         <div className="calendar-actions">
           {editing ? (
-            <Button onClick={() => setEditing(false)}>{t.editDone}</Button>
+            <>
+              <Button onClick={finish}>{t.editDone}</Button>
+              <Button variant="quiet" onClick={stopEditing}>
+                {t.editCancel}
+              </Button>
+            </>
           ) : (
             <>
-              <Button variant="secondary" onClick={() => setEditing(true)}>
+              <Button variant="secondary" onClick={startEditing}>
                 {t.edit}
               </Button>
               {month !== monthIndex(today) && (
@@ -178,11 +210,15 @@ export function Calendar({ logs, settings, prediction, today, onOpenDay, onToggl
           </section>
         ))}
 
-      {editing && <p className="calendar-edit-hint">{t.editHint}</p>}
+      {draft && (
+        <p className="calendar-edit-hint" aria-live="polite">
+          {draft.anchor ? t.editAnchor(formatDayMonth(draft.anchor)) : t.editHint}
+        </p>
+      )}
 
       {months.map((index) => {
         const ym = fromMonthIndex(index);
-        const weeks = calendarMonth(ym.year, ym.month, logs, prediction, predicted, today);
+        const weeks = calendarMonth(ym.year, ym.month, shown, editing ? null : prediction, predicted, today);
         const name = formatMonthYear(ym.year, ym.month);
         return (
           <section
@@ -217,6 +253,7 @@ export function Calendar({ logs, settings, prediction, today, onOpenDay, onToggl
                             className={[
                               'cal-day',
                               d.isToday && 'is-today',
+                              draft?.anchor === d.date && 'is-anchor',
                               d.period && `is-${d.period}`,
                               d.fertility && `is-${d.fertility}`,
                             ]
@@ -225,7 +262,7 @@ export function Calendar({ logs, settings, prediction, today, onOpenDay, onToggl
                             disabled={editing && d.future}
                             aria-label={dayLabel(d)}
                             aria-pressed={editing ? d.period === 'logged' : undefined}
-                            onClick={() => (editing ? onTogglePeriod(d.date) : onOpenDay(d.date))}
+                            onClick={() => (draft ? setDraft(tapDay(draft, d.date)) : onOpenDay(d.date))}
                           >
                             <span className="cal-num">{d.day}</span>
                             <span className="cal-marks" aria-hidden="true">
@@ -243,6 +280,71 @@ export function Calendar({ logs, settings, prediction, today, onOpenDay, onToggl
           </section>
         );
       })}
+      {confirming && draft && changes && (
+        <ConfirmPeriods changes={changes} warnings={draftWarnings(draft, changes)} onSave={save} onBack={() => setConfirming(false)} />
+      )}
     </main>
+  );
+}
+
+/** "Stimmt das so?": what the back-entry changes, and what looks unlikely, before it is saved. */
+function ConfirmPeriods({ changes, warnings, onSave, onBack }: {
+  changes: DraftChanges;
+  warnings: DraftWarning[];
+  onSave: () => void;
+  onBack: () => void;
+}) {
+  const c = t.confirm;
+  const ref = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    const d = ref.current;
+    if (d && !d.open) {
+      if (typeof d.showModal === 'function') d.showModal();
+      else d.setAttribute('open', '');
+    }
+  }, []);
+  const list = (days: ISODate[]) =>
+    runs(days).map(([from, to]) => <li key={from}>{c.range(formatDayMonth(from), formatDayMonth(to), diffDays(to, from) + 1)}</li>);
+  const w = c.warnings;
+  return (
+    <dialog ref={ref} className="sheet confirm-sheet" aria-labelledby="confirm-title" onCancel={(e) => (e.preventDefault(), onBack())}>
+      <div className="sheet-body">
+        <h2 id="confirm-title">{c.title}</h2>
+        {changes.added.length > 0 && (
+          <>
+            <h3>{c.added}</h3>
+            <ul>{list(changes.added)}</ul>
+          </>
+        )}
+        {changes.removed.length > 0 && (
+          <>
+            <h3>{c.removed}</h3>
+            <ul>{list(changes.removed)}</ul>
+          </>
+        )}
+        {warnings.length > 0 && (
+          <div className="confirm-warnings" role="alert">
+            <h3>{c.warningsTitle}</h3>
+            <ul>
+              {warnings.map((x) => (
+                <li key={`${x.kind}-${'date' in x ? x.date : 'start' in x ? x.start : x.first}`}>
+                  {x.kind === 'long'
+                    ? w.long(formatDayMonth(x.start), formatDayMonth(x.end), x.days)
+                    : x.kind === 'close'
+                      ? w.close(formatDayMonth(x.first), formatDayMonth(x.second), x.days)
+                      : w.single(formatDayMonth(x.date))}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        <div className="confirm-actions">
+          <Button onClick={onSave}>{c.save}</Button>
+          <Button variant="quiet" onClick={onBack}>
+            {c.keepEditing}
+          </Button>
+        </div>
+      </div>
+    </dialog>
   );
 }

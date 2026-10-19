@@ -288,3 +288,19 @@
   color: var(--accent);
   text-underline-offset: 4px;
 }
+
+/* Row with a title and a hint below, e.g. the import sources. */
+.row-two-line {
+  padding: var(--space-3) 0;
+}
+.row-two-line > span {
+  display: grid;
+  gap: 2px;
+}
+.row-title {
+  color: var(--ink);
+}
+.row-sub {
+  font-size: var(--text-sm);
+  color: var(--ink-muted);
+}

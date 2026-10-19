@@ -1,4 +1,6 @@
 import type { ReactNode } from 'react';
+import { ARTICLES, CATEGORY_LABEL, isNew, type Article, type Category } from '../../content/articles.ts';
+import type { ISODate } from '../../engine/dates.ts';
 import { de } from '../../i18n/de.ts';
 import { Brand } from '../components/Brand.tsx';
 import { DoctorHint } from '../components/DoctorHint.tsx';
@@ -115,6 +117,99 @@ export function Learn({ onBack }: { onBack: () => void }) {
         </dl>
       </section>
 
+      <DoctorHint />
+      <p className="article-disclaimer">{de.disclaimer}</p>
+    </ArticlePage>
+  );
+}
+
+const k = de.knowledge;
+
+function ArticleCard({ article, today, onOpen }: { article: Article; today: ISODate; onOpen: (id: string) => void }) {
+  return (
+    <li>
+      <button type="button" className="knowledge-card" onClick={() => onOpen(article.id)}>
+        <span className="knowledge-meta">
+          {CATEGORY_LABEL[article.category]} · {k.minutes(article.minutes)}
+          {isNew(article, today) && <span className="knowledge-new">{k.new}</span>}
+        </span>
+        <span className="knowledge-title">{article.title}</span>
+        <span className="knowledge-teaser">{article.teaser}</span>
+      </button>
+    </li>
+  );
+}
+
+/** The Wissen tab: new articles first, then everything by category. */
+export function Knowledge({ today, onOpen, onMethod }: { today: ISODate; onOpen: (id: string) => void; onMethod: () => void }) {
+  const fresh = ARTICLES.filter((a) => isNew(a, today)).sort((a, b) => b.added.localeCompare(a.added));
+  const categories = (Object.keys(CATEGORY_LABEL) as Category[]).filter((c) => ARTICLES.some((a) => a.category === c));
+  return (
+    <main className="article knowledge">
+      <h1 className="knowledge-heading">{k.title}</h1>
+      <p className="article-intro">{k.intro}</p>
+      {fresh.length > 0 && (
+        <section className="article-section" aria-labelledby="k-new">
+          <h2 id="k-new">{k.newShelf}</h2>
+          <ul className="knowledge-list">
+            {fresh.map((a) => (
+              <ArticleCard key={a.id} article={a} today={today} onOpen={onOpen} />
+            ))}
+          </ul>
+        </section>
+      )}
+      {categories.map((c) => (
+        <section key={c} className="article-section" aria-labelledby={`k-${c}`}>
+          <h2 id={`k-${c}`}>{CATEGORY_LABEL[c]}</h2>
+          <ul className="knowledge-list">
+            {ARTICLES.filter((a) => a.category === c).map((a) => (
+              <ArticleCard key={a.id} article={a} today={today} onOpen={onOpen} />
+            ))}
+          </ul>
+        </section>
+      ))}
+      <button type="button" className="row row-button article-link" onClick={onMethod}>
+        <span>{m.title}</span>
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M9 6l6 6-6 6" />
+        </svg>
+      </button>
+      <p className="article-disclaimer">{k.updates}</p>
+    </main>
+  );
+}
+
+/** One article from the content list. */
+export function ArticleView({ article, onBack }: { article: Article; onBack: () => void }) {
+  return (
+    <ArticlePage title={article.title} intro={article.teaser} onBack={onBack}>
+      <div className="article-section">
+        {article.blocks.map((b, i) => {
+          if (b.type === 'h') return <h2 key={i}>{b.text}</h2>;
+          if (b.type === 'list')
+            return (
+              <ul key={i} className="article-list">
+                {b.items.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            );
+          if (b.type === 'tip') return <p key={i} className="article-tip">{b.text}</p>;
+          return <p key={i}>{b.text}</p>;
+        })}
+      </div>
+      {article.sources && (
+        <section className="article-section" aria-labelledby="article-sources">
+          <h2 id="article-sources">{m.sourcesTitle}</h2>
+          <ol className="article-sources">
+            {article.sources.map((s) => (
+              <li key={s}>
+                <span>{s}</span>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
       <DoctorHint />
       <p className="article-disclaimer">{de.disclaimer}</p>
     </ArticlePage>

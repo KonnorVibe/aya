@@ -4,7 +4,8 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { appStore } from '../state/store.ts';
 import { App } from './App.tsx';
 
-const click = (name: string | RegExp) => fireEvent.click(screen.getByRole('button', { name }));
+const click = (target: string | RegExp | HTMLElement) =>
+  fireEvent.click(target instanceof HTMLElement ? target : screen.getByRole('button', { name: target }));
 const typePin = (pin: string) => [...pin].forEach((d) => click(d));
 
 afterEach(cleanup);
@@ -102,12 +103,48 @@ describe('App', () => {
     expect(screen.getByRole('heading', { name: 'So bekommst du die Datei' })).toBeTruthy();
     expect((screen.getByLabelText('Datei') as HTMLInputElement).accept).toContain('.zip');
     click('Zurück');
-    click(/^aya-Backup/);
+    click(await screen.findByRole('button', { name: /^aya-Backup/ }));
     expect(screen.getByLabelText('Backup-Datei')).toBeTruthy();
     click('Zurück');
+    await screen.findByRole('button', { name: /^aya-Backup/ });
     click('Zurück');
     expect(await screen.findByRole('heading', { name: 'Noch keine Periode eingetragen' })).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'Muster' })).toBeTruthy();
+
+    // Five tabs; Wissen lists the articles.
+    click('Wissen');
+    expect(screen.getByRole('heading', { level: 1, name: 'Wissen' })).toBeTruthy();
+    click(screen.getAllByRole('button', { name: /Regelschmerzen/ })[0]!);
+    expect(screen.getByRole('heading', { level: 1, name: 'Regelschmerzen: Was wirklich hilft' })).toBeTruthy();
+    click('Zurück');
+    expect(await screen.findByRole('heading', { level: 1, name: 'Wissen' })).toBeTruthy();
+  });
+
+  it('back-fills a period range in the calendar after a confirmation', async () => {
+    const { formatLongDate } = await import('../i18n/de.ts');
+    const { addDays, todayLocal } = await import('../engine/dates.ts');
+    const today = todayLocal();
+    render(<App dbName="aya-app-test-calendar" />);
+    await screen.findByRole('heading', { name: 'Deine Daten bleiben bei dir' });
+    click('Weiter');
+    click('Weiter');
+    await screen.findByRole('heading', { name: /letzte Periode/ });
+    click('Überspringen');
+    click('Weiter');
+    click('Los geht’s');
+    await screen.findByRole('heading', { name: 'Noch keine Periode eingetragen' });
+
+    click('Kalender');
+    click('Periode nachtragen');
+    const day = (offset: number) => screen.getByRole('button', { name: new RegExp(`^${formatLongDate(addDays(today, offset))}`) });
+    click(day(-4));
+    expect(screen.getByText(/Tippe jetzt auf den letzten Tag/)).toBeTruthy();
+    click(day(-1));
+    click('Fertig');
+    const dialog = await screen.findByRole('dialog', { name: 'Stimmt das so?' });
+    expect(within(dialog).getByText(/\(4 Tage\)/)).toBeTruthy();
+    expect(appStore.getState().logs).toHaveLength(0);
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Ja, speichern' }));
+    await waitFor(() => expect(appStore.getState().logs.map((l) => l.date)).toEqual([-4, -3, -2, -1].map((o) => addDays(today, o))));
   });
 
   it('sets up a passphrase, shows the recovery code once and unlocks with it', { timeout: 60_000 }, async () => {
@@ -163,7 +200,7 @@ describe('App', () => {
     await screen.findByRole('heading', { name: 'Noch keine Periode eingetragen' });
 
     click('Einstellungen');
-    click('Daten importieren');
+    click(/^Andere App oder Tabelle/);
     const input = screen.getByLabelText('Datei');
     fireEvent.change(input, { target: { files: [new File([csv], 'perioden.csv', { type: 'text/csv' })] } });
     expect(await screen.findByText('45 Tage gefunden, davon 45 mit Periode.')).toBeTruthy();

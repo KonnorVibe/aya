@@ -44,12 +44,16 @@ export function useAutoLock(enabled: boolean, lockMinutes: number, onLock: () =>
 }
 
 export const SHIELD_IDLE_MS = 15_000;
+/** Touches this close to the bottom are the start of the Home Screen swipe. */
+const HOME_SWIPE_ZONE = 28;
 
 /**
  * Privacy shield: covers the app after a short idle time and whenever it loses focus. iOS takes the
  * app-switcher snapshot before a web app gets to paint anything on its way to the background, so
  * covering on "hidden" alone comes too late; covering while idle means the last frame is usually
- * already covered. A tap uncovers it (the tap lands on the cover, not on a button behind it).
+ * already covered. A touch at the very bottom (the start of the swipe home) covers at once, so the
+ * frame iOS keeps is the cover. Only a finished tap uncovers it, never the start of a swipe; the tap
+ * lands on the cover, not on a button behind it.
  */
 export function usePrivacyShield(enabled: boolean, hint: string) {
   useEffect(() => {
@@ -68,17 +72,26 @@ export function usePrivacyShield(enabled: boolean, hint: string) {
       window.clearTimeout(timer);
       timer = window.setTimeout(on, SHIELD_IDLE_MS);
     };
+    const covered = () => root.hasAttribute('data-shield');
     const off = () => {
-      if (document.hidden) return;
+      if (document.hidden || !covered()) return;
       root.removeAttribute('data-shield');
       arm();
+    };
+    const down = (e: PointerEvent | TouchEvent) => {
+      if (covered()) return;
+      const y = 'touches' in e ? e.touches[0]?.clientY : e.clientY;
+      if (y !== undefined && y >= window.innerHeight - HOME_SWIPE_ZONE) on();
+      else arm();
     };
     const visibility = () => (document.hidden ? on() : undefined);
     const hide = ['blur', 'pagehide'] as const;
     const activity = ['keydown', 'scroll', 'touchmove'] as const;
     hide.forEach((e) => window.addEventListener(e, on, { capture: true }));
     activity.forEach((e) => window.addEventListener(e, arm, { capture: true, passive: true }));
-    window.addEventListener('pointerdown', off, { capture: true });
+    window.addEventListener('touchstart', down, { capture: true, passive: true });
+    window.addEventListener('pointerdown', down, { capture: true });
+    window.addEventListener('click', off, { capture: true });
     document.addEventListener('visibilitychange', visibility);
     document.addEventListener('freeze', on);
     arm();
@@ -86,7 +99,9 @@ export function usePrivacyShield(enabled: boolean, hint: string) {
       window.clearTimeout(timer);
       hide.forEach((e) => window.removeEventListener(e, on, { capture: true }));
       activity.forEach((e) => window.removeEventListener(e, arm, { capture: true }));
-      window.removeEventListener('pointerdown', off, { capture: true });
+      window.removeEventListener('touchstart', down, { capture: true });
+      window.removeEventListener('pointerdown', down, { capture: true });
+      window.removeEventListener('click', off, { capture: true });
       document.removeEventListener('visibilitychange', visibility);
       document.removeEventListener('freeze', on);
       root.removeAttribute('data-shield');

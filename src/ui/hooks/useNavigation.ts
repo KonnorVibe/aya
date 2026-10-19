@@ -1,16 +1,18 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { TabId } from '../components/TabBar.tsx';
-import type { Panel } from '../screens/Settings.tsx';
+import type { ImportSource } from '../screens/ImportPage.tsx';
 import { isStandalone } from './useAppEnvironment.ts';
 
-export type PageId = 'method' | 'learn' | 'import';
+/** Second-level pages over a tab. */
+export type Page =
+  | { kind: 'method' }
+  | { kind: 'import'; source?: ImportSource | undefined }
+  | { kind: 'article'; id: string };
 
 export interface Nav {
   tab: TabId;
-  /** Long-form pages over the tab; the last one is shown. */
-  pages: PageId[];
-  /** Settings panel to open right away. */
-  panel?: Panel | undefined;
+  /** Pages over the tab; the last one is shown. */
+  pages: Page[];
   /** Steps since the app opened; 0 = nothing to go back to. */
   depth: number;
 }
@@ -18,9 +20,10 @@ export interface Nav {
 const START: Nav = { tab: 'today', pages: [], depth: 0 };
 
 /**
- * Tabs and pages as browser history, so Safari's back swipe and the browser back button go to the
- * screen before. Installed on the Home Screen, iOS offers no back swipe, so a swipe from the left
- * edge does the same there.
+ * Pages as browser history, so Safari's back swipe and the browser back button return to the page
+ * before. Switching tabs replaces the entry instead: a tab is a top level, swiping on it does
+ * nothing. Going forward again is undone, so a swipe from the right edge never opens a page.
+ * Installed on the Home Screen, iOS offers no back swipe, so a swipe from the left edge does it.
  */
 export function useNavigation() {
   const [nav, setNav] = useState<Nav>(START);
@@ -32,14 +35,25 @@ export function useNavigation() {
   useEffect(() => {
     window.history.replaceState(START, '');
     const pop = (e: PopStateEvent) => {
-      setNav((e.state as Nav | null) ?? START);
+      const next = (e.state as Nav | null) ?? START;
+      if (next.depth > current.current.depth) {
+        window.history.back();
+        return;
+      }
+      // On a tab itself there is nowhere to go back to: stay (Safari's swipe has already popped).
+      if (!current.current.pages.length) {
+        window.history.pushState(current.current, '');
+        return;
+      }
+      current.current = next;
+      setNav(next);
       window.scrollTo?.(0, 0);
     };
     window.addEventListener('popstate', pop);
     return () => window.removeEventListener('popstate', pop);
   }, []);
 
-  const go = useCallback((next: Omit<Nav, 'depth'>) => {
+  const push = useCallback((next: Omit<Nav, 'depth'>) => {
     const entry = { ...next, depth: current.current.depth + 1 };
     window.history.pushState(entry, '');
     current.current = entry;
@@ -48,7 +62,17 @@ export function useNavigation() {
   }, []);
 
   const back = useCallback(() => {
-    if (current.current.depth > 0) window.history.back();
+    if (current.current.pages.length) window.history.back();
+  }, []);
+
+  const selectTab = useCallback((tab: TabId) => {
+    // Leaving the pages of the old tab: their history entries stay behind but go nowhere new,
+    // since a back step lands on a state of lower depth that we simply show.
+    const entry = { tab, pages: [], depth: current.current.depth };
+    window.history.replaceState(entry, '');
+    current.current = entry;
+    setNav(entry);
+    window.scrollTo?.(0, 0);
   }, []);
 
   useEdgeSwipe(isStandalone(), back);
@@ -56,9 +80,10 @@ export function useNavigation() {
   return {
     nav,
     back,
-    selectTab: (tab: TabId) => go({ tab, pages: [] }),
-    openPage: (page: PageId) => go({ tab: current.current.tab, pages: [...current.current.pages, page] }),
-    openSettings: (panel: Panel) => go({ tab: 'settings', pages: [], panel }),
+    selectTab,
+    openPage: (page: Page) => push({ tab: current.current.tab, pages: [...current.current.pages, page] }),
+    /** Opens a page on another tab (e.g. an import source from the settings). */
+    openPageOn: (tab: TabId, page: Page) => push({ tab, pages: [page] }),
   };
 }
 

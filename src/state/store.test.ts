@@ -161,6 +161,20 @@ describe('calendar actions', () => {
     expect(s.getState().logs).toHaveLength(1);
   });
 
+  it('saves a back-filled range and removals, keeping other entries', async () => {
+    const s = createAppStore();
+    await s.getState().init(db());
+    await s.getState().setupProtection({ kind: 'device' });
+    await s.getState().completeOnboarding({ mode: 'track' }, '2026-10-16');
+    await s.getState().saveDayLog({ date: '2026-10-02', flow: 'heavy', symptoms: ['cramps'] });
+    await s.getState().setPeriodDays(['2026-10-05', '2026-10-06'], ['2026-10-02']);
+    expect(s.getState().logs).toEqual([
+      { date: '2026-10-02', symptoms: ['cramps'] },
+      { date: '2026-10-05', flow: 'medium' },
+      { date: '2026-10-06', flow: 'medium' },
+    ]);
+  });
+
   it('records included cycles once', async () => {
     const s = createAppStore();
     await s.getState().init(db());

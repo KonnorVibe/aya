@@ -42,6 +42,8 @@ export interface AppState {
   startPeriod: (today: ISODate) => Promise<void>;
   /** Quick back-entry: toggles bleeding on a past day, keeping everything else logged there. */
   togglePeriodDay: (date: ISODate) => Promise<void>;
+  /** Calendar back-entry: bleeding on `add`, none on `remove`; everything else on those days stays. */
+  setPeriodDays: (add: readonly ISODate[], remove: readonly ISODate[]) => Promise<void>;
   /** Counts a cycle flagged as a possible missed log after all. */
   includeCycle: (start: ISODate) => Promise<void>;
   /** "Periode beendet": fills the unlogged days of the open period and marks today as its end. */
@@ -195,6 +197,25 @@ export function createAppStore() {
         next.flow = 'medium';
       }
       await r.saveDayLog(next);
+      set({ logs: r.dayLogs() });
+    },
+
+    async setPeriodDays(add, remove) {
+      const r = need();
+      const changed: DayLog[] = [];
+      for (const date of add) {
+        const log = r.getDayLog(date) ?? { date };
+        if (!log.flow || log.flow === 'spotting') changed.push({ ...log, flow: 'medium' });
+      }
+      for (const date of remove) {
+        const log = r.getDayLog(date);
+        if (!log) continue;
+        const next = { ...log };
+        delete next.flow;
+        delete next.periodEnd;
+        changed.push(next);
+      }
+      for (const log of changed) await r.saveDayLog(log);
       set({ logs: r.dayLogs() });
     },
 

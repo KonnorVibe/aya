@@ -5,15 +5,16 @@ import { overridesFrom } from '../engine/types.ts';
 import { de } from '../i18n/de.ts';
 import { useApp } from '../state/store.ts';
 import { DayLogSheet } from './components/DayLogSheet.tsx';
-import { TabBar } from './components/TabBar.tsx';
+import { TabBar, type TabId } from './components/TabBar.tsx';
 import { isStandalone, useAutoLock, usePrivacyShield, useTheme } from './hooks/useAppEnvironment.ts';
-import { useNavigation } from './hooks/useNavigation.ts';
+import { useNavigation, type Page } from './hooks/useNavigation.ts';
 import { ImportPage } from './screens/ImportPage.tsx';
 import { LockScreen } from './screens/LockScreen.tsx';
 import { Onboarding } from './screens/Onboarding.tsx';
 import { Calendar } from './screens/Calendar.tsx';
 import { Insights } from './screens/Insights.tsx';
-import { Learn, Method } from './screens/Article.tsx';
+import { ArticleView, Knowledge, Learn, Method } from './screens/Article.tsx';
+import { articleById, CYCLE_ARTICLE_ID } from '../content/articles.ts';
 import { Settings } from './screens/Settings.tsx';
 import { DeletePanel } from './screens/settings/DataPanels.tsx';
 import { Button } from './components/Button.tsx';
@@ -34,13 +35,18 @@ export function App({ dbName }: { dbName?: string }) {
   const saveDayLog = useApp((s) => s.saveDayLog);
   const startPeriod = useApp((s) => s.startPeriod);
   const endPeriod = useApp((s) => s.endPeriod);
-  const togglePeriodDay = useApp((s) => s.togglePeriodDay);
+  const setPeriodDays = useApp((s) => s.setPeriodDays);
   const includeCycle = useApp((s) => s.includeCycle);
   const [sheetDate, setSheetDate] = useState<string | null>(null);
   const lockNow = useApp((s) => s.lock);
-  const { nav, back, selectTab, openPage } = useNavigation();
-  const { tab, pages, panel: settingsPanel } = nav;
-  const [calendarFocus, setCalendarFocus] = useState<{ start: string; length: number; depth: number } | undefined>();
+  const { nav, back, selectTab, openPage, openPageOn } = useNavigation();
+  const { tab, pages } = nav;
+  const openArticle = (id: string) => openPage({ kind: 'article', id });
+  const [calendarFocus, setCalendarFocus] = useState<{ start: string; length: number } | undefined>();
+  const changeTab = (next: TabId) => {
+    setCalendarFocus(undefined);
+    selectTab(next);
+  };
   const today = todayLocal();
 
   useEffect(() => {
@@ -69,11 +75,19 @@ export function App({ dbName }: { dbName?: string }) {
 
   const prediction = settings ? predict({ logs, settings, today, overrides: overridesFrom(settings) }) : null;
   const page = pages.at(-1);
+  // A plain function, not a component: a component defined here would remount on every render.
+  const subPage = (page: Page) => {
+    if (page.kind === 'method') return <Method onBack={back} onLearn={() => openArticle(CYCLE_ARTICLE_ID)} />;
+    if (page.kind === 'import') {
+      return <ImportPage source={page.source} onChoose={(source) => openPage({ kind: 'import', source })} onBack={back} onDone={() => changeTab('today')} />;
+    }
+    if (page.id === CYCLE_ARTICLE_ID) return <Learn onBack={back} />;
+    const article = articleById(page.id);
+    return article ? <ArticleView article={article} onBack={back} /> : null;
+  };
   return (
     <>
-      {page === 'method' && <Method onBack={back} onLearn={() => openPage('learn')} />}
-      {page === 'learn' && <Learn onBack={back} />}
-      {page === 'import' && <ImportPage onBack={back} onDone={back} />}
+      {page && subPage(page)}
       {!page && tab === 'today' && (
         <Today
           prediction={prediction}
@@ -85,12 +99,12 @@ export function App({ dbName }: { dbName?: string }) {
           onPeriodEnd={() => void endPeriod(today)}
           onLog={() => setSheetDate(today)}
           onAddMissed={(start, length) => {
-            setCalendarFocus({ start, length, depth: nav.depth + 1 });
             selectTab('calendar');
+            setCalendarFocus({ start, length });
           }}
           onIncludeCycle={(c) => void includeCycle(c)}
-          onImport={() => openPage('import')}
-          onMethod={() => openPage('method')}
+          onImport={() => openPage({ kind: 'import' })}
+          onMethod={() => openPage({ kind: 'method' })}
         />
       )}
       {!page && tab === 'calendar' && settings && (
@@ -100,18 +114,24 @@ export function App({ dbName }: { dbName?: string }) {
           prediction={prediction}
           today={today}
           onOpenDay={setSheetDate}
-          onTogglePeriod={(d) => void togglePeriodDay(d)}
+          onSavePeriods={(add, remove) => void setPeriodDays(add, remove)}
           onIncludeCycle={(c) => void includeCycle(c)}
-          focus={calendarFocus?.depth === nav.depth ? calendarFocus : undefined}
+          focus={calendarFocus}
         />
       )}
       {!page && tab === 'insights' && settings && (
-        <Insights logs={logs} settings={settings} today={today} onMethod={() => openPage('method')} onLearn={() => openPage('learn')} />
+        <Insights logs={logs} settings={settings} today={today} onMethod={() => openPage({ kind: 'method' })} onLearn={() => openArticle(CYCLE_ARTICLE_ID)} />
       )}
+      {!page && tab === 'learn' && <Knowledge today={today} onOpen={openArticle} onMethod={() => openPage({ kind: 'method' })} />}
       {!page && tab === 'settings' && (
-        <Settings key={settingsPanel ?? ''} prediction={prediction} today={today} initialPanel={settingsPanel} onMethod={() => openPage('method')} />
+        <Settings
+          prediction={prediction}
+          today={today}
+          onMethod={() => openPage({ kind: 'method' })}
+          onImport={(source) => openPageOn('settings', { kind: 'import', source })}
+        />
       )}
-      <TabBar active={tab} onSelect={selectTab} />
+      <TabBar active={tab} onSelect={changeTab} />
       {sheetDate && (
         <DayLogSheet
           date={sheetDate}

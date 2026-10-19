@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { de } from '../../i18n/de.ts';
 import { ArticlePage } from './Article.tsx';
 import { RestorePanel } from './settings/DataPanels.tsx';
@@ -6,7 +5,8 @@ import { ImportPanel } from './settings/ImportPanels.tsx';
 import './ImportPage.css';
 
 const t = de.importPage;
-type Source = keyof typeof t.sources;
+export type ImportSource = keyof typeof t.sources;
+type Source = ImportSource;
 const SOURCES = Object.keys(t.sources) as Source[];
 const ACCEPT: Record<Exclude<Source, 'backup'>, string> = {
   health: '.zip,.xml,application/zip,text/xml',
@@ -18,8 +18,13 @@ const ACCEPT: Record<Exclude<Source, 'backup'>, string> = {
  * Import as its own page (from the empty Today screen): pick where the data comes from, read how to
  * get the file out of that app, then choose it. The reading itself is the settings' import panel.
  */
-export function ImportPage({ onBack, onDone }: { onBack: () => void; onDone: () => void }) {
-  const [source, setSource] = useState<Source | null>(null);
+export function ImportPage({ source, onChoose, onBack, onDone }: {
+  source?: Source | undefined;
+  /** Opens the chosen source as the next page, so "Zurück" and the swipe return to this list. */
+  onChoose: (source: Source) => void;
+  onBack: () => void;
+  onDone: () => void;
+}) {
 
   if (!source) {
     return (
@@ -27,7 +32,7 @@ export function ImportPage({ onBack, onDone }: { onBack: () => void; onDone: () 
         <ul className="import-choices">
           {SOURCES.map((s) => (
             <li key={s}>
-              <button type="button" className="import-choice" onClick={() => setSource(s)}>
+              <button type="button" className="import-choice" onClick={() => onChoose(s)}>
                 <span className="import-choice-text">
                   <span className="import-choice-label">{t.sources[s].label}</span>
                   <span className="import-choice-hint">{t.sources[s].hint}</span>
@@ -46,7 +51,7 @@ export function ImportPage({ onBack, onDone }: { onBack: () => void; onDone: () 
 
   const info = t.sources[source];
   return (
-    <ArticlePage title={info.label} intro={info.hint} onBack={() => setSource(null)}>
+    <ArticlePage title={info.label} intro={info.hint} onBack={onBack}>
       <section className="article-section" aria-labelledby="import-steps">
         <h2 id="import-steps">{t.how}</h2>
         <ol className="import-steps">
