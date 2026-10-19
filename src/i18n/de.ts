@@ -180,7 +180,8 @@ export const de = {
   },
   insights: {
     title: 'Muster',
-    subtitle: 'aya, 綾: ein gewebtes Muster. Hier siehst du das Muster, das dein Zyklus über die Monate webt.',
+    kanji: '綾',
+    subtitle: 'Hier siehst du das Muster, das dein Zyklus über die Monate webt.',
     more: 'Mehr erfahren',
     cycleLength: 'Zykluslänge',
     periodLength: 'Periodendauer',
@@ -243,6 +244,15 @@ export const de = {
    * The line above the statement on Today. Each one follows what the body is actually doing in that
    * phase (see the Wissen page) and says "viele" rather than "du": cycles differ.
    */
+  quotePhase: {
+    menstruation: 'Periode',
+    follicular: 'Follikelphase',
+    ovulation: 'Rund um den Eisprung',
+    luteal: 'Lutealphase',
+    premenstrual: 'Vor der Periode',
+    late: 'Periode später',
+    hormonal: 'Heute',
+  },
   quotes: {
     menstruation: [
       'Dein Körper erneuert gerade die Gebärmutterschleimhaut. Ruhe ist jetzt keine Faulheit.',
@@ -284,6 +294,53 @@ export const de = {
       'Hör heute auf das, was dein Körper dir sagt.',
     ],
   },
+  importPage: {
+    title: 'Alte Daten importieren',
+    intro: 'Woher kommen deine Daten? aya liest die Datei nur hier auf deinem Gerät.',
+    private: 'Die Datei verlässt dein iPhone nicht. Bestehende Einträge bleiben erhalten.',
+    how: 'So bekommst du die Datei',
+    file: 'Datei auswählen',
+    toToday: 'Zu Heute',
+    sources: {
+      health: {
+        label: 'Apple Health',
+        hint: 'Auch für Apps, die in Health schreiben, etwa Flo oder Clue.',
+        steps: [
+          'Öffne die App Health und tippe oben rechts auf dein Profilbild.',
+          'Tippe ganz unten auf „Alle Gesundheitsdaten exportieren“ und bestätige.',
+          'Sichere die Datei export.zip in „Dateien“.',
+          'Wähle sie unten aus. aya übernimmt nur die Zyklusdaten.',
+        ],
+      },
+      flo: {
+        label: 'Flo',
+        hint: 'Direkt aus der Flo-App, ohne Apple Health.',
+        steps: [
+          'Öffne in Flo dein Profil und dann die Einstellungen.',
+          'Fordere unter Datenschutz eine Kopie deiner Daten an. Flo schickt sie dir per E-Mail. Je nach Version heißt der Punkt etwas anders.',
+          'Sichere die Datei aus der E-Mail in „Dateien“ und wähle sie unten aus.',
+          'Tipp: Ist Flo mit Apple Health verbunden, geht es über Apple Health schneller.',
+        ],
+      },
+      other: {
+        label: 'Andere App oder Tabelle',
+        hint: 'CSV- oder JSON-Datei, zum Beispiel aus Clue oder einer eigenen Tabelle.',
+        steps: [
+          'Exportiere deine Daten in der anderen App als CSV oder JSON. Eine Tabelle aus Numbers oder Excel speicherst du als CSV.',
+          'Wähle die Datei unten aus.',
+          'aya zeigt dir eine Vorschau und fragt, welche Spalte das Datum und welche die Blutung enthält.',
+        ],
+      },
+      backup: {
+        label: 'aya-Backup',
+        hint: 'Eine .aya-Datei von diesem oder einem anderen Gerät.',
+        steps: [
+          'Wähle die Backup-Datei aus und gib das Passwort ein, das du beim Erstellen vergeben hast.',
+          'Achtung: Das Backup ersetzt alles, was gerade in aya gespeichert ist.',
+        ],
+      },
+    },
+  },
   method: {
     title: 'Methodik und Quellen',
     back: 'Zurück',
@@ -320,7 +377,7 @@ export const de = {
       {
         title: 'Normbereiche',
         body: [
-          'Als üblich gelten Zyklen von 24 bis 38 Tagen, Perioden bis 8 Tage und Schwankungen bis 7 bis 9 Tage zwischen kürzestem und längstem Zyklus, je nach Alter. aya weist dich darauf hin, wenn deine Werte länger außerhalb liegen.',
+          'Als üblich gelten Zyklen von 24 bis 38 Tagen, Perioden bis 8 Tage und ein Unterschied von höchstens 7 bis 9 Tagen zwischen kürzestem und längstem Zyklus, je nach Alter. aya weist dich darauf hin, wenn deine Werte länger außerhalb liegen.',
         ],
       },
       {
@@ -370,7 +427,7 @@ export const de = {
     normal: [
       'Zykluslänge: 24 bis 38 Tage. Nur bei wenigen sind es genau 28.',
       'Periodendauer: bis 8 Tage.',
-      'Schwankung: Bis 7 bis 9 Tage Unterschied zwischen kürzestem und längstem Zyklus gelten als regelmäßig.',
+      'Schwankung: Liegen zwischen deinem kürzesten und längsten Zyklus höchstens 7 bis 9 Tage, je nach Alter, gilt dein Zyklus als regelmäßig.',
       'In den ersten Jahren nach der ersten Periode und in den Jahren vor den Wechseljahren schwankt der Zyklus oft stärker.',
     ],
     mythsTitle: 'Drei verbreitete Irrtümer',
@@ -398,6 +455,10 @@ export const de = {
     ringCaption: 'noch keine Daten',
   },
   loadError: 'aya konnte deine Daten nicht öffnen. Schließ die App und öffne sie noch einmal.',
+  loadErrorBrowser:
+    'Im Safari-Tab und in der App auf dem Home-Bildschirm hat aya getrennte Speicher. Deine Daten in der App sind davon nicht betroffen. Nutze aya am besten nur über das Icon auf dem Home-Bildschirm.',
+  loadErrorCode: (code: string) => `Fehlercode: ${code}`,
+  loadErrorReset: 'In diesem Browser neu beginnen',
   onboarding: {
     step: (n: number, of: number) => `Schritt ${n} von ${of}`,
     next: 'Weiter',
@@ -515,7 +576,8 @@ export const de = {
     minutes: (n: number) => (n === 1 ? '1 Minute' : `${n} Minuten`),
     autoLockHint: 'Und immer, wenn aya länger als eine Minute im Hintergrund war.',
     shield: 'Sichtschutz',
-    shieldHint: 'Macht den Inhalt unscharf, sobald aya in den Hintergrund geht.',
+    shieldHint: 'Deckt aya ab, wenn du die App 15 Sekunden nicht bedienst oder verlässt. Ein Tipp zeigt sie wieder. So zeigt meist auch der App-Umschalter nichts Lesbares. Ganz zuverlässig geht das bei Web-Apps leider nicht, weil iOS das Vorschaubild sehr früh aufnimmt.',
+    shieldTap: 'Tippen zum Anzeigen',
     aboutSection: 'Über aya',
     generalSection: 'Allgemein',
     mode: 'Modus',

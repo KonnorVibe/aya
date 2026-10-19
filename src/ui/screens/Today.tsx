@@ -80,7 +80,13 @@ export function Today({ prediction, logs, settings, today, lastBackupAt, onPerio
     <main className="today">
       {head}
 
-      <p className={`today-quote quote-${quote.phase}`}>{quote.text}</p>
+      <figure className={`today-quote quote-${quote.phase}`}>
+        <figcaption>
+          <i aria-hidden="true" />
+          {de.quotePhase[quote.phase]}
+        </figcaption>
+        <p>{quote.text}</p>
+      </figure>
 
       <section className="today-statement" aria-live="polite">
         <h1>{statement(prediction, today)}</h1>

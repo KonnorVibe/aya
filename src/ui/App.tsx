@@ -5,14 +5,18 @@ import { overridesFrom } from '../engine/types.ts';
 import { de } from '../i18n/de.ts';
 import { useApp } from '../state/store.ts';
 import { DayLogSheet } from './components/DayLogSheet.tsx';
-import { TabBar, type TabId } from './components/TabBar.tsx';
-import { useAutoLock, usePrivacyShield, useTheme } from './hooks/useAppEnvironment.ts';
+import { TabBar } from './components/TabBar.tsx';
+import { isStandalone, useAutoLock, usePrivacyShield, useTheme } from './hooks/useAppEnvironment.ts';
+import { useNavigation } from './hooks/useNavigation.ts';
+import { ImportPage } from './screens/ImportPage.tsx';
 import { LockScreen } from './screens/LockScreen.tsx';
 import { Onboarding } from './screens/Onboarding.tsx';
 import { Calendar } from './screens/Calendar.tsx';
 import { Insights } from './screens/Insights.tsx';
 import { Learn, Method } from './screens/Article.tsx';
-import { Settings, type Panel } from './screens/Settings.tsx';
+import { Settings } from './screens/Settings.tsx';
+import { DeletePanel } from './screens/settings/DataPanels.tsx';
+import { Button } from './components/Button.tsx';
 import { Today } from './screens/Today.tsx';
 import './theme/tokens.css';
 import './theme/base.css';
@@ -34,22 +38,9 @@ export function App({ dbName }: { dbName?: string }) {
   const includeCycle = useApp((s) => s.includeCycle);
   const [sheetDate, setSheetDate] = useState<string | null>(null);
   const lockNow = useApp((s) => s.lock);
-  const [tab, setTabState] = useState<TabId>('today');
-  const [calendarFocus, setCalendarFocus] = useState<{ start: string; length: number } | undefined>();
-  const [settingsPanel, setSettingsPanel] = useState<Panel | undefined>();
-  /** Long-form pages over the current tab; the last one is shown, "Zurück" pops it. */
-  const [pages, setPages] = useState<('method' | 'learn')[]>([]);
-  const openPage = (p: 'method' | 'learn') => {
-    setPages((cur) => [...cur, p]);
-    window.scrollTo?.(0, 0);
-  };
-  const back = () => setPages((cur) => cur.slice(0, -1));
-  const setTab = (next: TabId) => {
-    setCalendarFocus(undefined);
-    setSettingsPanel(undefined);
-    setPages([]);
-    setTabState(next);
-  };
+  const { nav, back, selectTab, openPage } = useNavigation();
+  const { tab, pages, panel: settingsPanel } = nav;
+  const [calendarFocus, setCalendarFocus] = useState<{ start: string; length: number; depth: number } | undefined>();
   const today = todayLocal();
 
   useEffect(() => {
@@ -60,10 +51,10 @@ export function App({ dbName }: { dbName?: string }) {
   useTheme(settings?.theme);
   // Passphrase mode always locks itself; device mode only with a PIN.
   useAutoLock((pinSet || protection === 'passphrase') && status === 'ready', settings?.lockMinutes ?? 5, lock);
-  usePrivacyShield(!!settings?.privacyShield);
+  usePrivacyShield(!!settings?.privacyShield && status === 'ready', de.settings.shieldTap);
 
   if (status === 'loading') return null;
-  if (status === 'error') return <p className="load-error">{de.loadError}</p>;
+  if (status === 'error') return <LoadError />;
   if (status === 'onboarding') {
     return (
       <Onboarding
@@ -82,6 +73,7 @@ export function App({ dbName }: { dbName?: string }) {
     <>
       {page === 'method' && <Method onBack={back} onLearn={() => openPage('learn')} />}
       {page === 'learn' && <Learn onBack={back} />}
+      {page === 'import' && <ImportPage onBack={back} onDone={back} />}
       {!page && tab === 'today' && (
         <Today
           prediction={prediction}
@@ -93,14 +85,11 @@ export function App({ dbName }: { dbName?: string }) {
           onPeriodEnd={() => void endPeriod(today)}
           onLog={() => setSheetDate(today)}
           onAddMissed={(start, length) => {
-            setCalendarFocus({ start, length });
-            setTabState('calendar');
+            setCalendarFocus({ start, length, depth: nav.depth + 1 });
+            selectTab('calendar');
           }}
           onIncludeCycle={(c) => void includeCycle(c)}
-          onImport={() => {
-            setTab('settings');
-            setSettingsPanel('import');
-          }}
+          onImport={() => openPage('import')}
           onMethod={() => openPage('method')}
         />
       )}
@@ -113,7 +102,7 @@ export function App({ dbName }: { dbName?: string }) {
           onOpenDay={setSheetDate}
           onTogglePeriod={(d) => void togglePeriodDay(d)}
           onIncludeCycle={(c) => void includeCycle(c)}
-          focus={calendarFocus}
+          focus={calendarFocus?.depth === nav.depth ? calendarFocus : undefined}
         />
       )}
       {!page && tab === 'insights' && settings && (
@@ -122,7 +111,7 @@ export function App({ dbName }: { dbName?: string }) {
       {!page && tab === 'settings' && (
         <Settings key={settingsPanel ?? ''} prediction={prediction} today={today} initialPanel={settingsPanel} onMethod={() => openPage('method')} />
       )}
-      <TabBar active={tab} onSelect={setTab} />
+      <TabBar active={tab} onSelect={selectTab} />
       {sheetDate && (
         <DayLogSheet
           date={sheetDate}
@@ -135,5 +124,24 @@ export function App({ dbName }: { dbName?: string }) {
         />
       )}
     </>
+  );
+}
+
+/** Shown when the database cannot be opened. The code helps tell causes apart (e.g. private mode). */
+function LoadError() {
+  const code = useApp((s) => s.errorCode);
+  const [reset, setReset] = useState(false);
+  return (
+    <main className="load-error">
+      <p>{de.loadError}</p>
+      {code && <p className="load-error-code">{de.loadErrorCode(code)}</p>}
+      {/* Only in a browser tab: its storage is separate from the Home Screen app. */}
+      {!isStandalone() && (
+        <>
+          <p className="load-error-hint">{de.loadErrorBrowser}</p>
+          {reset ? <DeletePanel /> : <Button variant="quiet" onClick={() => setReset(true)}>{de.loadErrorReset}</Button>}
+        </>
+      )}
+    </main>
   );
 }

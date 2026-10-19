@@ -62,10 +62,13 @@
   font-size: var(--text-md);
   font-weight: 600;
 }
+/* Section numbers in the serif italic of the headings, with old-style figures. */
 .article-num {
-  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
-  font-size: var(--text-xs);
+  font-family: var(--font-name);
+  font-style: italic;
+  font-size: var(--text-lg);
   font-weight: 400;
+  font-variant-numeric: oldstyle-nums;
   color: var(--accent);
 }
 .article-section p {
@@ -92,10 +95,13 @@
   counter-increment: src;
 }
 .article-sources li::before {
-  content: '[' counter(src) ']';
+  content: counter(src);
   position: absolute;
   left: 0;
-  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-family: var(--font-name);
+  font-style: italic;
+  font-size: var(--text-md);
+  font-variant-numeric: oldstyle-nums;
   color: var(--accent);
 }
 .article-cite {

@@ -4,7 +4,7 @@ import { Brand } from '../components/Brand.tsx';
 import { DoctorHint } from '../components/DoctorHint.tsx';
 import './Article.css';
 
-function ArticlePage({ title, intro, onBack, children }: { title: string; intro: string; onBack: () => void; children: ReactNode }) {
+export function ArticlePage({ title, intro, onBack, children }: { title: string; intro: string; onBack: () => void; children: ReactNode }) {
   return (
     <main className="article">
       <header className="article-head">
@@ -33,7 +33,7 @@ export function Method({ onBack, onLearn }: { onBack: () => void; onLearn: () =>
       {m.sections.map((s, i) => (
         <section key={s.title} className="article-section" aria-labelledby={`method-${i}`}>
           <h2 id={`method-${i}`}>
-            <span className="article-num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+            <span className="article-num" aria-hidden="true">{i + 1}</span>
             {s.title}
           </h2>
           {s.body.map((p) => (

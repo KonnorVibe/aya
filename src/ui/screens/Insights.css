@@ -152,8 +152,17 @@
 }
 
 .insights-subtitle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
   margin-top: var(--space-3);
   font-size: var(--text-sm);
   line-height: 1.5;
   color: var(--ink-muted);
+}
+.insights-kanji {
+  flex: none;
+  font-size: var(--text-xl);
+  line-height: 1;
+  color: var(--accent);
 }

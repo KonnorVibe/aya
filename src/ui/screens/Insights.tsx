@@ -38,7 +38,10 @@ export function Insights({ logs, settings, today, onMethod, onLearn }: Props) {
   return (
     <main className="insights">
       <h1>{t.title}</h1>
-      <p className="insights-subtitle">{t.subtitle}</p>
+      <p className="insights-subtitle">
+        <span className="insights-kanji" lang="ja">{t.kanji}</span>
+        {t.subtitle}
+      </p>
 
       <dl className="insights-figures">
         <div>

@@ -43,38 +43,56 @@ export function useAutoLock(enabled: boolean, lockMinutes: number, onLock: () =>
   }, [enabled, lockMinutes, onLock]);
 }
 
+export const SHIELD_IDLE_MS = 15_000;
+
 /**
- * Privacy shield: blurs the app as soon as it loses focus or goes to the background, so the iOS
- * app switcher snapshot shows nothing readable.
+ * Privacy shield: covers the app after a short idle time and whenever it loses focus. iOS takes the
+ * app-switcher snapshot before a web app gets to paint anything on its way to the background, so
+ * covering on "hidden" alone comes too late; covering while idle means the last frame is usually
+ * already covered. A tap uncovers it (the tap lands on the cover, not on a button behind it).
  */
-export function usePrivacyShield(enabled: boolean) {
+export function usePrivacyShield(enabled: boolean, hint: string) {
   useEffect(() => {
     const root = document.documentElement;
     if (!enabled) {
       root.removeAttribute('data-shield');
       return;
     }
-    const on = () => root.setAttribute('data-shield', '');
-    const off = () => {
-      if (!document.hidden) root.removeAttribute('data-shield');
+    document.body.setAttribute('data-shield-hint', hint);
+    let timer = 0;
+    const on = () => {
+      window.clearTimeout(timer);
+      root.setAttribute('data-shield', '');
     };
-    const visibility = () => (document.hidden ? on() : off());
-    // iOS fires these in different orders (or only some of them) when the app switcher opens, so
-    // the shield goes up on whichever comes first and only comes down once aya is visible again.
-    const hide = ['blur', 'pagehide', 'freeze'] as const;
-    const show = ['focus', 'pageshow', 'pointerdown'] as const;
+    const arm = () => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(on, SHIELD_IDLE_MS);
+    };
+    const off = () => {
+      if (document.hidden) return;
+      root.removeAttribute('data-shield');
+      arm();
+    };
+    const visibility = () => (document.hidden ? on() : undefined);
+    const hide = ['blur', 'pagehide'] as const;
+    const activity = ['keydown', 'scroll', 'touchmove'] as const;
     hide.forEach((e) => window.addEventListener(e, on, { capture: true }));
-    show.forEach((e) => window.addEventListener(e, off, { capture: true }));
+    activity.forEach((e) => window.addEventListener(e, arm, { capture: true, passive: true }));
+    window.addEventListener('pointerdown', off, { capture: true });
     document.addEventListener('visibilitychange', visibility);
     document.addEventListener('freeze', on);
+    arm();
     return () => {
+      window.clearTimeout(timer);
       hide.forEach((e) => window.removeEventListener(e, on, { capture: true }));
-      show.forEach((e) => window.removeEventListener(e, off, { capture: true }));
+      activity.forEach((e) => window.removeEventListener(e, arm, { capture: true }));
+      window.removeEventListener('pointerdown', off, { capture: true });
       document.removeEventListener('visibilitychange', visibility);
       document.removeEventListener('freeze', on);
       root.removeAttribute('data-shield');
+      document.body.removeAttribute('data-shield-hint');
     };
-  }, [enabled]);
+  }, [enabled, hint]);
 }
 
 /** True when running as an installed Home Screen app. */

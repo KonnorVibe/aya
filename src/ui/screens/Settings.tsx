@@ -277,15 +277,18 @@ export function Settings({ prediction, today, initialPanel, onMethod }: Props) {
         <p className="settings-disclaimer">{de.disclaimer}</p>
         <p className="row-hint">{t.privacy}</p>
         <p className="settings-links">
+          <a
+            href="#methodik"
+            onClick={(e) => {
+              e.preventDefault();
+              onMethod();
+            }}
+          >
+            {t.methodology}
+          </a>
           <a href="./datenschutz.html">{t.privacyLink}</a>
           <a href="./impressum.html">{t.imprintLink}</a>
         </p>
-        <button type="button" className="row row-button" onClick={onMethod}>
-          <span>{t.methodology}</span>
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M9 6l6 6-6 6" />
-          </svg>
-        </button>
       </section>
     </main>
   );

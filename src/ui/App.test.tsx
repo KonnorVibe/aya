@@ -90,12 +90,23 @@ describe('App', () => {
     expect(screen.getByRole('heading', { level: 1, name: 'Methodik und Quellen' })).toBeTruthy();
     click('Mehr über den Zyklus');
     expect(screen.getByRole('heading', { level: 1, name: 'Der Zyklus' })).toBeTruthy();
+    // "Zurück" goes through the browser history, so the swipe back works the same way.
     click('Zurück');
+    expect(await screen.findByRole('heading', { level: 1, name: 'Methodik und Quellen' })).toBeTruthy();
     click('Zurück');
-    expect(screen.getByRole('heading', { name: 'Noch keine Periode eingetragen' })).toBeTruthy();
+    expect(await screen.findByRole('heading', { name: 'Noch keine Periode eingetragen' })).toBeTruthy();
 
     click('Alte Daten importieren');
-    expect(screen.getByLabelText('Datei')).toBeTruthy();
+    expect(screen.getByRole('heading', { level: 1, name: 'Alte Daten importieren' })).toBeTruthy();
+    click(/^Apple Health/);
+    expect(screen.getByRole('heading', { name: 'So bekommst du die Datei' })).toBeTruthy();
+    expect((screen.getByLabelText('Datei') as HTMLInputElement).accept).toContain('.zip');
+    click('Zurück');
+    click(/^aya-Backup/);
+    expect(screen.getByLabelText('Backup-Datei')).toBeTruthy();
+    click('Zurück');
+    click('Zurück');
+    expect(await screen.findByRole('heading', { name: 'Noch keine Periode eingetragen' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Muster' })).toBeTruthy();
   });
 

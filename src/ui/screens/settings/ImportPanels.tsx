@@ -131,7 +131,10 @@ function TableImport({ detected, onImport }: { detected: Extract<Detected, { kin
   );
 }
 
-export function ImportPanel() {
+const ACCEPT_ALL = '.csv,.json,.xml,.zip,.txt,text/csv,application/json,application/zip,text/xml';
+
+/** `intro` and `accept` let the import page tailor the panel to the chosen source. */
+export function ImportPanel({ intro = t.importIntro, accept = ACCEPT_ALL, onDone }: { intro?: string; accept?: string; onDone?: () => void }) {
   const importLogs = useApp((s) => s.importLogs);
   const [stage, setStage] = useState<Stage>({ kind: 'idle' });
 
@@ -153,14 +156,15 @@ export function ImportPanel() {
 
   return (
     <div className="panel">
-      <p>{t.importIntro}</p>
+      {intro && <p>{intro}</p>}
       <label className="panel-field">
         <span>{t.importFile}</span>
-        <input type="file" accept=".csv,.json,.xml,.zip,.txt,text/csv,application/json,application/zip,text/xml" onChange={(e) => void pick(e.target.files?.[0])} />
+        <input type="file" accept={accept} onChange={(e) => void pick(e.target.files?.[0])} />
       </label>
       {(stage.kind === 'reading' || stage.kind === 'importing') && <p className="panel-status" role="status">{stage.kind === 'reading' ? t.importReading : t.working}</p>}
       {stage.kind === 'error' && <p className="panel-status is-error" role="status">{stage.text}</p>}
       {stage.kind === 'done' && <p className="panel-status" role="status">{t.importDone(stage.count)}</p>}
+      {stage.kind === 'done' && onDone && <Button onClick={onDone}>{de.importPage.toToday}</Button>}
       {stage.kind === 'ready' && stage.detected.kind === 'logs' && (
         <>
           <p className="panel-status" role="status">{t.importFound(stage.detected.result.logs.length, stage.detected.result.periodDays)}</p>

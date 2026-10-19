@@ -23,6 +23,8 @@ export interface AppState {
   protection?: Protection | undefined;
   /** ISO timestamp of the last backup export. */
   lastBackupAt?: string | undefined;
+  /** Error name and message when the database could not be opened (no health data in it). */
+  errorCode?: string | undefined;
   init: (dbName?: string, iterations?: number) => Promise<void>;
   /** First onboarding step: creates the vault. Returns the recovery code in passphrase mode. */
   setupProtection: (choice: ProtectionChoice) => Promise<{ recoveryCode?: string }>;
@@ -110,8 +112,9 @@ export function createAppStore() {
           status: pinSet ? 'locked' : 'ready',
           settings,
         });
-      } catch {
-        set({ status: 'error' });
+      } catch (e) {
+        const code = e instanceof Error ? `${e.name}: ${e.message}` : String(e);
+        set({ status: 'error', errorCode: code.slice(0, 160) });
       }
     },
 
@@ -264,7 +267,7 @@ export function createAppStore() {
       await Database.wipe(name, database);
       repo = undefined;
       database = undefined;
-      set({ status: 'loading', logs: [], settings: undefined, pinSet: false, protection: undefined, lastBackupAt: undefined });
+      set({ status: 'loading', logs: [], settings: undefined, pinSet: false, protection: undefined, lastBackupAt: undefined, errorCode: undefined });
       await get().init(name, kdfIterations);
     },
 

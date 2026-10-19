@@ -84,7 +84,10 @@ a {
   filter: blur(28px);
 }
 :root[data-shield] body::after {
-  content: 'aya';
+  content: 'aya\A' attr(data-shield-hint);
+  white-space: pre;
+  text-align: center;
+  line-height: 2.2;
   position: fixed;
   inset: 0;
   z-index: 2147483647;
@@ -98,9 +101,20 @@ a {
 }
 
 .load-error {
-  max-width: 34ch;
+  display: grid;
+  gap: var(--space-4);
+  max-width: 480px;
   margin: 0 auto;
   padding: var(--space-7) var(--gutter);
+}
+.load-error-hint,
+.load-error-code {
+  font-size: var(--text-sm);
+  color: var(--ink-muted);
+}
+.load-error-code {
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  overflow-wrap: anywhere;
 }
 
 /* Recovery code and confirm checkbox (onboarding and settings). */

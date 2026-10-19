@@ -1,0 +1,56 @@
+.import-choices {
+  margin: var(--space-5) 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--rule);
+}
+.import-choice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: 64px;
+  padding: var(--space-3) 0;
+  border: 0;
+  border-bottom: 1px solid var(--rule);
+  background: none;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+.import-choice-text {
+  display: grid;
+  gap: 2px;
+}
+.import-choice-label {
+  font-weight: 600;
+}
+.import-choice-hint {
+  font-size: var(--text-sm);
+  color: var(--ink-muted);
+}
+.import-choice svg {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: var(--ink-muted);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.import-steps {
+  margin: 0;
+  padding-left: 1.4em;
+}
+.import-steps li {
+  padding: var(--space-2) 0;
+  line-height: 1.5;
+}
+.import-steps li::marker {
+  font-family: var(--font-name);
+  font-style: italic;
+  color: var(--accent);
+}
