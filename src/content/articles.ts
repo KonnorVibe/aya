@@ -1,10 +1,11 @@
 import type { ISODate } from '../engine/dates.ts';
+import { LINKS } from './externalLinks.ts';
 
 /**
  * Knowledge articles for the Wissen tab. They ship with the app (aya loads nothing from the
- * internet), so new ones arrive with an update; `added` drives the "Neu" shelf. Facts carry their
- * source in `sources` so they can be checked. "Der Zyklus" has its own layout (Learn) and is listed
- * here only for the shelf.
+ * internet), so new ones arrive with an update. Facts carry their source in `sources` so they can be
+ * checked. Each ends with one question; answering it marks the article as read. "Der Zyklus" has
+ * its own layout (Learn) and is listed here for the list and its question.
  */
 
 export type Category = 'basics' | 'health' | 'everyday' | 'tips';
@@ -13,7 +14,18 @@ export type Block =
   | { type: 'p'; text: string }
   | { type: 'h'; text: string }
   | { type: 'list'; items: string[] }
-  | { type: 'tip'; text: string };
+  | { type: 'tip'; text: string }
+  /** External pages; the address must be in externalLinks.ts. */
+  | { type: 'links'; items: { label: string; href: string; note: string }[] };
+
+export interface Quiz {
+  question: string;
+  options: string[];
+  /** Index of the right option. */
+  answer: number;
+  /** Shown after answering, right or wrong. */
+  explain: string;
+}
 
 export interface Article {
   id: string;
@@ -24,6 +36,7 @@ export interface Article {
   minutes: number;
   blocks: Block[];
   sources?: string[];
+  quiz: Quiz;
 }
 
 export const CATEGORY_LABEL: Record<Category, string> = {
@@ -33,14 +46,17 @@ export const CATEGORY_LABEL: Record<Category, string> = {
   tips: 'Empfehlungen',
 };
 
-/** Articles count as new for this many days after `added`. */
-export const NEW_DAYS = 30;
-
 export const CYCLE_ARTICLE_ID = 'zyklus';
 
 export const ARTICLES: Article[] = [
   {
     id: CYCLE_ARTICLE_ID,
+    quiz: {
+      question: 'Wann findet der Eisprung bei den meisten statt?',
+      options: ['Immer an Tag 14', 'Etwa 12 bis 14 Tage vor der nächsten Periode', 'Am letzten Tag der Periode'],
+      answer: 1,
+      explain: 'Die Zeit nach dem Eisprung ist recht konstant, die Zeit davor schwankt. Deshalb rechnet aya vom erwarteten Beginn der nächsten Periode zurück.',
+    },
     category: 'basics',
     title: 'Der Zyklus',
     teaser: 'Die vier Phasen, was normal ist und welche Signale dein Körper sendet.',
@@ -50,6 +66,12 @@ export const ARTICLES: Article[] = [
   },
   {
     id: 'regelschmerzen',
+    quiz: {
+      question: 'Wann wirken Schmerzmittel wie Ibuprofen bei Regelschmerzen am besten?',
+      options: ['Früh, sobald die Schmerzen beginnen', 'Erst wenn die Schmerzen unerträglich sind', 'Nur vorbeugend eine Woche vorher'],
+      answer: 0,
+      explain: 'Sie bremsen die Bildung der Prostaglandine. Früh genommen verhindern sie, dass sich viele davon ansammeln.',
+    },
     category: 'health',
     title: 'Regelschmerzen: Was wirklich hilft',
     teaser: 'Warum die Periode wehtut, was gut belegt hilft und wann du es abklären lassen solltest.',
@@ -86,6 +108,12 @@ export const ARTICLES: Article[] = [
   },
   {
     id: 'pms',
+    quiz: {
+      question: 'Woran erkennt man PMS typischerweise?',
+      options: ['Beschwerden vor der Periode, die mit der Blutung nachlassen', 'Beschwerden nur während der Blutung', 'Beschwerden, die im ganzen Zyklus gleich stark sind'],
+      answer: 0,
+      explain: 'PMS ist an die zweite Zyklushälfte gebunden. Mit dem Beginn der Blutung lassen die Beschwerden nach.',
+    },
     category: 'health',
     title: 'PMS und PMDS',
     teaser: 'Beschwerden vor der Periode: wie häufig sie sind und wann sie mehr als lästig sind.',
@@ -112,6 +140,12 @@ export const ARTICLES: Article[] = [
   },
   {
     id: 'basaltemperatur',
+    quiz: {
+      question: 'Was zeigt dir ein Anstieg der Basaltemperatur?',
+      options: ['Dass der Eisprung bevorsteht', 'Dass der Eisprung stattgefunden hat', 'Dass die Periode heute beginnt'],
+      answer: 1,
+      explain: 'Das Progesteron nach dem Eisprung hebt die Temperatur. Sie bestätigt den Eisprung also im Nachhinein.',
+    },
     category: 'everyday',
     title: 'Basaltemperatur richtig messen',
     teaser: 'So wird deine Kurve aussagekräftig, und das bringt sie dir.',
@@ -135,6 +169,12 @@ export const ARTICLES: Article[] = [
   },
   {
     id: 'sport',
+    quiz: {
+      question: 'Was empfiehlt die Forschung zu zyklusbasiertem Training?',
+      options: ['Einen festen Plan nach Phasen für alle', 'Einen persönlichen Ansatz, je nachdem wie du dich fühlst', 'In der Periode gar keinen Sport'],
+      answer: 1,
+      explain: 'Die Unterschiede sind klein und die Studien oft schwach. Dein eigenes Gefühl ist der bessere Maßstab.',
+    },
     category: 'everyday',
     title: 'Zyklus und Sport',
     teaser: 'Sollte man nach Zyklusphase trainieren? Was die Forschung dazu sagt.',
@@ -149,6 +189,12 @@ export const ARTICLES: Article[] = [
   },
   {
     id: 'quellen',
+    quiz: {
+      question: 'Woran erkennst du eine verlässliche Gesundheitsquelle?',
+      options: ['Sie ist unabhängig, belegt ihre Aussagen und zeigt keine Werbung', 'Sie hat viele Likes', 'Sie verkauft passende Produkte'],
+      answer: 0,
+      explain: 'Unabhängigkeit und Belege sind wichtiger als Reichweite. Wer etwas verkaufen will, hat ein Interesse.',
+    },
     category: 'tips',
     title: 'Gute Quellen zum Weiterlesen',
     teaser: 'Verlässliche, werbefreie Seiten zu Zyklus und Frauengesundheit.',
@@ -157,15 +203,15 @@ export const ARTICLES: Article[] = [
     blocks: [
       { type: 'p', text: 'Im Netz kursiert viel Halbwissen. Diese Angebote sind unabhängig oder werden von Fachgesellschaften getragen:' },
       {
-        type: 'list',
+        type: 'links',
         items: [
-          'gesundheitsinformation.de: vom Institut für Qualität und Wirtschaftlichkeit im Gesundheitswesen (IQWiG), geprüft und ohne Werbung.',
-          'frauenaerzte-im-netz.de: von den Berufsverbänden der Frauenärztinnen und Frauenärzte.',
-          'endometriose-vereinigung.de: Selbsthilfe und Informationen zu Endometriose.',
-          'familienplanung.de: von der staatlichen Gesundheitsaufklärung, zu Verhütung und Kinderwunsch.',
+          { label: 'gesundheitsinformation.de', href: LINKS.gesundheitsinformation, note: 'Vom Institut für Qualität und Wirtschaftlichkeit im Gesundheitswesen (IQWiG), geprüft und ohne Werbung.' },
+          { label: 'frauenaerzte-im-netz.de', href: LINKS.frauenaerzte, note: 'Von den Berufsverbänden der Frauenärztinnen und Frauenärzte.' },
+          { label: 'endometriose-vereinigung.de', href: LINKS.endometriose, note: 'Selbsthilfe und Informationen zu Endometriose.' },
+          { label: 'familienplanung.de', href: LINKS.familienplanung, note: 'Von der staatlichen Gesundheitsaufklärung, zu Verhütung und Kinderwunsch.' },
         ],
       },
-      { type: 'tip', text: 'Tipp: Gib die Adresse selbst in Safari ein. aya öffnet von sich aus keine Seiten.' },
+      { type: 'tip', text: 'Die Links öffnen sich in Safari. aya gibt dabei nichts über dich weiter, auch nicht, von wo du kommst.' },
     ],
   },
 ];
@@ -174,7 +220,3 @@ export function articleById(id: string): Article | undefined {
   return ARTICLES.find((a) => a.id === id);
 }
 
-export function isNew(a: Article, today: ISODate): boolean {
-  const days = (Date.parse(`${today}T00:00:00Z`) - Date.parse(`${a.added}T00:00:00Z`)) / 86_400_000;
-  return days >= 0 && days < NEW_DAYS;
-}

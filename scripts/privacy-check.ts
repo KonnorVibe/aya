@@ -2,6 +2,7 @@
 // external URLs, or a weakened CSP. Run after `npm run build` to also check dist/.
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
+import { ALLOWED_LINKS } from '../src/content/externalLinks.ts';
 
 export interface Finding {
   file: string;
@@ -10,9 +11,13 @@ export interface Finding {
   excerpt: string;
 }
 
+const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&');
+// The links from src/content/externalLinks.ts, matched exactly (a quote must follow).
+const LINKS = ALLOWED_LINKS.map((l) => escape(l.replace(/^https:\/\//, ''))).join('|');
+
 // Allowlist: SVG/XML namespaces, inert URLs inside library error messages (never requested;
-// connect-src 'none' would block them anyway) and the doctor-search links, which only open in the
-// browser when tapped (target=_blank, no referrer) and never carry data.
+// connect-src 'none' would block them anyway) and aya's own links, which only open in the browser
+// when tapped (target=_blank, no referrer) and never carry data.
 const RULES: { name: string; pattern: RegExp }[] = [
   { name: 'fetch', pattern: /\bfetch\s*\(/ },
   { name: 'XMLHttpRequest', pattern: /\bXMLHttpRequest\b/ },
@@ -20,7 +25,12 @@ const RULES: { name: string; pattern: RegExp }[] = [
   { name: 'EventSource', pattern: /\bEventSource\b/ },
   { name: 'sendBeacon', pattern: /\bsendBeacon\b/ },
   { name: 'RTCPeerConnection', pattern: /\bRTCPeerConnection\b/ },
-  { name: 'external-url', pattern: /\b(?:https?:|wss?:)\/\/(?!(?:www\.w3\.org|react\.dev\/errors|bit\.ly\/wb-precache|docs\.github\.com\/de\/site-policy)\b|(?:www\.doctolib\.de\/frauenarzt|arztsuche\.116117\.de\/)['"`])[^\s'"`)]+/ },
+  {
+    name: 'external-url',
+    pattern: new RegExp(
+      `\\b(?:https?:|wss?:)\\/\\/(?!(?:www\\.w3\\.org|react\\.dev\\/errors|bit\\.ly\\/wb-precache|docs\\.github\\.com\\/de\\/site-policy)\\b|(?:${LINKS})['"\`])[^\\s'"\`)]+`,
+    ),
+  },
 ];
 
 // Build output from third-party code (React, Workbox) mentions these names without using

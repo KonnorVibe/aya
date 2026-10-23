@@ -9,8 +9,9 @@ const PHASES = [
 ] as const;
 
 /** Key for the ring: phases on one row, forecast and the flow-size ramp on the next. */
-export function Legend({ showFertility = true }: { showFertility?: boolean }) {
-  const phases = PHASES.filter((i) => showFertility || (i.key !== 'fertile' && i.key !== 'ovulation'));
+/** Under hormonal contraception there are no cycle phases: only the bleed, called "Blutung". */
+export function Legend({ showFertility = true, hormonal = false }: { showFertility?: boolean; hormonal?: boolean }) {
+  const phases = PHASES.filter((i) => (showFertility || (i.key !== 'fertile' && i.key !== 'ovulation')) && !(hormonal && i.key === 'luteal'));
   return (
     <div className="legend">
       <ul>
@@ -19,7 +20,7 @@ export function Legend({ showFertility = true }: { showFertility?: boolean }) {
             <svg viewBox="0 0 12 12" aria-hidden="true">
               <circle className={`dot ${i.cls}`} cx="6" cy="6" r="4" />
             </svg>
-            {de.legend[i.key]}
+            {hormonal && i.key === 'period' ? de.legend.bleed : de.legend[i.key]}
           </li>
         ))}
       </ul>

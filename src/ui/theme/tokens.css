@@ -88,3 +88,18 @@
 :root[data-theme='dark'] {
   color-scheme: dark;
 }
+
+/*
+ * Mode tint: the ink of what the mode is about. Zyklus verfolgen = the period, Kinderwunsch = the
+ * fertile days, hormonal contraception = the calm violet of the second half. Used for primary
+ * buttons, the active tab and the mode badge; set on the root by the app.
+ */
+:root {
+  --mode: var(--period);
+}
+:root[data-mode='conceive'] {
+  --mode: var(--fertile);
+}
+:root[data-mode='hormonal_contraception'] {
+  --mode: var(--luteal);
+}

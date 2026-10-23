@@ -171,8 +171,10 @@
 }
 
 /* Wissen tab */
-.knowledge-heading {
+/* Same top as the other tab titles (Muster, Einstellungen), so switching tabs does not jump. */
+.article .knowledge-heading {
   margin-top: 0;
+  line-height: inherit;
   padding-bottom: var(--space-3);
   border-bottom: 1px solid var(--rule);
 }
@@ -232,4 +234,119 @@
   border-radius: var(--radius-control);
   background: var(--ground-raised);
   font-size: var(--text-sm);
+}
+
+/* External links in articles: name, arrow, one line on what the page is. */
+.article-links {
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.article-links li {
+  display: grid;
+  gap: 2px;
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--rule);
+}
+.article-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--target);
+  margin: -8px 0;
+  color: var(--accent);
+  font-weight: 600;
+  text-underline-offset: 0.2em;
+}
+.article-links svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.article-links span {
+  font-size: var(--text-sm);
+  line-height: 1.45;
+  color: var(--ink-muted);
+}
+
+/* Until its question is answered. */
+.knowledge-unread {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: auto;
+  color: var(--accent);
+  font-weight: 600;
+}
+.knowledge-unread i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+/* Question and note at the end of an article. */
+.check-options {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.check-options legend {
+  margin-bottom: var(--space-3);
+  font-weight: 600;
+  line-height: 1.4;
+}
+.check-option {
+  min-height: var(--target);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--ink);
+  font-size: var(--text-sm);
+  text-align: left;
+  cursor: pointer;
+}
+.check-option:disabled {
+  cursor: default;
+}
+.check-option.is-right {
+  border-color: var(--fertile);
+  background: color-mix(in srgb, var(--fertile) 14%, transparent);
+}
+.check-option.is-wrong {
+  border-color: var(--period);
+  background: color-mix(in srgb, var(--period) 10%, transparent);
+}
+.check-result {
+  margin-top: var(--space-3);
+  font-size: var(--text-sm);
+}
+.check-result.is-right strong {
+  color: var(--fertile);
+}
+.check-note {
+  display: grid;
+  gap: var(--space-2);
+  margin-top: var(--space-5);
+  font-weight: 600;
+}
+.check-note textarea {
+  width: 100%;
+  padding: var(--space-3);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-control);
+  background: var(--ground-raised);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 400;
+  font-size: 16px;
+  resize: vertical;
 }

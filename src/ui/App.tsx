@@ -6,7 +6,7 @@ import { de } from '../i18n/de.ts';
 import { useApp } from '../state/store.ts';
 import { DayLogSheet } from './components/DayLogSheet.tsx';
 import { TabBar, type TabId } from './components/TabBar.tsx';
-import { isStandalone, useAutoLock, usePrivacyShield, useTheme } from './hooks/useAppEnvironment.ts';
+import { isStandalone, useAutoLock, useModeTint, useTheme } from './hooks/useAppEnvironment.ts';
 import { useNavigation, type Page } from './hooks/useNavigation.ts';
 import { ImportPage } from './screens/ImportPage.tsx';
 import { LockScreen } from './screens/LockScreen.tsx';
@@ -55,9 +55,9 @@ export function App({ dbName }: { dbName?: string }) {
 
   const lock = useCallback(() => lockNow(), [lockNow]);
   useTheme(settings?.theme);
+  useModeTint(settings?.mode);
   // Passphrase mode always locks itself; device mode only with a PIN.
   useAutoLock((pinSet || protection === 'passphrase') && status === 'ready', settings?.lockMinutes ?? 5, lock);
-  usePrivacyShield(!!settings?.privacyShield && status === 'ready', de.settings.shieldTap);
 
   if (status === 'loading') return null;
   if (status === 'error') return <LoadError />;
@@ -120,9 +120,9 @@ export function App({ dbName }: { dbName?: string }) {
         />
       )}
       {!page && tab === 'insights' && settings && (
-        <Insights logs={logs} settings={settings} today={today} onMethod={() => openPage({ kind: 'method' })} onLearn={() => openArticle(CYCLE_ARTICLE_ID)} />
+        <Insights logs={logs} settings={settings} today={today} onMethod={() => openPage({ kind: 'method' })} onLearn={() => changeTab('learn')} />
       )}
-      {!page && tab === 'learn' && <Knowledge today={today} onOpen={openArticle} onMethod={() => openPage({ kind: 'method' })} />}
+      {!page && tab === 'learn' && <Knowledge onOpen={openArticle} onMethod={() => openPage({ kind: 'method' })} />}
       {!page && tab === 'settings' && (
         <Settings
           prediction={prediction}

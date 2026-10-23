@@ -24,6 +24,7 @@ import {
   type DraftWarning,
   type PeriodDraft,
 } from './periodDraft.ts';
+import { useSheetDismiss } from '../components/useSheetDismiss.ts';
 import './Calendar.css';
 
 const t = de.calendar;
@@ -296,6 +297,7 @@ function ConfirmPeriods({ changes, warnings, onSave, onBack }: {
 }) {
   const c = t.confirm;
   const ref = useRef<HTMLDialogElement>(null);
+  useSheetDismiss(ref, onBack);
   useEffect(() => {
     const d = ref.current;
     if (d && !d.open) {
@@ -308,6 +310,7 @@ function ConfirmPeriods({ changes, warnings, onSave, onBack }: {
   const w = c.warnings;
   return (
     <dialog ref={ref} className="sheet confirm-sheet" aria-labelledby="confirm-title" onCancel={(e) => (e.preventDefault(), onBack())}>
+      <div className="sheet-grabber" aria-hidden="true" />
       <div className="sheet-body">
         <h2 id="confirm-title">{c.title}</h2>
         {changes.added.length > 0 && (

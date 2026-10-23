@@ -20,6 +20,8 @@ export interface RingModel {
   days: RingDay[];
   /** Next-period range as offsets from cycle start (may exceed length); null before any data. */
   range: { earliest: number; latest: number } | null;
+  /** Fertile window as offsets from cycle start, when there is one. */
+  fertile?: { start: number; end: number } | undefined;
 }
 
 /** A quiet placeholder ring for the first start: a typical cycle, no phases, no forecast. */
@@ -72,5 +74,6 @@ export function ringModel(prediction: Prediction, logs: readonly DayLog[], today
       earliest: diffDays(prediction.nextPeriod.earliest, start),
       latest: diffDays(prediction.nextPeriod.latest, start),
     },
+    ...(w ? { fertile: { start: diffDays(w.start, start), end: diffDays(w.end, start) } } : {}),
   };
 }

@@ -20,10 +20,11 @@ export interface Nav {
 const START: Nav = { tab: 'today', pages: [], depth: 0 };
 
 /**
- * Pages as browser history, so Safari's back swipe and the browser back button return to the page
- * before. Switching tabs replaces the entry instead: a tab is a top level, swiping on it does
- * nothing. Going forward again is undone, so a swipe from the right edge never opens a page.
- * Installed on the Home Screen, iOS offers no back swipe, so a swipe from the left edge does it.
+ * Every screen change, tabs included, is one step of browser history, so Safari's back swipe and
+ * the browser back button always return to the screen one step before. Right after opening there
+ * is nothing to go back to and nothing happens. Going forward again is undone, so a swipe from the
+ * right edge never reopens a screen. Installed on the Home Screen, iOS offers no back swipe, so a
+ * swipe from the left edge does it.
  */
 export function useNavigation() {
   const [nav, setNav] = useState<Nav>(START);
@@ -38,11 +39,6 @@ export function useNavigation() {
       const next = (e.state as Nav | null) ?? START;
       if (next.depth > current.current.depth) {
         window.history.back();
-        return;
-      }
-      // On a tab itself there is nowhere to go back to: stay (Safari's swipe has already popped).
-      if (!current.current.pages.length) {
-        window.history.pushState(current.current, '');
         return;
       }
       current.current = next;
@@ -62,18 +58,17 @@ export function useNavigation() {
   }, []);
 
   const back = useCallback(() => {
-    if (current.current.pages.length) window.history.back();
+    if (current.current.depth > 0) window.history.back();
   }, []);
 
-  const selectTab = useCallback((tab: TabId) => {
-    // Leaving the pages of the old tab: their history entries stay behind but go nowhere new,
-    // since a back step lands on a state of lower depth that we simply show.
-    const entry = { tab, pages: [], depth: current.current.depth };
-    window.history.replaceState(entry, '');
-    current.current = entry;
-    setNav(entry);
-    window.scrollTo?.(0, 0);
-  }, []);
+  const selectTab = useCallback(
+    (tab: TabId) => {
+      const now = current.current;
+      if (now.tab === tab && !now.pages.length) return;
+      push({ tab, pages: [] });
+    },
+    [push],
+  );
 
   useEdgeSwipe(isStandalone(), back);
 
@@ -87,38 +82,57 @@ export function useNavigation() {
   };
 }
 
-const EDGE = 24;
-const DISTANCE = 70;
+const EDGE = 40;
+const DISTANCE = 60;
 
-/** A horizontal swipe that starts at the left edge calls `onBack` once. */
+/**
+ * A horizontal swipe that starts near the left edge calls `onBack` once. The page follows the
+ * finger a little, so the gesture is visible; it springs back if the swipe is not finished.
+ * Off while a sheet or dialog is open.
+ */
 function useEdgeSwipe(enabled: boolean, onBack: () => void) {
   useEffect(() => {
     if (!enabled) return;
     let start: { x: number; y: number } | null = null;
+    const page = () => document.querySelector<HTMLElement>('#root > main');
+    const reset = () => {
+      if (!start) return;
+      const el = page();
+      if (el) {
+        el.style.transition = 'transform 200ms ease-out';
+        el.style.transform = '';
+      }
+      start = null;
+    };
     const down = (e: TouchEvent) => {
       const t = e.touches[0];
-      start = t && e.touches.length === 1 && t.clientX <= EDGE ? { x: t.clientX, y: t.clientY } : null;
+      const open = document.querySelector('dialog[open]');
+      start = t && e.touches.length === 1 && t.clientX <= EDGE && !open ? { x: t.clientX, y: t.clientY } : null;
     };
     const move = (e: TouchEvent) => {
       const t = e.touches[0];
       if (!start || !t) return;
       const dx = t.clientX - start.x;
-      if (Math.abs(t.clientY - start.y) > dx) start = null;
-      else if (dx > DISTANCE) {
-        start = null;
+      if (Math.abs(t.clientY - start.y) > Math.max(dx, 12)) return reset();
+      const el = page();
+      if (el && dx > 0) {
+        el.style.transition = 'none';
+        el.style.transform = `translateX(${Math.min(dx, 120) * 0.5}px)`;
+      }
+      if (dx > DISTANCE) {
+        reset();
         onBack();
       }
     };
-    const cancel = () => (start = null);
     window.addEventListener('touchstart', down, { passive: true });
     window.addEventListener('touchmove', move, { passive: true });
-    window.addEventListener('touchend', cancel);
-    window.addEventListener('touchcancel', cancel);
+    window.addEventListener('touchend', reset);
+    window.addEventListener('touchcancel', reset);
     return () => {
       window.removeEventListener('touchstart', down);
       window.removeEventListener('touchmove', move);
-      window.removeEventListener('touchend', cancel);
-      window.removeEventListener('touchcancel', cancel);
+      window.removeEventListener('touchend', reset);
+      window.removeEventListener('touchcancel', reset);
     };
   }, [enabled, onBack]);
 }

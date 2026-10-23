@@ -5,6 +5,7 @@ import { de, formatDayMonth, formatLongDate } from '../../i18n/de.ts';
 import { BarChart } from '../components/BarChart.tsx';
 import { Button } from '../components/Button.tsx';
 import { TempChart } from '../components/TempChart.tsx';
+import { accuracyTrend, type BacktestStep } from '../../engine/backtest.ts';
 import { insightsModel, PERIOD_LIMIT } from './insightsModel.ts';
 import './Insights.css';
 
@@ -35,13 +36,55 @@ export function Insights({ logs, settings, today, onMethod, onLearn }: Props) {
   const cycleMax = Math.max(45, ...m.cycleBars.map((b) => b.value));
   const periodMax = Math.max(10, ...m.periodBars.map((b) => b.value));
 
+  const hormonal = settings.mode === 'hormonal_contraception';
+  const conceive = settings.mode === 'conceive';
+  const temperature = hormonal ? null : (
+    <section aria-labelledby="ins-temp">
+      <h2 id="ins-temp">{t.temperature}</h2>
+      {m.temperature.points.length >= 2 ? (
+        <>
+          <TempChart
+            title={t.temperatureLabel(m.temperature.points.length)}
+            points={m.temperature.points}
+            coverline={m.temperature.coverline !== undefined ? { value: m.temperature.coverline, label: t.coverline } : undefined}
+            ovulationDay={m.temperature.ovulationDay !== undefined ? { day: m.temperature.ovulationDay, label: t.ovulationMark } : undefined}
+          />
+          <p className="insights-note">
+            {m.temperature.ovulationDate ? t.temperatureRise(formatDayMonth(m.temperature.ovulationDate)) : t.temperatureNoRise}
+          </p>
+        </>
+      ) : (
+        <p className="insights-note">{t.temperatureEmpty}</p>
+      )}
+    </section>
+  );
+  const patterns = (
+    <section aria-labelledby="ins-patterns">
+      <h2 id="ins-patterns">{t.patterns}</h2>
+      {m.patterns.length ? (
+        <ul className="insights-patterns">
+          {m.patterns.map((p) => (
+            <li key={p}>{p}</li>
+          ))}
+        </ul>
+      ) : (
+        <p className="insights-note">{t.patternsEmpty}</p>
+      )}
+    </section>
+  );
+
   return (
     <main className="insights">
-      <h1>{t.title}</h1>
-      <p className="insights-subtitle">
-        <span className="insights-kanji" lang="ja">{t.kanji}</span>
-        {t.subtitle}
-      </p>
+      {/* One header line: the character, the title and what the page shows. */}
+      <header className="insights-head">
+        <span className="insights-kanji" lang="ja" aria-hidden="true">
+          {t.kanji}
+        </span>
+        <div>
+          <h1>{t.title}</h1>
+          <p className="insights-subtitle">{t.subtitle}</p>
+        </div>
+      </header>
 
       <dl className="insights-figures">
         <div>
@@ -64,6 +107,10 @@ export function Insights({ logs, settings, today, onMethod, onLearn }: Props) {
       <p className="insights-note">
         {s.regularity === 'unknown' ? t.regularityPending : t.regularityText(s.variation!, m.variabilityLimit)}
       </p>
+
+      {/* Kinderwunsch: the temperature curve first; hormonal contraception: symptoms first. */}
+      {conceive && temperature}
+      {hormonal && patterns}
 
       <section aria-labelledby="ins-cycle">
         <h2 id="ins-cycle">{t.cycleLength}</h2>
@@ -97,39 +144,9 @@ export function Insights({ logs, settings, today, onMethod, onLearn }: Props) {
         </section>
       )}
 
-      {settings.mode !== 'hormonal_contraception' && (
-        <section aria-labelledby="ins-temp">
-          <h2 id="ins-temp">{t.temperature}</h2>
-          {m.temperature.points.length >= 2 ? (
-            <>
-              <TempChart
-                title={t.temperatureLabel(m.temperature.points.length)}
-                points={m.temperature.points}
-                coverline={m.temperature.coverline !== undefined ? { value: m.temperature.coverline, label: t.coverline } : undefined}
-                ovulationDay={m.temperature.ovulationDay !== undefined ? { day: m.temperature.ovulationDay, label: t.ovulationMark } : undefined}
-              />
-              <p className="insights-note">
-                {m.temperature.ovulationDate ? t.temperatureRise(formatDayMonth(m.temperature.ovulationDate)) : t.temperatureNoRise}
-              </p>
-            </>
-          ) : (
-            <p className="insights-note">{t.temperatureEmpty}</p>
-          )}
-        </section>
-      )}
+      {!conceive && temperature}
+      {!hormonal && patterns}
 
-      <section aria-labelledby="ins-patterns">
-        <h2 id="ins-patterns">{t.patterns}</h2>
-        {m.patterns.length ? (
-          <ul className="insights-patterns">
-            {m.patterns.map((p) => (
-              <li key={p}>{p}</li>
-            ))}
-          </ul>
-        ) : (
-          <p className="insights-note">{t.patternsEmpty}</p>
-        )}
-      </section>
 
       <section aria-labelledby="ins-accuracy">
         <h2 id="ins-accuracy">{t.accuracy}</h2>
@@ -138,6 +155,7 @@ export function Insights({ logs, settings, today, onMethod, onLearn }: Props) {
             ? t.accuracyText(m.accuracy.n, t.accuracyDays(m.accuracy.mae), Math.round(m.accuracy.coverage * m.accuracy.n))
             : t.accuracyPending}
         </p>
+        {m.accuracy && <AccuracyHistory steps={m.accuracy.steps} />}
       </section>
 
       <section aria-labelledby="ins-print" className="insights-print">
@@ -183,6 +201,36 @@ export function Insights({ logs, settings, today, onMethod, onLearn }: Props) {
         <LinkRow label={de.method.learn} onClick={onLearn} />
       </section>
     </main>
+  );
+}
+
+/**
+ * Baustein 5: how far off aya was for each cycle, predicted only from the cycles before it, and
+ * whether that got better. Bars are the absolute error; the line marks one day.
+ */
+function AccuracyHistory({ steps }: { steps: readonly BacktestStep[] }) {
+  const trend = accuracyTrend(steps);
+  const bars = steps.map((s) => ({
+    key: s.start,
+    label: `${Number(s.start.slice(8))}.${Number(s.start.slice(5, 7))}.`,
+    value: Math.abs(s.error),
+    description: t.accuracyStep(formatDayMonth(s.start), s.error),
+    muted: !s.hit,
+  }));
+  return (
+    <>
+      {steps.length >= 2 && (
+        <BarChart
+          title={t.accuracyChart(steps.length)}
+          bars={bars}
+          yMax={Math.max(4, ...bars.map((b) => b.value))}
+          tone="luteal"
+          limit={{ value: 1, label: t.accuracyOneDay }}
+        />
+      )}
+      {trend && <p className="insights-note">{t.accuracyTrend(t.accuracyDays(trend.early), t.accuracyDays(trend.recent), trend.count, trend.recent - trend.early)}</p>}
+      <p className="insights-note">{t.accuracyChartNote}</p>
+    </>
   );
 }
 

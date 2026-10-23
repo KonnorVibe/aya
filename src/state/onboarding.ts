@@ -8,7 +8,7 @@ export interface OnboardingInput {
   mode: Mode;
 }
 
-export const DEFAULT_SETTINGS: Settings = { mode: 'track', lockMinutes: 5, theme: 'system', privacyShield: false };
+export const DEFAULT_SETTINGS: Settings = { mode: 'track', lockMinutes: 5, theme: 'system' };
 const FALLBACK_PERIOD_LENGTH = 5;
 
 /**

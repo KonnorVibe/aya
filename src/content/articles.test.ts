@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ARTICLES, CATEGORY_LABEL, CYCLE_ARTICLE_ID, isNew } from './articles.ts';
+import { ARTICLES, CATEGORY_LABEL, CYCLE_ARTICLE_ID } from './articles.ts';
 
 describe('articles', () => {
   it('have unique ids, known categories and content', () => {
@@ -10,10 +10,10 @@ describe('articles', () => {
     }
   });
 
-  it('count as new for 30 days', () => {
-    const a = ARTICLES[1]!;
-    expect(isNew({ ...a, added: '2026-10-01' }, '2026-10-30')).toBe(true);
-    expect(isNew({ ...a, added: '2026-10-01' }, '2026-10-31')).toBe(false);
-    expect(isNew({ ...a, added: '2026-11-01' }, '2026-10-31')).toBe(false);
+  it('each end with a question whose answer is one of its options', () => {
+    for (const a of ARTICLES) {
+      expect(a.quiz.options.length).toBeGreaterThanOrEqual(2);
+      expect(a.quiz.options[a.quiz.answer]).toBeTruthy();
+    }
   });
 });

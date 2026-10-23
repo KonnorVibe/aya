@@ -167,8 +167,9 @@ export function createAppStore() {
       const r = need();
       const merged = Object.entries({ ...get().settings!, ...patch }).filter(([, v]) => v !== undefined);
       const settings = Object.fromEntries(merged) as unknown as Settings;
-      await r.saveSettings(settings);
+      // State first, so a second change right after builds on this one instead of the old settings.
       set({ settings });
+      await r.saveSettings(settings);
     },
 
     async saveDayLog(log) {

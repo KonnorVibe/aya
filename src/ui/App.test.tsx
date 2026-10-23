@@ -31,6 +31,11 @@ describe('App', () => {
     click('Periode begonnen');
     expect(await screen.findByRole('heading', { name: 'Tag 1 deiner Periode' })).toBeTruthy();
     click('Heute eintragen');
+    // A tap outside the sheet closes it.
+    const first = await screen.findByRole('dialog', { name: 'Heute' });
+    fireEvent.click(first, { clientX: -10, clientY: -10 });
+    await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Heute' })).toBeNull());
+    click('Heute eintragen');
     const sheet = await screen.findByRole('dialog', { name: 'Heute' });
     // Conceive mode: temperature and tests come before the symptoms.
     const headings = within(sheet).getAllByRole('heading', { level: 3 }).map((h) => h.textContent);
@@ -110,13 +115,34 @@ describe('App', () => {
     click('Zurück');
     expect(await screen.findByRole('heading', { name: 'Noch keine Periode eingetragen' })).toBeTruthy();
 
-    // Five tabs; Wissen lists the articles.
+    // Back goes one screen back, across tabs too.
+    click('Kalender');
+    expect(screen.getByRole('button', { name: 'Periode nachtragen' })).toBeTruthy();
+    click('Muster');
+    expect(screen.getByRole('heading', { level: 1, name: 'Muster' })).toBeTruthy();
+    act(() => window.history.back());
+    expect(await screen.findByRole('button', { name: 'Periode nachtragen' })).toBeTruthy();
+    act(() => window.history.back());
+    expect(await screen.findByRole('heading', { name: 'Noch keine Periode eingetragen' })).toBeTruthy();
+
+    // Five tabs; Wissen lists the articles, each unread until its question is answered.
     click('Wissen');
     expect(screen.getByRole('heading', { level: 1, name: 'Wissen' })).toBeTruthy();
-    click(screen.getAllByRole('button', { name: /Regelschmerzen/ })[0]!);
+    const card = () => screen.getByRole('button', { name: /Regelschmerzen/ });
+    expect(within(card()).getByText('Ungelesen')).toBeTruthy();
+    click(card());
     expect(screen.getByRole('heading', { level: 1, name: 'Regelschmerzen: Was wirklich hilft' })).toBeTruthy();
+    click('Erst wenn die Schmerzen unerträglich sind');
+    expect(screen.getByText('Nicht ganz.')).toBeTruthy();
+    click('Früh, sobald die Schmerzen beginnen');
+    expect(screen.getByText('Richtig.')).toBeTruthy();
+    const note = screen.getByLabelText('Was nimmst du mit?');
+    fireEvent.change(note, { target: { value: 'Wärmflasche ausprobieren' } });
+    fireEvent.blur(note);
+    await waitFor(() => expect(appStore.getState().settings?.articles?.regelschmerzen).toEqual({ answered: true, note: 'Wärmflasche ausprobieren' }));
     click('Zurück');
     expect(await screen.findByRole('heading', { level: 1, name: 'Wissen' })).toBeTruthy();
+    expect(within(card()).queryByText('Ungelesen')).toBeNull();
   });
 
   it('back-fills a period range in the calendar after a confirmation', async () => {

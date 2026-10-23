@@ -3,17 +3,25 @@
   flex-direction: column;
   max-width: 480px;
   margin: 0 auto;
-  padding: max(var(--space-5), env(safe-area-inset-top)) var(--gutter) calc(96px + env(safe-area-inset-bottom));
+  padding: 0 var(--gutter) calc(104px + env(safe-area-inset-bottom));
 }
 
+/* The header runs edge to edge, up under the status bar, lightly tinted in the mode's ink. */
 .today-head {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
-  padding-bottom: var(--space-3);
-  border-bottom: 1px solid var(--rule);
+  align-items: center;
+  margin: 0 calc(var(--gutter) * -1);
+  padding: max(var(--space-3), env(safe-area-inset-top)) var(--gutter) var(--space-2);
+  background: color-mix(in srgb, var(--mode) 13%, var(--ground));
+  border-bottom: 1px solid color-mix(in srgb, var(--mode) 30%, transparent);
   font-size: var(--text-sm);
   color: var(--ink-muted);
+}
+@media (min-width: 520px) {
+  .today-head {
+    border-radius: 0 0 var(--radius-control) var(--radius-control);
+  }
 }
 
 .wordmark {
@@ -24,33 +32,98 @@
 }
 
 .today-statement {
-  padding-top: var(--space-5);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-top: var(--space-3);
 }
 .today-statement h1 {
   font-family: var(--font-name);
   font-style: italic;
   font-weight: 400;
-  font-size: var(--text-xl);
-  line-height: 1.1;
+  font-size: 2rem;
+  line-height: 1.08;
   letter-spacing: -0.01em;
 }
 .today-statement p {
-  margin-top: var(--space-2);
+  margin-top: var(--space-1);
   color: var(--ink-muted);
+}
+.today-empty {
+  display: block;
+}
+
+/* Sicherheit as a small filling donut next to the statement. */
+.today-confidence {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  margin: 0;
+}
+.today-confidence figcaption {
+  font-size: 0.625rem;
+  color: var(--ink-muted);
+  white-space: nowrap;
 }
 
 .today-chart {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-3);
-  margin: var(--space-5) 0 0;
+  gap: var(--space-2);
+  margin: var(--space-3) 0 0;
 }
 
+/* Side by side: both actions are in view together with the ring. */
 .today-actions {
   display: grid;
-  gap: var(--space-3);
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+.today-actions .btn {
+  padding: 0 var(--space-2);
+  font-size: 0.9375rem;
+  white-space: nowrap;
+}
+
+/* The mode's focus: next period, fertile window or next bleed. */
+.today-focus {
   margin-top: var(--space-5);
+  padding: var(--space-4);
+  border-radius: var(--radius-control);
+  background: color-mix(in srgb, var(--mode) 9%, var(--ground));
+  border: 1px solid color-mix(in srgb, var(--mode) 35%, transparent);
+}
+.today-focus h2 {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mode);
+}
+.today-focus-headline {
+  margin-top: var(--space-1);
+  font-family: var(--font-name);
+  font-style: italic;
+  font-size: var(--text-lg);
+  line-height: 1.25;
+}
+.today-focus.focus-fertile {
+  --mode: var(--fertile);
+}
+.today-focus ul {
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.today-focus li {
+  padding: var(--space-2) 0;
+  border-top: 1px solid color-mix(in srgb, var(--mode) 20%, transparent);
+  font-size: var(--text-sm);
+  line-height: 1.45;
+  text-wrap: pretty;
 }
 
 .today-empty p {
@@ -112,7 +185,7 @@
 /* One line per day that fits the phase: a small phase label in its ink, then the line itself. */
 .today-quote {
   --tone: var(--ink-muted);
-  margin: var(--space-5) 0 0;
+  margin: var(--space-3) 0 0;
 }
 .today-quote figcaption {
   display: flex;
@@ -131,7 +204,7 @@
   background: var(--tone);
 }
 .today-quote p {
-  margin-top: var(--space-2);
+  margin-top: var(--space-1);
   font-family: var(--font-name);
   font-style: italic;
   font-size: var(--text-md);

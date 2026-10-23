@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ISODate } from '../../engine/dates.ts';
 import { MOOD_IDS, SYMPTOM_IDS, type DayLog, type Flow, type Mode, type MoodId, type SymptomId } from '../../engine/types.ts';
 import { de, formatLongDate } from '../../i18n/de.ts';
 import { AdvancedLog, hasAdvanced } from './AdvancedLog.tsx';
 import { Button } from './Button.tsx';
 import { Chip } from './Chip.tsx';
+import { useSheetDismiss } from './useSheetDismiss.ts';
 import './DayLogSheet.css';
 
 const FLOWS: (Flow | 'none')[] = ['none', 'spotting', 'light', 'medium', 'heavy'];
@@ -70,6 +71,13 @@ export function DayLogSheet({ date, today, log, history, mode, onSave, onClose }
     if (note !== (current.note ?? '')) commit(clean({ ...current, note }));
     onClose();
   };
+  // The latest close (it carries the note being typed) for the tap-outside and swipe-down handlers.
+  const closeRef = useRef(close);
+  useEffect(() => {
+    closeRef.current = close;
+  });
+  const dismiss = useCallback(() => closeRef.current(), []);
+  useSheetDismiss(ref, dismiss);
 
   const protectedSex = current.sex?.some((s) => s.protected === true) ?? false;
   const unprotectedSex = current.sex?.some((s) => s.protected !== true) ?? false;
@@ -92,6 +100,7 @@ export function DayLogSheet({ date, today, log, history, mode, onSave, onClose }
 
   return (
     <dialog ref={ref} className="sheet" aria-labelledby="sheet-title" onCancel={(e) => (e.preventDefault(), close())}>
+      <div className="sheet-grabber" aria-hidden="true" />
       <header className="sheet-head">
         <h2 id="sheet-title">{t.title(formatLongDate(date), date === today)}</h2>
         <Button variant="quiet" onClick={close}>

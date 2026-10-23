@@ -2,7 +2,9 @@
   position: fixed;
   inset: auto 0 0 0;
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 104px));
+  /* The Muster seal in the middle gets the widest column. */
+  grid-template-columns: repeat(2, minmax(0, 96px)) minmax(76px, 112px) repeat(2, minmax(0, 96px));
+  align-items: end;
   justify-content: center;
   padding: var(--space-1) 0 max(var(--space-2), env(safe-area-inset-bottom));
   background: color-mix(in srgb, var(--ground) 92%, transparent);
@@ -40,5 +42,61 @@
   font-weight: 600;
 }
 .tab[aria-current='page'] svg {
-  stroke: var(--accent);
+  stroke: var(--mode);
+}
+
+/* Muster: the 綾 seal, raised above the bar as the centre of attention, in the mode's ink. */
+.tab-seal {
+  align-self: start;
+  margin-top: -22px;
+  min-height: 0;
+}
+.tab-seal .aya-seal {
+  width: 64px;
+  height: 64px;
+  padding: 9px;
+  border-radius: 20px;
+  background: var(--ground);
+  border: 1px solid var(--rule-strong);
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--ink) 14%, transparent);
+  color: var(--ink-muted);
+  transition: transform 160ms var(--ease-out), color 160ms var(--ease-out), background-color 160ms var(--ease-out);
+}
+.aya-seal-glyph {
+  font-family: 'Hiragino Mincho ProN', 'Hiragino Mincho Pro', 'Yu Mincho', 'Noto Serif JP', serif;
+  font-size: 40px;
+  fill: currentColor;
+}
+.tab-seal:active .aya-seal {
+  transform: scale(0.96);
+}
+.tab-seal[aria-current='page'] .aya-seal {
+  color: var(--mode);
+  background: color-mix(in srgb, var(--mode) 10%, var(--ground));
+  border-color: var(--mode);
+}
+.tab-seal:focus-visible {
+  outline: none;
+}
+.tab-seal:focus-visible .aya-seal {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+
+/* Heute: the braided aya mark in the tab's colour. */
+.tab .mark-icon {
+  width: 24px;
+  height: 24px;
+}
+.tab .mark-icon path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 7;
+  stroke-linecap: round;
+}
+.tab .mark-icon .mark-icon-under {
+  opacity: 0.55;
+}
+.tab[aria-current='page'] .mark-icon path {
+  stroke: var(--mode);
 }

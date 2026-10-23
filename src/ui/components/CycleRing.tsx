@@ -53,6 +53,13 @@ interface Props {
   label: string;
   dayCaption: string;
   rangeLabels?: [string, string] | undefined;
+  /** Names written on the phase arcs; "Blutung" under hormonal contraception. */
+  phaseNames?: Record<'period' | 'fertile' | 'luteal', string>;
+  /**
+   * What the mode is about, drawn bold on the outer orbit: the fertile window (Kinderwunsch) or the
+   * range of the next period or bleed (the other modes).
+   */
+  focus?: 'fertile' | 'next' | undefined;
 }
 
 /**
@@ -60,8 +67,8 @@ interface Props {
  * flow, colour and a written name the phase, hollow points are forecast, the amber reticle marks
  * today. The dashed outer arc is the 80 % range for the next period, its ends ticked and dated.
  */
-export function CycleRing({ model, cycleDay, label, dayCaption, rangeLabels }: Props) {
-  const { length, days, range } = model;
+export function CycleRing({ model, cycleDay, label, dayCaption, rangeLabels, phaseNames = de.ringPhase, focus }: Props) {
+  const { length, days, range, fertile } = model;
   const today = days.find((d) => d.isToday);
   const weekTicks = Array.from({ length: Math.floor(length / 7) + 1 }, (_, i) => i * 7).filter((o) => o < length);
 
@@ -81,8 +88,11 @@ export function CycleRing({ model, cycleDay, label, dayCaption, rangeLabels }: P
         })}
       </g>
 
+      {focus === 'fertile' && fertile && (
+        <path className="ring-focus ring-focus-fertile" aria-hidden="true" d={arcPath(fertile.start, fertile.end + 1, length, RANGE_ORBIT)} />
+      )}
       {range && rangeLabels && (
-      <g className="ring-range" aria-hidden="true">
+      <g className={focus === 'next' ? 'ring-range is-focus' : 'ring-range'} aria-hidden="true">
         <path d={arcPath(range.earliest, range.latest, length, RANGE_ORBIT)} />
         {[range.earliest, range.latest].map((o, i) => {
           const a = point(o, length, RANGE_ORBIT - 4);
@@ -122,7 +132,7 @@ export function CycleRing({ model, cycleDay, label, dayCaption, rangeLabels }: P
           const anchor = Math.abs(p.x - C) < 30 ? 'middle' : p.x < C ? 'start' : 'end';
           return (
             <text key={r.from} className={`name-${r.group}`} x={p.x} y={p.y + 4} textAnchor={anchor}>
-              {de.ringPhase[r.group]}
+              {phaseNames[r.group]}
             </text>
           );
         })}

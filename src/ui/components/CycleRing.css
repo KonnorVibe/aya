@@ -1,6 +1,6 @@
 .ring {
   display: block;
-  width: min(288px, 76vw);
+  width: min(236px, 62vw);
   height: auto;
   overflow: visible;
 }
@@ -92,4 +92,22 @@
   .ring-day {
     animation: none;
   }
+}
+
+/* The mode's focus on the outer orbit: bold and solid, in the mode's ink. */
+.ring-focus {
+  fill: none;
+  stroke-width: 5;
+  stroke-linecap: round;
+}
+.ring-focus-fertile {
+  stroke: var(--fertile);
+}
+.ring-range.is-focus path {
+  stroke: var(--mode);
+  stroke-width: 4;
+  stroke-dasharray: none;
+}
+.ring-range.is-focus line {
+  stroke: var(--mode);
 }

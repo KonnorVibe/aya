@@ -150,3 +150,13 @@ section .sheet-chips + .sheet-field {
 .sheet-more > section:last-child {
   border-bottom: 0;
 }
+
+/* Handle at the top: a hint that the sheet can be swiped down. */
+.sheet-grabber {
+  flex: none;
+  width: 40px;
+  height: 5px;
+  margin: var(--space-2) auto 0;
+  border-radius: var(--radius-pill);
+  background: var(--rule-strong);
+}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { backtest } from './backtest.ts';
+import { accuracyTrend, backtest } from './backtest.ts';
 import { deriveCycles } from './cycles.ts';
 import { normal, periodLogs, rng } from './fixtures.ts';
 
@@ -30,5 +30,24 @@ describe('backtest', () => {
     expect(coverage).toBeLessThanOrEqual(0.9);
     expect(mae).toBeGreaterThanOrEqual(1);
     expect(mae).toBeLessThanOrEqual(3);
+  });
+
+  it('lists every predicted cycle with its signed error', () => {
+    // 28-day cycles, then one 32: the last prediction is 4 days early.
+    const result = backtest(deriveCycles(periodLogs('2025-01-01', [28, 28, 28, 28, 32]).logs))!;
+    expect(result.steps).toHaveLength(3);
+    expect(result.steps.at(-1)!.error).toBeGreaterThan(2);
+    expect(result.n).toBe(result.steps.length);
+  });
+});
+
+describe('accuracyTrend', () => {
+  const step = (error: number) => ({ start: '2026-01-01', error, hit: Math.abs(error) <= 2 });
+  it('compares the first predictions with the latest', () => {
+    expect(accuracyTrend([step(4), step(-3), step(1), step(0), step(1), step(-1)])).toEqual({ early: 8 / 3, recent: 2 / 3, count: 3 });
+    expect(accuracyTrend([step(4), step(2), step(0), step(1)])).toEqual({ early: 3, recent: 0.5, count: 2 });
+  });
+  it('needs four predictions', () => {
+    expect(accuracyTrend([step(1), step(2), step(3)])).toBeNull();
   });
 });

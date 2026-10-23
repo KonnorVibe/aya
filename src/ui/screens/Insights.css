@@ -3,13 +3,19 @@
   margin: 0 auto;
   padding: max(var(--space-5), env(safe-area-inset-top)) var(--gutter) calc(96px + env(safe-area-inset-bottom));
 }
+.insights-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--rule);
+}
 .insights h1 {
   font-family: var(--font-name);
   font-style: italic;
   font-weight: 400;
   font-size: var(--text-xl);
-  padding-bottom: var(--space-3);
-  border-bottom: 1px solid var(--rule);
+  line-height: 1.1;
 }
 .insights section {
   margin-top: var(--space-6);
@@ -152,17 +158,17 @@
 }
 
 .insights-subtitle {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  margin-top: var(--space-3);
+  margin-top: 2px;
   font-size: var(--text-sm);
-  line-height: 1.5;
+  line-height: 1.4;
   color: var(--ink-muted);
+  text-wrap: pretty;
 }
+/* 綾 in the same Mincho as the tab seal. */
 .insights-kanji {
   flex: none;
-  font-size: var(--text-xl);
+  font-family: 'Hiragino Mincho ProN', 'Hiragino Mincho Pro', 'Yu Mincho', 'Noto Serif JP', serif;
+  font-size: 3.25rem;
   line-height: 1;
-  color: var(--accent);
+  color: var(--mode);
 }

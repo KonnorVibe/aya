@@ -3,12 +3,14 @@ import { deriveCycles } from '../../engine/cycles.ts';
 import type { ISODate } from '../../engine/dates.ts';
 import type { Prediction } from '../../engine/prediction.ts';
 import { overridesFrom, type DayLog, type Settings } from '../../engine/types.ts';
-import { confidenceLabel, de, formatDayMonth, formatLongDate, formatRange, statement } from '../../i18n/de.ts';
+import { de, formatDayMonth, formatLongDate, formatRange, statement } from '../../i18n/de.ts';
 import { Button } from '../components/Button.tsx';
 import { CycleRing } from '../components/CycleRing.tsx';
 import { Legend } from '../components/Legend.tsx';
 import { emptyRingModel, ringModel } from '../components/ringModel.ts';
 import { phaseQuote } from './phaseQuote.ts';
+import { focusModel, type Focus } from './focusModel.ts';
+import { ConfidenceDonut, confidencePercent, FULL_CYCLES } from '../components/ConfidenceDonut.tsx';
 import { logSummary, todayNotes } from './todayNotes.ts';
 import './Today.css';
 
@@ -17,7 +19,7 @@ const shortDay = (d: ISODate) => `${Number(d.slice(8))}.`;
 interface Props {
   prediction: Prediction | null;
   logs: readonly DayLog[];
-  settings: Pick<Settings, 'mode' | 'birthYear' | 'includedCycles' | 'excludedCycles'>;
+  settings: Pick<Settings, 'mode' | 'birthYear' | 'includedCycles' | 'excludedCycles' | 'defaultPeriodLength'>;
   today: ISODate;
   lastBackupAt?: string | undefined;
   onPeriodStart: () => void;
@@ -41,6 +43,10 @@ export function Today({ prediction, logs, settings, today, lastBackupAt, onPerio
       <span>{formatLongDate(today)}</span>
     </header>
   );
+  const hormonal = settings.mode === 'hormonal_contraception';
+  const conceive = settings.mode === 'conceive';
+  const startLabel = hormonal ? de.bleedStarted : de.periodStarted;
+  const endLabel = hormonal ? de.bleedEnded : de.periodEnded;
   const summary = logSummary(logs.find((l) => l.date === today));
   if (!prediction) {
     return (
@@ -54,7 +60,7 @@ export function Today({ prediction, logs, settings, today, lastBackupAt, onPerio
           <CycleRing model={emptyRingModel(today)} label={de.emptyToday.ring} dayCaption={de.emptyToday.ringCaption} />
         </figure>
         <div className="today-actions">
-          <Button onClick={onPeriodStart}>{de.periodStarted}</Button>
+          <Button onClick={onPeriodStart}>{startLabel}</Button>
           <Button variant="secondary" onClick={onLog}>
             {de.logToday}
           </Button>
@@ -71,6 +77,8 @@ export function Today({ prediction, logs, settings, today, lastBackupAt, onPerio
   }
   const notes = todayNotes(prediction, logs, settings, today, lastBackupAt);
   const quote = phaseQuote(prediction, today, settings.mode);
+  const focus = focusModel(prediction, logs, settings, today);
+  const percent = confidencePercent(prediction);
   const model = ringModel(prediction, logs, today);
   const range = formatRange(prediction.nextPeriod.earliest, prediction.nextPeriod.latest);
   // Once "Periode beendet" was tapped, the button offers a new start again.
@@ -89,12 +97,16 @@ export function Today({ prediction, logs, settings, today, lastBackupAt, onPerio
       </figure>
 
       <section className="today-statement" aria-live="polite">
-        <h1>{statement(prediction, today)}</h1>
-        <p>
-          {de.expected} {range}
-          <br />
-          {confidenceLabel[prediction.confidence]}
-        </p>
+        <div>
+          <h1>{statement(prediction, today, settings.mode)}</h1>
+          <p>
+            {conceive ? de.expectedPeriod : hormonal ? de.expectedBleed : de.expected} {range}
+          </p>
+        </div>
+        <figure className="today-confidence">
+          <ConfidenceDonut percent={percent} label={de.confidence.label(percent, Math.min(prediction.usedCycles, FULL_CYCLES), FULL_CYCLES)} />
+          <figcaption aria-hidden="true">{de.confidence.caption(Math.min(prediction.usedCycles, FULL_CYCLES), FULL_CYCLES)}</figcaption>
+        </figure>
       </section>
 
       <figure className="today-chart">
@@ -104,18 +116,34 @@ export function Today({ prediction, logs, settings, today, lastBackupAt, onPerio
           dayCaption={de.cycleDayOf(model.length)}
           label={de.ringLabel(prediction.cycleDay, model.length, range)}
           rangeLabels={[shortDay(prediction.nextPeriod.earliest), shortDay(prediction.nextPeriod.latest)]}
+          phaseNames={hormonal ? de.ringPhaseHormonal : de.ringPhase}
+          focus={focus.kind === 'fertile' ? 'fertile' : 'next'}
         />
         <figcaption>
-          <Legend showFertility={!!prediction.fertileWindow} />
+          <Legend showFertility={!!prediction.fertileWindow} hormonal={hormonal} />
         </figcaption>
       </figure>
 
       <div className="today-actions">
-        <Button onClick={inPeriod ? onPeriodEnd : onPeriodStart}>{inPeriod ? de.periodEnded : de.periodStarted}</Button>
-        <Button variant="secondary" onClick={onLog}>
-          {de.logToday}
-        </Button>
+        {/* Kinderwunsch: logging temperature and tests is the daily task, so it comes first. */}
+        {conceive && !inPeriod ? (
+          <>
+            <Button onClick={onLog}>{de.logToday}</Button>
+            <Button variant="secondary" onClick={onPeriodStart}>
+              {startLabel}
+            </Button>
+          </>
+        ) : (
+          <>
+            <Button onClick={inPeriod ? onPeriodEnd : onPeriodStart}>{inPeriod ? endLabel : startLabel}</Button>
+            <Button variant="secondary" onClick={onLog}>
+              {de.logToday}
+            </Button>
+          </>
+        )}
       </div>
+
+      <FocusCard focus={focus} />
 
       {summary && <TodaySummary text={summary} />}
 
@@ -129,6 +157,21 @@ export function Today({ prediction, logs, settings, today, lastBackupAt, onPerio
         </ul>
       )}
     </main>
+  );
+}
+
+/** What the mode is about, with the few facts that help now. */
+function FocusCard({ focus }: { focus: Focus }) {
+  return (
+    <section className={`today-focus focus-${focus.kind}`} aria-labelledby="today-focus-title">
+      <h2 id="today-focus-title">{focus.title}</h2>
+      <p className="today-focus-headline">{focus.headline}</p>
+      <ul>
+        {focus.rows.map((r) => (
+          <li key={r}>{r}</li>
+        ))}
+      </ul>
+    </section>
   );
 }
 

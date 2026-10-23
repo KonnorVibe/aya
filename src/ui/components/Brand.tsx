@@ -17,6 +17,16 @@ const pieces = strands.map((pts, s) => {
   return out;
 });
 
+/** The mark in one colour for the tab bar: the under strand a little lighter, so the weave reads. */
+export function MarkIcon() {
+  return (
+    <svg className="mark-icon" viewBox="0 0 100 100" aria-hidden="true">
+      {pieces[0]!.map((d, i) => <path key={`a${i}`} d={d} />)}
+      {pieces[1]!.map((d, i) => <path key={`b${i}`} d={d} className="mark-icon-under" />)}
+    </svg>
+  );
+}
+
 export function Mark({ size = 24 }: { size?: number }) {
   return (
     <svg className="mark" width={size} height={size} viewBox="0 0 100 100" aria-hidden="true">

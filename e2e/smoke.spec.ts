@@ -43,6 +43,12 @@ test('onboarding, logging, encryption at rest, passphrase switch, lock, offline 
     if (!r.url().startsWith('http://127.0.0.1:4173')) external.push(r.url());
   });
 
+  // WebKit on macOS has the share sheet like the iPhone; without it aya falls back to a download,
+  // which the test can catch. Linux WebKit in CI has no share sheet anyway.
+  await page.addInitScript(() => {
+    Object.defineProperty(Navigator.prototype, 'share', { value: undefined, configurable: true });
+    Object.defineProperty(Navigator.prototype, 'canShare', { value: undefined, configurable: true });
+  });
   await page.goto('/');
   await expect(page.getByRole('heading', { name: 'Deine Daten bleiben bei dir' })).toBeVisible();
   await page.getByRole('button', { name: 'Weiter' }).click();

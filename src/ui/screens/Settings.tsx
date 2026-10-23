@@ -5,7 +5,9 @@ import type { Mode, Settings as SettingsType } from '../../engine/types.ts';
 import { de, formatLongDate } from '../../i18n/de.ts';
 import { useApp } from '../../state/store.ts';
 import { Button } from '../components/Button.tsx';
+import { MiniPreview, MiniPreviewSystem } from '../components/MiniPreview.tsx';
 import { PinPad } from '../components/PinPad.tsx';
+import { LINKS } from '../../content/externalLinks.ts';
 import { BackupPanel, DeletePanel, IcsPanel, RestorePanel } from './settings/DataPanels.tsx';
 import { CsvExportPanel } from './settings/ImportPanels.tsx';
 import type { ImportSource } from './ImportPage.tsx';
@@ -108,30 +110,27 @@ export function Settings({ prediction, today, onMethod, onImport }: Props) {
 
       <section aria-labelledby="set-general">
         <h2 id="set-general">{t.generalSection}</h2>
-        <fieldset className="choices">
+        <fieldset className="tiles">
           <legend className="row-legend">{t.mode}</legend>
           {MODES.map((m) => (
-            <label key={m} className="choice">
-              <input type="radio" name="mode" checked={settings.mode === m} onChange={() => void updateSettings({ mode: m })} />
-              <span className="choice-text">
-                <span className="choice-label">{de.onboarding.mode.options[m].label}</span>
-                <span className="choice-hint">{de.onboarding.mode.options[m].hint}</span>
-              </span>
+            <label key={m} className="tile" data-tile-mode={m}>
+              <input type="radio" name="mode" className="visually-hidden" checked={settings.mode === m} onChange={() => void updateSettings({ mode: m })} />
+              <MiniPreview mode={m} />
+              <span className="tile-label">{de.onboarding.mode.options[m].label}</span>
             </label>
           ))}
         </fieldset>
+        <p className="row-hint">{de.onboarding.mode.options[settings.mode].hint}</p>
 
-        <fieldset className="row segmented">
-          <legend className="visually-hidden">{t.themeLabel}</legend>
-          <span aria-hidden="true">{t.themeLabel}</span>
-          <span className="segmented-options">
-            {THEMES.map((th) => (
-              <label key={th}>
-                <input type="radio" name="theme" checked={settings.theme === th} onChange={() => void updateSettings({ theme: th })} />
-                <span>{de.theme[th]}</span>
-              </label>
-            ))}
-          </span>
+        <fieldset className="tiles">
+          <legend className="row-legend">{t.themeLabel}</legend>
+          {THEMES.map((th) => (
+            <label key={th} className="tile" data-tile-mode={settings.mode}>
+              <input type="radio" name="theme" className="visually-hidden" checked={settings.theme === th} onChange={() => void updateSettings({ theme: th })} />
+              {th === 'system' ? <MiniPreviewSystem mode={settings.mode} /> : <MiniPreview mode={settings.mode} theme={th} />}
+              <span className="tile-label">{de.theme[th]}</span>
+            </label>
+          ))}
         </fieldset>
 
         <label className="row">
@@ -219,17 +218,6 @@ export function Settings({ prediction, today, onMethod, onImport }: Props) {
           </>
         )}
 
-        <label className="row">
-          <span>{t.shield}</span>
-          <input
-            type="checkbox"
-            role="switch"
-            className="switch"
-            checked={!!settings.privacyShield}
-            onChange={(e) => void updateSettings({ privacyShield: e.target.checked })}
-          />
-        </label>
-        <p className="row-hint">{t.shieldHint}</p>
 
         {newRecovery ? (
           <RecoveryView
@@ -288,7 +276,7 @@ export function Settings({ prediction, today, onMethod, onImport }: Props) {
         </Disclosure>
       </section>
 
-      <section aria-labelledby="set-delete">
+      <section aria-labelledby="set-delete" className="settings-danger">
         <h2 id="set-delete">{t.deleteSection}</h2>
         <Disclosure id="panel-delete" label={t.deleteAll} open={panel === 'delete'} onToggle={() => toggle('delete')}>
           <DeletePanel />
@@ -298,7 +286,18 @@ export function Settings({ prediction, today, onMethod, onImport }: Props) {
       <section aria-labelledby="set-about">
         <h2 id="set-about">{t.aboutSection}</h2>
         <p className="settings-disclaimer">{de.disclaimer}</p>
-        <p className="row-hint">{t.privacy}</p>
+        <h3 className="settings-about-title">{t.aboutDataTitle}</h3>
+        <ul className="settings-about">
+          {t.aboutData.map((line) => (
+            <li key={line}>{line}</li>
+          ))}
+          <li>
+            {t.aboutSource}{' '}
+            <a href={LINKS.source} target="_blank" rel="noopener noreferrer">
+              {t.aboutSourceLink}
+            </a>
+          </li>
+        </ul>
         <p className="settings-links">
           <a
             href="#methodik"

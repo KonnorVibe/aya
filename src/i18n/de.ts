@@ -1,5 +1,7 @@
 import { diffDays, type ISODate } from '../engine/dates.ts';
 import type { Confidence, Prediction } from '../engine/prediction.ts';
+import type { Mode } from '../engine/types.ts';
+import { LINKS } from '../content/externalLinks.ts';
 
 const dayMonth = new Intl.DateTimeFormat('de-DE', { day: 'numeric', month: 'short', timeZone: 'UTC' });
 const monthYear = new Intl.DateTimeFormat('de-DE', { month: 'long', year: 'numeric', timeZone: 'UTC' });
@@ -33,29 +35,46 @@ export const confidenceLabel: Record<Confidence, string> = {
   high: 'Sicherheit\u00a0hoch',
 };
 
-/** The one sentence the Today screen leads with. */
-export function statement(p: Prediction, today: ISODate): string {
-  if (p.periodDay) return `Tag ${p.periodDay} deiner Periode`;
-  if (p.lateByDays !== undefined) return p.lateByDays === 1 ? 'Periode seit 1 Tag später' : `Periode seit ${p.lateByDays} Tagen später`;
+/**
+ * The one sentence the Today screen leads with, by mode: "Kinderwunsch" leads with the fertile
+ * window, hormonal contraception says "Blutung" (a withdrawal bleed, not a period).
+ */
+export function statement(p: Prediction, today: ISODate, mode: Mode = 'track'): string {
+  const bleed = mode === 'hormonal_contraception' ? 'Blutung' : 'Periode';
+  if (p.periodDay) return `Tag ${p.periodDay} deiner ${bleed}`;
+  if (p.lateByDays !== undefined) return p.lateByDays === 1 ? `${bleed} seit 1 Tag später` : `${bleed} seit ${p.lateByDays} Tagen später`;
   const until = diffDays(p.nextPeriod.mostLikely, today);
-  if (until <= 0) return 'Periode heute erwartet';
-  if (p.ovulation && p.fertileWindow && today >= p.fertileWindow.peakStart && today <= p.fertileWindow.peakEnd) {
-    return 'Hohe Fruchtbarkeit';
+  if (until <= 0) return `${bleed} heute erwartet`;
+  const w = p.fertileWindow;
+  if (mode === 'conceive' && w && p.ovulation) {
+    if (today === p.ovulation.mostLikely) return 'Eisprung voraussichtlich heute';
+    if (today >= w.peakStart && today <= w.peakEnd) return 'Hohe Fruchtbarkeit';
+    if (today >= w.start && today <= w.end) return 'Fruchtbare Tage';
+    if (today < w.start) {
+      const n = diffDays(w.start, today);
+      return n === 1 ? 'Fruchtbare Tage ab morgen' : `Fruchtbare Tage in ${days(n)}`;
+    }
   }
-  return until === 1 ? 'Periode morgen' : `Periode in ${days(until)}`;
+  if (p.ovulation && w && today >= w.peakStart && today <= w.peakEnd) return 'Hohe Fruchtbarkeit';
+  return until === 1 ? `${bleed} morgen` : `${bleed} in ${days(until)}`;
 }
 
 export const de = {
   appName: 'aya',
   periodStarted: 'Periode begonnen',
   periodEnded: 'Periode beendet',
+  bleedStarted: 'Blutung begonnen',
+  bleedEnded: 'Blutung beendet',
   logToday: 'Heute eintragen',
   expected: 'voraussichtlich',
+  expectedPeriod: 'Periode voraussichtlich',
+  expectedBleed: 'Blutung voraussichtlich',
   cycleDayOf: (n: number) => `Zyklustag von etwa ${n}`,
   ringLabel: (day: number, length: number, range: string) =>
     `Zyklustag ${day} von etwa ${length}. Nächste Periode voraussichtlich ${range}.`,
   legend: {
     period: 'Periode',
+    bleed: 'Blutung',
     fertile: 'fruchtbar',
     ovulation: 'Eisprung',
     luteal: 'Lutealphase',
@@ -66,6 +85,7 @@ export const de = {
     flowHeavy: 'stark',
   },
   ringPhase: { period: 'Periode', fertile: 'fruchtbar', luteal: 'Lutealphase' },
+  ringPhaseHormonal: { period: 'Blutung', fertile: 'fruchtbar', luteal: 'Lutealphase' },
   log: {
     title: (date: string, isToday: boolean) => (isToday ? 'Heute' : date),
     done: 'Fertig',
@@ -141,7 +161,7 @@ export const de = {
     refinedBbt: 'Vorhersage verfeinert durch deinen Temperaturanstieg.',
     refinedLh: 'Vorhersage verfeinert durch deinen positiven LH-Test.',
     irregular: 'Deine Zyklen schwanken stärker als üblich, deshalb ist die Spanne breiter.',
-    fertileWindow: (range: string) => `Fruchtbares Fenster voraussichtlich ${range}.`,
+    fertileWindow: (range: string) => `Fruchtbares Fenster voraussichtlich ${range}${range.endsWith('.') ? '' : '.'}`,
     upcoming: (list: string) => `Erfahrungsgemäß könnten in den nächsten Tagen ${list} auftreten.`,
     health: {
       short_cycles: 'Deine Zyklen sind meist kürzer als 24 Tage. Sprich bei Gelegenheit mit deiner Ärztin darüber.',
@@ -248,6 +268,19 @@ export const de = {
     accuracyPending: 'Nach drei Zyklen kann aya prüfen, wie genau die Vorhersagen bei dir sind.',
     accuracyText: (n: number, mae: string, hits: number) =>
       `aya hat ${n} deiner Zyklen nachträglich vorhergesagt, nur mit den Daten davor. Im Mittel lag der wahrscheinlichste Tag ${mae} daneben. ${hits} von ${n} Mal lag der echte Beginn in der angezeigten Spanne.`,
+    accuracyChart: (n: number) => `Abweichung der Vorhersage in den letzten ${n} Zyklen`,
+    accuracyStep: (date: string, error: number) =>
+      error === 0
+        ? `Zyklus ab ${date}: genau getroffen`
+        : `Zyklus ab ${date}: Periode ${Math.abs(error)} ${Math.abs(error) === 1 ? 'Tag' : 'Tage'} ${error > 0 ? 'später' : 'früher'} als vorhergesagt`,
+    accuracyOneDay: '1 Tag',
+    accuracyChartNote: 'Jeder Balken ist ein Zyklus: so viele Tage lag der wahrscheinlichste Tag daneben. Hohle Balken: Der echte Beginn lag außerhalb der Spanne.',
+    accuracyTrend: (early: string, recent: string, count: number, change: number) =>
+      change < -0.5
+        ? `Anfangs lag aya ${early} daneben, bei den letzten ${count} Zyklen nur noch ${recent}. Je mehr du einträgst, desto besser kennt aya dich.`
+        : change > 0.5
+          ? `Zuletzt lag aya ${recent} daneben, anfangs ${early}. Das passiert, wenn sich dein Zyklus verändert, zum Beispiel durch Stress oder neue Medikamente.`
+          : `aya liegt gleichbleibend ${recent} daneben.`,
     accuracyDays: (d: number) => (d < 0.95 ? 'weniger als einen Tag' : d < 1.5 ? 'etwa einen Tag' : `etwa ${Math.round(d)} Tage`),
     print: 'Übersicht drucken',
     printHint: 'Für Arzttermine. Du kannst die Übersicht als PDF sichern oder ausdrucken. Es wird nichts verschickt.',
@@ -260,6 +293,38 @@ export const de = {
    * The line above the statement on Today. Each one follows what the body is actually doing in that
    * phase (see the Wissen page) and says "viele" rather than "du": cycles differ.
    */
+  focus: {
+    today: 'heute',
+    tomorrow: 'morgen',
+    inDays: (n: number) => `in ${n} Tagen`,
+    nextTitle: 'Nächste Periode',
+    bleedTitle: 'Nächste Blutung',
+    fertileTitle: 'Fruchtbares Fenster',
+    afterTitle: 'Nach dem fruchtbaren Fenster',
+    now: (end: string) => `jetzt, bis ${end}`,
+    waiting: 'Jetzt heißt es abwarten',
+    peak: (range: string) => `Höchste Chance: ${range}`,
+    ovulation: (date: string) => `Eisprung voraussichtlich am ${date}`,
+    ovulationConfirmed: (date: string) => `Eisprung am ${date}, bestätigt durch deine Temperatur`,
+    lhFrom: (date: string) => `LH-Tests ab ${date} täglich, am besten nachmittags`,
+    timing: 'Sex alle ein bis zwei Tage im Fenster erhöht die Chance am meisten.',
+    testFrom: (date: string) => `Ein Schwangerschaftstest ist ab ${date} aussagekräftig.`,
+    nextPeriod: (range: string) => `Kommt keine Schwangerschaft zustande, beginnt die nächste Periode voraussichtlich ${range}.`,
+    duration: (n: number) => `Dauer meist ${n === 1 ? '1 Tag' : `${n} Tage`}`,
+    lastCycle: (n: number) => `Dein letzter Zyklus: ${n} Tage`,
+    spread: (range: string) => `In etwa vier von fünf Fällen beginnt sie zwischen ${range}.`,
+    prepare: 'Bald ist es so weit: Leg dir Binden, Tampons oder deine Tasse zurecht.',
+    hormonalRows: [
+      'Unter hormoneller Verhütung ist die Blutung meist eine Abbruchblutung, zum Beispiel in der Pillenpause.',
+      'Zwischenblutungen sind vor allem in den ersten Monaten häufig. Halten sie an, sprich mit deiner Ärztin.',
+      'Erbrechen oder Durchfall können die Wirkung der Pille schwächen. Im Beipackzettel steht, was dann gilt.',
+    ],
+  },
+  confidence: {
+    label: (percent: number, used: number, of: number) =>
+      `Sicherheit der Vorhersage ${percent} Prozent: aus ${used} von ${of} Zyklen, die aya für eine sichere Vorhersage braucht`,
+    caption: (used: number, of: number) => (used >= of ? 'Sicherheit' : `${used} von ${of} Zyklen`),
+  },
   quotePhase: {
     menstruation: 'Periode',
     follicular: 'Follikelphase',
@@ -416,8 +481,14 @@ export const de = {
   knowledge: {
     title: 'Wissen',
     intro: 'Verständlich erklärt und mit Quellen belegt: was in deinem Körper passiert und was dir guttun kann.',
-    newShelf: 'Neu',
-    new: 'Neu',
+    unread: 'Ungelesen',
+    checkTitle: 'Kurz nachgefragt',
+    right: 'Richtig.',
+    wrong: 'Nicht ganz.',
+    tryAgain: 'Lies den Abschnitt noch einmal und versuch es erneut.',
+    noteLabel: 'Was nimmst du mit?',
+    notePlaceholder: 'Zum Beispiel, was du dir merken oder ausprobieren willst',
+    noteHint: 'Freiwillig. Deine Notiz bleibt verschlüsselt auf diesem Gerät.',
     minutes: (n: number) => `${n} Min.`,
     updates: 'Neue Artikel kommen mit App-Updates. aya lädt dafür nichts aus dem Internet.',
   },
@@ -548,8 +619,8 @@ export const de = {
     title: 'Wann du zur Ärztin gehen solltest',
     body: 'aya hilft dir, deinen Zyklus zu verstehen. Für eine ernsthafte Beratung ist eine Frauenärztin oder ein Frauenarzt da: bei starken Schmerzen, sehr starken oder ausbleibenden Blutungen, bei Fragen zur Verhütung, nach einem positiven Schwangerschaftstest und wenn ein Kinderwunsch länger als ein Jahr unerfüllt bleibt.',
     links: [
-      { label: 'Termin über Doctolib finden', href: 'https://www.doctolib.de/frauenarzt' },
-      { label: 'Arztsuche der Kassenärztlichen Vereinigungen (116117)', href: 'https://arztsuche.116117.de/' },
+      { label: 'Termin über Doctolib finden', href: LINKS.doctolib },
+      { label: 'Arztsuche der Kassenärztlichen Vereinigungen (116117)', href: LINKS.arztsuche },
     ],
     urgent: 'Außerhalb der Sprechzeiten: ärztlicher Bereitschaftsdienst 116 117. Im Notfall 112.',
     opens: 'öffnet im Browser',
@@ -599,9 +670,6 @@ export const de = {
     autoLock: 'Automatisch sperren nach',
     minutes: (n: number) => (n === 1 ? '1 Minute' : `${n} Minuten`),
     autoLockHint: 'Und immer, wenn aya länger als eine Minute im Hintergrund war.',
-    shield: 'Sichtschutz',
-    shieldHint: 'Deckt aya ab, wenn du die App 15 Sekunden nicht bedienst, zum Home-Bildschirm wischst oder sie verlässt. Ein Tipp zeigt sie wieder. Ganz zuverlässig geht das bei Web-Apps nicht, weil iOS das Vorschaubild sehr früh aufnimmt. Sicher schützt eine PIN.',
-    shieldTap: 'Tippen zum Anzeigen',
     aboutSection: 'Über aya',
     generalSection: 'Allgemein',
     mode: 'Modus',
@@ -681,7 +749,15 @@ export const de = {
     deleteWord: 'LÖSCHEN',
     deleteButton: 'Unwiderruflich löschen',
     methodology: 'Methodik und Quellen',
-    privacy: 'aya speichert alles verschlüsselt auf diesem Gerät und stellt keine Verbindung ins Internet her.',
+    aboutDataTitle: 'Deine Daten gehören dir',
+    aboutData: [
+      'Deine Einträge bleiben auf diesem Gerät. aya speichert sie verschlüsselt und schickt sie nie an einen Server, auch nicht an uns.',
+      'aya ist eine Web-App: Dein iPhone lädt die App selbst von GitHub Pages und schaut dort beim Öffnen nach Updates. Dabei sieht GitHub wie bei jeder Website deine IP-Adresse, aber nie deine Einträge.',
+      'Kein Konto, keine Werbung, kein Tracking, keine Analyse.',
+      'Du kannst jederzeit ein Backup machen, deine Daten exportieren oder alles löschen. Es gibt keine Kopie anderswo.',
+    ],
+    aboutSource: 'Der Quellcode ist öffentlich. Alle können nachprüfen, dass aya hält, was es verspricht:',
+    aboutSourceLink: 'github.com/KonnorVibe/aya',
     privacyLink: 'Datenschutz und Sicherheit',
     imprintLink: 'Impressum',
   },

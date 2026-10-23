@@ -60,14 +60,20 @@ export interface Settings {
   /** Inactivity minutes before auto-lock; only applies while a PIN is set. */
   lockMinutes: number;
   theme: 'system' | 'light' | 'dark';
-  /** Blur the app while it is in the background (app switcher). */
-  privacyShield?: boolean;
   /** Neutral title for exported calendar events. */
   icsTitle?: string;
   /** Cycle start dates the user chose to include despite a missed-log flag. */
   includedCycles?: ISODate[];
   /** Cycle start dates the user chose to leave out of the statistics. */
   excludedCycles?: ISODate[];
+  /** Wissen: per article, whether its question was answered and the reader's own note. */
+  articles?: Record<string, ArticleProgress>;
+}
+
+export interface ArticleProgress {
+  /** The question at the end was answered correctly; the article no longer counts as unread. */
+  answered: boolean;
+  note?: string;
 }
 
 export function overridesFrom(settings: Pick<Settings, 'includedCycles' | 'excludedCycles'>): CycleOverrides {

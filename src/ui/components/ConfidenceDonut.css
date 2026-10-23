@@ -1,0 +1,34 @@
+.donut {
+  display: block;
+  width: 56px;
+  height: 56px;
+  flex: none;
+}
+.donut-track,
+.donut-fill {
+  fill: none;
+  stroke-width: 6;
+}
+.donut-track {
+  stroke: var(--rule);
+}
+.donut-fill {
+  stroke: var(--mode);
+  stroke-linecap: round;
+  transition: stroke-dashoffset 900ms var(--ease-out);
+}
+.donut text {
+  font-family: var(--font-name);
+  font-style: italic;
+  font-size: 15px;
+  fill: var(--ink);
+}
+.donut .donut-unit {
+  font-size: 10px;
+  fill: var(--ink-muted);
+}
+@media (prefers-reduced-motion: reduce) {
+  .donut-fill {
+    transition: none;
+  }
+}
