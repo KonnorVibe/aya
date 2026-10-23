@@ -20,20 +20,31 @@ export interface Nav {
 const START: Nav = { tab: 'today', pages: [], depth: 0 };
 
 /**
- * Every screen change, tabs included, is one step of browser history, so Safari's back swipe and
- * the browser back button always return to the screen one step before. Right after opening there
- * is nothing to go back to and nothing happens. Going forward again is undone, so a swipe from the
- * right edge never reopens a screen. Installed on the Home Screen, iOS offers no back swipe, so a
- * swipe from the left edge does it.
+ * Every screen change, tabs included, is one step back: the swipe and "Zurück" always return to the
+ * screen one step before, and right after opening nothing happens.
+ *
+ * In Safari the steps are browser history, so Safari's own back swipe and button work. Installed on
+ * the Home Screen they stay in memory instead: iOS there reacts to history on its own (a back swipe
+ * reloaded the app and landed on Heute), so aya keeps it out of the browser and handles the swipe
+ * from the left edge itself. In history mode going forward again is undone.
  */
-export function useNavigation() {
+export function useNavigation({ memory = isStandalone() }: { memory?: boolean } = {}) {
   const [nav, setNav] = useState<Nav>(START);
   const current = useRef(nav);
+  /** Memory mode: the screens before the current one, oldest first. */
+  const stack = useRef<Nav[]>([]);
   useLayoutEffect(() => {
     current.current = nav;
   }, [nav]);
 
+  const show = useCallback((next: Nav) => {
+    current.current = next;
+    setNav(next);
+    window.scrollTo?.(0, 0);
+  }, []);
+
   useEffect(() => {
+    if (memory) return;
     window.history.replaceState(START, '');
     const pop = (e: PopStateEvent) => {
       const next = (e.state as Nav | null) ?? START;
@@ -41,25 +52,28 @@ export function useNavigation() {
         window.history.back();
         return;
       }
-      current.current = next;
-      setNav(next);
-      window.scrollTo?.(0, 0);
+      show(next);
     };
     window.addEventListener('popstate', pop);
     return () => window.removeEventListener('popstate', pop);
-  }, []);
+  }, [memory, show]);
 
-  const push = useCallback((next: Omit<Nav, 'depth'>) => {
-    const entry = { ...next, depth: current.current.depth + 1 };
-    window.history.pushState(entry, '');
-    current.current = entry;
-    setNav(entry);
-    window.scrollTo?.(0, 0);
-  }, []);
+  const push = useCallback(
+    (next: Omit<Nav, 'depth'>) => {
+      const entry = { ...next, depth: current.current.depth + 1 };
+      if (memory) stack.current.push(current.current);
+      else window.history.pushState(entry, '');
+      show(entry);
+    },
+    [memory, show],
+  );
 
   const back = useCallback(() => {
-    if (current.current.depth > 0) window.history.back();
-  }, []);
+    if (current.current.depth === 0) return;
+    if (!memory) return window.history.back();
+    const prev = stack.current.pop();
+    if (prev) show(prev);
+  }, [memory, show]);
 
   const selectTab = useCallback(
     (tab: TabId) => {
@@ -70,7 +84,7 @@ export function useNavigation() {
     [push],
   );
 
-  useEdgeSwipe(isStandalone(), back);
+  useEdgeSwipe(memory, back);
 
   return {
     nav,
